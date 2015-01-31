@@ -1,0 +1,10 @@
+# Add new changelog entries following the format below.
+# Add newest entries to the top of the list.
+# Separate entries from eachother with a blank line.
+
+# * date Author's Name <author's email> version-release
+# - Summary of changes
+
+* Thu Jan 29 2015 Michal Kosciesza <michal@mkiol.net> 1.0.0-1
+- Initial version
+

@@ -1,0 +1,17 @@
+{
+  "name": "sendtojolla",
+  "title": "Send to Jolla",
+  "id": "jid1-BgrkQiC8PYuvrQ",
+  "description": "Add-on that allows to send urls and text from Firefox to your Jolla phone",
+  "author": "Michal Kosciesza <michal@mkiol.net>",
+  "license": "MPL 2.0",
+  "version": "1.0",
+  "preferences": [
+    {
+      "name": "jollaUrl",
+      "title": "Server URL",
+      "type": "string",
+      "value": ""
+    }
+   ]
+}
