@@ -1,14 +1,14 @@
 {
-  "name": "sendtojolla",
-  "title": "Send to Jolla",
+  "name": "sendtophone",
+  "title": "Send to Phone",
   "id": "jid1-BgrkQiC8PYuvrQ",
-  "description": "Add-on that allows to send urls and text from Firefox to your Jolla phone",
+  "description": "An add-on that allows you to send URLs and text between Firefox and your phone via WiFi. To make it work you need to install mobile app on your phone as well.",
   "author": "Michal Kosciesza <michal@mkiol.net>",
   "license": "MPL 2.0",
-  "version": "1.0",
+  "version": "1.1",
   "preferences": [
     {
-      "name": "jollaUrl",
+      "name": "serverUrl",
       "title": "Server URL",
       "type": "string",
       "value": ""

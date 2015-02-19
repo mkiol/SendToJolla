@@ -21,9 +21,9 @@
    id="svg2"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="icon-ff-sendtojolla.svg"
-   inkscape:export-filename="/home/mkiol/dev/firefox/foxtojolla/data/icon-16.png"
-   inkscape:export-xdpi="16.744186"
-   inkscape:export-ydpi="16.744186"><metadata
+   inkscape:export-filename="/home/mkiol/dev/SendToJolla/firefox-addon/icon64.png"
+   inkscape:export-xdpi="66.976746"
+   inkscape:export-ydpi="66.976746"><metadata
      id="metadata40"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
@@ -173,8 +173,8 @@
      id="namedview36"
      showgrid="false"
      inkscape:zoom="2.744186"
-     inkscape:cx="-7.470339"
-     inkscape:cy="43"
+     inkscape:cx="-7.4703389"
+     inkscape:cy="42.999999"
      inkscape:window-x="-2"
      inkscape:window-y="-3"
      inkscape:window-maximized="1"
