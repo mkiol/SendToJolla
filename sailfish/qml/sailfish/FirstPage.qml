@@ -67,6 +67,7 @@ Page {
                 }
 
                 menu: ContextMenu {
+                    enabled: server.running
                     MenuItem {
                         text: qsTr("Generate new URL")
                         onClicked: {

@@ -22,7 +22,7 @@
 static const char *APP_NAME = "Send to Jolla";
 static const char *AUTHOR = "Michal Kosciesza <michal@mkiol.net>";
 static const char *PAGE = "https://github.com/mkiol/SendToJolla";
-static const char *VERSION = "1.0";
+static const char *VERSION = "1.1";
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {

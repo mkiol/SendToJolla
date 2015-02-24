@@ -40,8 +40,8 @@ function getServerUrl() {
 }
 
 function sendRequest(url,data,resposeHandler) {
-  //console.log("url:",url);
-  //console.log("data:",data);
+  console.log("url:",url);
+  console.log("data:",data);
   var Request = require("sdk/request").Request;
 
   if (data && data != "") {

@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QString>
 #include <QNetworkConfigurationManager>
+#include <QClipboard>
 
 #include "qhttpserver/qhttpserver.h"
 #include "qhttpserver/qhttprequest.h"
@@ -38,6 +39,8 @@ public slots:
 
 private slots:
     void bodyReceived();
+    void clipboardChanged(QClipboard::Mode);
+    void onlineStateChanged(bool state);
 
 signals:
     void newEvent(QString text);
@@ -46,11 +49,15 @@ signals:
 private:
     QHttpServer *server;
     QNetworkConfigurationManager ncm;
+    QClipboard *clipboard;
+    QString clipboardData;
 
     bool isListening;
     void launchBrowser(QString data);
     void setClipboard(QString data);
+    QString getClipboard();
     bool isRunning();
+    void stopServer();
 };
 
 #endif // SERVER_H

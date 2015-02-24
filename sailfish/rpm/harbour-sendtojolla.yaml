@@ -1,6 +1,6 @@
 Name: harbour-sendtojolla
-Summary: An app that allows to send urls and text from PC to your Jolla phone.
-Version: 1.0
+Summary: An app that allows you to send URLs and text between Firefox and your Jolla phone via WiFi.
+Version: 1.1
 Release: 0
 # The contents of the Group field should be one of the groups listed here:
 # http://gitorious.org/meego-developer-tools/spectacle/blobs/master/data/GROUPS
@@ -12,7 +12,7 @@ License: LICENSE
 Sources:
 - '%{name}-%{version}.tar.bz2'
 Description: |
-  An app that allows to send urls and text from PC to your Jolla phone.
+  An app that allows you to send URLs and text between Firefox and your Jolla phone via WiFi.
 Configure: none
 # The qtc5 builder inserts macros to allow QtCreator to have fine
 # control over qmake/make execution

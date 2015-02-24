@@ -19,7 +19,6 @@
 #include <QNetworkInterface>
 #include <QAbstractSocket>
 #include <QProcess>
-#include <QClipboard>
 #include <QGuiApplication>
 #include <QNetworkConfiguration>
 #include <QDateTime>
@@ -31,6 +30,13 @@ Server::Server(QObject *parent) :
     QObject(parent), isListening(false)
 {
     qsrand(QDateTime::currentDateTime().toTime_t());
+
+    connect(&ncm, SIGNAL(onlineStateChanged(bool)), this, SLOT(onlineStateChanged(bool)));
+
+
+    clipboard = QGuiApplication::clipboard();
+    connect(clipboard, SIGNAL(changed(QClipboard::Mode)), this, SLOT(clipboardChanged(QClipboard::Mode)));
+
     server = new QHttpServer;
     connect(server, SIGNAL(newRequest(QHttpRequest*, QHttpResponse*)),
             this, SLOT(handle(QHttpRequest*, QHttpResponse*)));
@@ -40,6 +46,43 @@ Server::~Server()
 {
     delete server;
 }
+
+void Server::onlineStateChanged(bool state)
+{
+    if (state && !isListening) {
+        //qDebug() << "New network conectivity was detected.";
+        emit newEvent("New network conectivity was detected.");
+        startServer();
+        return;
+    }
+
+    if (!state && isListening) {
+        //qDebug() << "Network was disconnected.";
+        emit newEvent("Network was disconnected.");
+        stopServer();
+        return;
+    }
+}
+
+void Server::clipboardChanged(QClipboard::Mode mode)
+{
+    Q_UNUSED(mode)
+
+    QString data = getClipboard();
+
+    if (clipboardData!=data) {
+        clipboardData = data;
+        emit newEvent("Clipboard data change was detected.");
+    }
+}
+
+void Server::stopServer()
+{
+    server->close();
+    isListening = false;
+    emit runningChanged();
+}
+
 
 void Server::startServer()
 {
@@ -58,8 +101,8 @@ void Server::startServer()
     }
 
     if (!bearerOk) {
-        qWarning() << "Server failed to start because WLAN is not active.";
-        emit newEvent("Server failed to start because WLAN is not active.");
+        qWarning() << "Server is failed to start because WLAN is not active.";
+        emit newEvent("Server is failed to start because WLAN is not active.");
         return;
     }
 
@@ -73,10 +116,10 @@ void Server::startServer()
 
     if (isListening) {
         //qDebug() << "Server listening on" << port << "port.";
-        emit newEvent(QString("Server listening on %1 port").arg(port));
+        emit newEvent(QString("Server is listening on %1 port.").arg(port));
     } else {
-        qWarning() << "Server failed to start on" << port << "port.";
-        emit newEvent(QString("Server failed to start on %1 port").arg(port));
+        qWarning() << "Server is failed to start on" << port << "port.";
+        emit newEvent(QString("Server is failed to start on %1 port.").arg(port));
     }
 }
 
@@ -91,31 +134,45 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
     Settings* s = Settings::instance();
     if (path.length()>2 && path.at(1)==s->getCookie()) {
 
+        if (path.length()>2 && path.at(2)=="get-clipboard") {
+            QString data = getClipboard();
+            resp->setHeader("Content-Length", QString::number(data.size()));
+            resp->setHeader("Content-Type", "text/plain; charset=utf-8");
+            resp->setHeader("Connection", "close");
+            resp->writeHead(200);
+            resp->end(data.toUtf8());
+            ok = true;
+        }
+
         if (path.length()>3 && path.at(2)=="open-url") {
             launchBrowser(path.at(3));
+            resp->setHeader("Content-Length", "0");
+            resp->setHeader("Connection", "close");
+            resp->writeHead(204);
+            resp->end("");
             ok = true;
         }
 
         if (path.length()>2 && path.at(2)=="set-clipboard" && req->method()==QHttpRequest::HTTP_POST) {
             connect(req, SIGNAL(end()), this, SLOT(bodyReceived()));
             req->storeBody();
-            //setClipboard(QString(req->body()));
+            resp->setHeader("Content-Length", "0");
+            resp->setHeader("Connection", "close");
+            resp->writeHead(204);
+            resp->end("");
             ok = true;
         }
     }
 
-    resp->setHeader("Content-Length", "0");
-    resp->setHeader("Connection", "close");
-
     if (ok) {
         emit newEvent(QString("%1 request from %2 received.").arg(path.at(2)).arg(req->remoteAddress()));
-        resp->writeHead(204);
     } else {
-        emit newEvent(QString("Unknown request from %1 received.").arg(req->remoteAddress()));
+        resp->setHeader("Content-Length", "0");
+        resp->setHeader("Connection", "close");
         resp->writeHead(400);
+        resp->end("");
+        emit newEvent(QString("Unknown request from %1 received.").arg(req->remoteAddress()));
     }
-
-    resp->end("");
 }
 
 void Server::bodyReceived() {
@@ -132,8 +189,7 @@ QString Server::getServerUrl()
 
     foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
         if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
-             //url += QString("http://%1:%2/\n").arg(address.toString()).arg(port);
-            return QString("http://%1:%2/%3/").arg(address.toString()).arg(port).arg(s->getCookie());
+            return QString("http://%1:%2/%3").arg(address.toString()).arg(port).arg(s->getCookie());
         }
     }
 
@@ -157,10 +213,14 @@ void Server::launchBrowser(QString data)
 
 void Server::setClipboard(QString data)
 {
-    QString text = QUrl::fromPercentEncoding(data.toUtf8());
-    //qDebug() << text;
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(data);
+}
+
+QString Server::getClipboard()
+{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    return clipboard->text();
 }
 
 bool Server::isRunning()

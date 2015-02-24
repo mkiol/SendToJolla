@@ -5,6 +5,9 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
-* Thu Jan 29 2015 Michal Kosciesza <michal@mkiol.net> 1.0.0-1
+* Thu Feb 19 2015 Michal Kosciesza <michal@mkiol.net> 1.1-0
+- Get-clipboard action
+
+* Thu Jan 29 2015 Michal Kosciesza <michal@mkiol.net> 1.0-1
 - Initial version
 
