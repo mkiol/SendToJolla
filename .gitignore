@@ -27,9 +27,16 @@ Makefile*
 
 *.autosave
 
-#QtCtreator Qml
+# QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
 
-#SVG
+# SVG
 sailfish/svg/*
+
+# Dolphin
+*.directory
+
+# BB10
+bb10/arm
+bb10/x86
