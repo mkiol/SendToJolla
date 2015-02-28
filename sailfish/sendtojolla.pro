@@ -19,9 +19,10 @@ OTHER_FILES += $$files(rpm/*) \
     qml/sailfish/FirstPage.qml
 ##
 
-SOURCES += src/main.cpp \
+SOURCES += src/main_sailfish.cpp \
     src/server.cpp \
-    src/settings.cpp
+    src/settings.cpp \
+    src/utils.cpp
 
 # QHttpServer
 include(qhttpserver/qhttpserver.pri)
@@ -36,4 +37,5 @@ OTHER_FILES += qml/sailfish/main.qml \
 
 HEADERS += \
     src/server.h \
-    src/settings.h
+    src/settings.h \
+    src/utils.h
