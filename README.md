@@ -1,93 +1,21 @@
-# Send To Jolla
+# Send To Phone
 
-Sailfish app and Firefox add-on that allows you to send
-URLs and text between Firefox and your Jolla phone via WiFi.
+Mobile app and Firefox add-on that allows you to send
+URLs and text between Firefox and your mobile via WiFi.
+
+This app is for those who want to, in simple and handy way, send text or URLs between Firefox and mobile phone. To make it work, only Wi-Fi and local LAN network is used, so your data will not be transferred to any third parties.
 
 ## Downloads
 
-* Sailfish app (server): [OpenRepos repository](https://openrepos.net/content/mkiol/send-jolla)
-* Firefox add-on (client): [addons.mozilla.org page](https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/)
+* Sailfish app ("Send to Jolla"): [OpenRepos repository](https://openrepos.net/content/mkiol/send-jolla)
+* BlackBerry 10 app ("Send to Berry"): BlackBerry World (Coming soon!)
+* Firefox add-on ("Send to Phone"): [addons.mozilla.org page](https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/)
 
 ## API description
 
-*Send To Jolla* implements HTTP server that expose an API for client applications.
+*Send To Phone* implements HTTP server that expose an API. API is public and can be used by anyone who want to create client application.
 
-### Server URL
-
-*Send To Jolla* API is accessible at server URL. URL has the following form:
-
-`http://[IP address]:[port]/[cookie]`
-
-where:
-
-* `IP address` is phone'e IP address on WLAN interface,
-* `port` is server listening port (by default is 9090),
-* `cookie` is 5 character random string generated when *Send to Jolla* app is installed on phone.
-
-Example:
-
-`http://192.168.1.1:9090/cRKTI`
-
-### Methods
-
-#### Open URL
-Opens URL in default phone's browser.
-
-Has the following form:
-
-|Method|URL|Content|
-|:--:|:--:|:--:|
-|GET|`[server URL]/open-url/[url]`|-|
-
-where:
-
-* `server URL` is server URL,
-* `url` is percent encoded URL of page to open.
-
-Returns `204 No Content` response upon success.
-
-URL example:
-
-`http://192.168.1.1:9090/cRKTI/open-url/https%3A%2F%2Fjolla.com%2`
-
-#### Set clipboard text
-Sets text in phone's clipboard.
-
-Has the following form:
-
-|Method|URL|Content|
-|:--:|:--:|:--:|
-|POST|`[server URL]/set-clipboard`|`[text]`|
-
-where:
-
-* `server URL` is server URL,
-* `text` text to be inserted into phone's clipboard.
-
-Returns `204 No Content` response upon success.
-
-URL example:
-
-`http://192.168.1.1:9090/cRKTI/set-clipboard`
-
-#### Get clipboard text
-Gets text from phone's clipboard.
-
-Has the following form:
-
-|Method|URL|Content|
-|:--:|:--:|:--:|
-|GET|`[server URL]/get-clipboard`|-|
-
-where:
-
-* `server URL` is server URL.
-
-Returns `200 OK` response upon success. Response contains phone's clipboard text.
-
-URL example:
-
-`http://192.168.1.1:9090/cRKTI/get-clipboard`
+API description is located [here](https://github.com/mkiol/SendToJolla/blob/master/API.md).
 
 ---------------
 
