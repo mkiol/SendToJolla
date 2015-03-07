@@ -106,7 +106,7 @@ Page {
             
             PaddingLabel {
                 textStyle.textAlign: TextAlign.Left
-                text: qsTr("Send to Berry utilizes third party software. Such third party software is copyrighted by their owners as indicated below.")
+                text: qsTr("%1 utilizes third party software. Such third party software is copyrighted by their owners as indicated below.").arg(APP_NAME)
             }
             
             PaddingLabel {

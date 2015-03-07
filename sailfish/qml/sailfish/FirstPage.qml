@@ -46,6 +46,22 @@ Page {
                 wrapMode: Text.WordWrap
             }
 
+            Label {
+                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                visible: server.running
+                color: Theme.secondaryColor
+                text: qsTr("Tip #1: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
+                wrapMode: Text.WordWrap
+            }
+
+            Label {
+                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                visible: server.running
+                color: Theme.secondaryColor
+                text: qsTr("Tip #2: To send phone's clipboard data, after copying bring %1 to the foreground.").arg(APP_NAME)
+                wrapMode: Text.WordWrap
+            }
+
             ListItem {
                 enabled: true
                 onClicked: showMenu()

@@ -31,7 +31,7 @@ Page {
     }
     
     titleBar: TitleBar {
-        title: qsTr("Send to Berry") + Retranslate.onLocaleOrLanguageChanged
+        title: APP_NAME
     }
 
     Container {
@@ -46,11 +46,18 @@ Page {
                     
                     Label {
                         text: server.running ? 
-                        qsTr("Server is running. Use below URL to configure client application.") :
+                        qsTr("Server is running. Use below URL to configure Firefox add-on.") :
                         qsTr("Server is not running.")
                         multiline: true
                     }
-                    
+
+                    Label {
+                        visible: server.running
+                        textStyle.color: utils.secondaryText()
+                        text: qsTr("Go to Firefox add-on's preferences and fill out the 'Server URL' field with the URL displayed below.")
+                        multiline: true
+                    }
+
                     Label {
                         id: urlLabel
                         text: server.getServerUrl()

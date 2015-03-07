@@ -20,7 +20,7 @@
 
 using namespace bb::cascades;
 
-static const char *APP_NAME = "Send to Berry";
+static const char *APP_NAME = "Send to Phone";
 static const char *AUTHOR = "Michal Kosciesza <michal@mkiol.net>";
 static const char *PAGE = "https://github.com/mkiol/SendToJolla";
 static const char *VERSION = "1.1";

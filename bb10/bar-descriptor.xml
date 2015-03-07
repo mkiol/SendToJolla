@@ -26,28 +26,28 @@
 
     <!-- A universally unique application identifier. Must be unique across all BlackBerry 10 applications.
          Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-    <id>net.mkiol.sendtoberry</id>
+    <id>net.mkiol.sendtophone</id>
     <configuration name="Device-Debug">
        <platformArchitecture>armle-v7</platformArchitecture>
-       <asset path="arm/o.le-v7-g/sendtoberry" entry="true" type="Qnx/Elf">sendtoberry</asset>
+       <asset path="arm/o.le-v7-g/sendtophone" entry="true" type="Qnx/Elf">sendtophone</asset>
     </configuration>
     <configuration name="Device-Release">
        <entryPointType>Qnx/Cascades</entryPointType>
        <platformArchitecture>armle-v7</platformArchitecture>
-       <asset path="arm/o.le-v7/sendtoberry.so" entry="true" type="Qnx/Elf">sendtoberry.so</asset>
+       <asset path="arm/o.le-v7/sendtophone.so" entry="true" type="Qnx/Elf">sendtophone.so</asset>
     </configuration>
     <configuration name="Device-Profile">
        <platformArchitecture>armle-v7</platformArchitecture>
-       <asset path="arm-p/o.le-v7-g/sendtoberry" entry="true" type="Qnx/Elf">sendtoberry</asset>
+       <asset path="arm-p/o.le-v7-g/sendtophone" entry="true" type="Qnx/Elf">sendtophone</asset>
     </configuration>
     <configuration name="Simulator-Debug">
        <platformArchitecture>x86</platformArchitecture>
-       <asset path="x86/o-g/sendtoberry" entry="true" type="Qnx/Elf">sendtoberry</asset>
+       <asset path="x86/o-g/sendtophone" entry="true" type="Qnx/Elf">sendtophone</asset>
     </configuration>
 
     <!-- The name that is displayed in the BlackBerry 10 application installer.
          May have multiple values for each language. See samples or xsd schema file. Optional. -->
-    <name>Send to Berry</name>
+    <name>Send to Phone</name>
 
     <!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade.
          Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
@@ -70,10 +70,10 @@
     <!--  Name of author which is used for signing. Must match the developer name of your development certificate. -->
     <description>An app that allows you to send URLs and text between Firefox and your BlackBerry phone via WiFi.</description>
     <icon>
-       <image>sendtoberry96.png</image>
-       <image>sendtoberry90.png</image>
-       <image>sendtoberry110.png</image>
-       <image>sendtoberry144.png</image>
+       <image>sendtophone96.png</image>
+       <image>sendtophone90.png</image>
+       <image>sendtophone110.png</image>
+       <image>sendtophone144.png</image>
     </icon>
     <authorId>gYAAgCJQlmpIp4weW4nXTq966vY</authorId>
     <author>Michal Kosciesza</author>
@@ -95,10 +95,10 @@
     <asset path="translations" dest="qm">
         <include name="*.qm"/>
     </asset>
-    <asset path="sendtoberry96.png">sendtoberry96.png</asset>
-    <asset path="sendtoberry90.png">sendtoberry90.png</asset>
-    <asset path="sendtoberry110.png">sendtoberry110.png</asset>
-    <asset path="sendtoberry144.png">sendtoberry144.png</asset>
+    <asset path="sendtophone96.png">sendtophone96.png</asset>
+    <asset path="sendtophone90.png">sendtophone90.png</asset>
+    <asset path="sendtophone110.png">sendtophone110.png</asset>
+    <asset path="sendtophone144.png">sendtophone144.png</asset>
 
     <!-- Request permission to execute native code.  Required for native applications. -->
     <permission system="true">run_native</permission>

@@ -61,14 +61,14 @@ void Server::onlineStateChanged(bool state)
 {
     if (state && !isListening) {
         //qDebug() << "New network conectivity was detected.";
-        emit newEvent("New network conectivity was detected.");
+        emit newEvent(tr("New network conectivity was detected."));
         startServer();
         return;
     }
 
     if (!state && isListening) {
         //qDebug() << "Network was disconnected.";
-        emit newEvent("Network was disconnected.");
+        emit newEvent(tr("Network was disconnected."));
         stopServer();
         return;
     }
@@ -83,7 +83,7 @@ void Server::clipboardChanged(QClipboard::Mode mode)
 
     if (clipboardData!=data) {
         clipboardData = data;
-        emit newEvent("Clipboard data change was detected.");
+        emit newEvent(tr("Clipboard data change was detected."));
     }
 }
 #endif
@@ -114,7 +114,7 @@ void Server::startServer()
 
     if (!bearerOk) {
         //qWarning() << "Server is failed to start because WLAN is not active.";
-        emit newEvent("Server is failed to start because WLAN is not active.");
+        emit newEvent(tr("Server is failed to start because WLAN is not active."));
         return;
     }
 
@@ -128,10 +128,10 @@ void Server::startServer()
 
     if (isListening) {
         //qDebug() << "Server listening on" << port << "port.";
-        emit newEvent(QString("Server is listening on %1 port.").arg(port));
+        emit newEvent(tr("Server is listening on %1 port.").arg(port));
     } else {
         qWarning() << "Server is failed to start on" << port << "port.";
-        emit newEvent(QString("Server is failed to start on %1 port.").arg(port));
+        emit newEvent(tr("Server is failed to start on %1 port.").arg(port));
     }
 }
 
@@ -183,7 +183,7 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
         resp->setHeader("Connection", "close");
         resp->writeHead(400);
         resp->end("");
-        emit newEvent(QString("Unknown request from %1 received.").arg(req->remoteAddress()));
+        emit newEvent(tr("Unknown request from %1 received.").arg(req->remoteAddress()));
     }
 }
 

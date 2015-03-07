@@ -1,5 +1,7 @@
 TARGET = harbour-sendtojolla
 
+DEFINES += SAILFISH
+
 ## sailfishapp.prf ##
 QT += quick qml network
 target.path = /usr/bin
