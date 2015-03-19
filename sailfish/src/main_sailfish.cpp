@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2015 Michal Kosciesza <michal@mkiol.net>
 
-  This file is part of SendToJolla application.
+  This file is part of SendToPhone application.
 
   This Source Code Form is subject to the terms of
   the Mozilla Public License, v.2.0. If a copy of
@@ -19,10 +19,10 @@
 #include "server.h"
 #include "settings.h"
 
-static const char *APP_NAME = "Send to Jolla";
+static const char *APP_NAME = "Send to Phone";
 static const char *AUTHOR = "Michal Kosciesza <michal@mkiol.net>";
 static const char *PAGE = "https://github.com/mkiol/SendToJolla";
-static const char *VERSION = "1.1";
+static const char *VERSION = "1.2";
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {

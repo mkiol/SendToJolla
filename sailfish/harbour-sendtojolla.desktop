@@ -3,5 +3,5 @@ Type=Application
 X-Nemo-Application-Type=silica-qt5
 Icon=harbour-sendtojolla
 Exec=harbour-sendtojolla
-Name=Send to Jolla
+Name=Send to Phone
 

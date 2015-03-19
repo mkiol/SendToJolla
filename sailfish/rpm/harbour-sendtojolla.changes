@@ -5,6 +5,9 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Thu Mar 19 2015 Michal Kosciesza <michal@mkiol.net> 1.2-0
+- Renamed to 'Send to Phone'
+
 * Thu Feb 19 2015 Michal Kosciesza <michal@mkiol.net> 1.1-0
 - Get-clipboard action
 

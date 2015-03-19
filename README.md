@@ -10,7 +10,7 @@ so your data will not be transferred to any third parties.
 
 ## Downloads
 
-* Sailfish app ("Send to Jolla"): [OpenRepos repository](https://openrepos.net/content/mkiol/send-jolla)
+* Sailfish app: [OpenRepos repository](https://openrepos.net/content/mkiol/send-jolla)
 * BlackBerry 10 app: [BlackBerry World](https://appworld.blackberry.com/webstore/content/59953449/?countrycode=PL&lang=en)
 * Firefox add-on: [addons.mozilla.org page](https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/)
 
