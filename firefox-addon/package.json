@@ -5,7 +5,7 @@
   "description": "An add-on that allows you to send URLs and text between Firefox and your phone via WiFi. To make it work you need to install mobile app on your phone as well.",
   "author": "Michal Kosciesza <michal@mkiol.net>",
   "license": "MPL 2.0",
-  "version": "1.1",
+  "version": "1.2",
   "preferences": [
     {
       "name": "serverUrl",

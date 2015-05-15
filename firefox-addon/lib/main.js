@@ -117,16 +117,7 @@ cm.Item({
   label: "Send text to Phone",
   image: self.data.url("icon-16.png"),
   context: cm.SelectionContext(),
-  contentScript: 'self.on("click", function (node, data) {' +
-  '  var text = window.getSelection().toString();' +
-  '  self.postMessage(text);' +
-  '});'+
-  'self.on("context", function () {' +
-  '  var text = window.getSelection().toString();' +
-  '  if (text.length > 20)' +
-  '    text = text.substr(0, 20) + "...";' +
-  '  return "Send “" + text + "” to Phone";' +
-  '});',
+  contentScriptFile: self.data.url("content-script.js"),
   onMessage: function (text) {
     sendAPI.invokeSetClipboardAction(text);
   }

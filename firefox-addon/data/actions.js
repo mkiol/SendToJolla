@@ -63,7 +63,7 @@ addon.port.on("hide-open-button", function () {
 });
 
 addon.port.on("status-changed", function (status) {
-  statusLabel.innerHTML = status;
+  statusLabel.textContent = status;
 });
 
 addon.port.on("get-clipboard-response", function (text) {
