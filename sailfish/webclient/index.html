@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<!--
+  Copyright (C) 2015 Michal Kosciesza <michal@mkiol.net>
+
+  This file is part of SendToPhone application.
+
+  This Source Code Form is subject to the terms of
+  the Mozilla Public License, v.2.0. If a copy of
+  the MPL was not distributed with this file, You can
+  obtain one at http://mozilla.org/MPL/2.0/.
+-->
+
+<head>
+  <title>Send To Phone Web Client</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" type="text/css" href="default.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="webclient.js"></script>
+</head>
+
+<body>
+  <h1>Send to Phone Web Client</h1>
+  <div id="menu" class="clearfix">
+    <ul>
+      <li><a id="browserMenuItem" href="#">Browser</a></li>
+      <li><a id="clipboardMenuItem" href="#">Clipboard</a></li>
+      <li><a id="notesMenuItem" href="#">Notes</a></li>
+      <li><a id="aboutMenuItem" href="#">About</a></li>
+    </ul>
+  </div>
+
+  <div class="page" id="browser">
+    <p>Open the specified URL in phone's default browser.</p>
+    <input type="text" value="" placeholder="Insert URL here" />
+    <button id="openUrl">Open</button>
+    <img class="loader" src="loader.gif" />
+    <span class="info"></span>
+  </div>
+
+  <div class="page" id="clipboard">
+    <p>Set or get the contents of the phone's clipboard.</p>
+    <textarea placeholder="Insert clipboard content here"></textarea>
+    <br/>
+    <button id="setClip">Set</button>
+    <button id="getClip">Get</button>
+    <img class="loader" src="loader.gif" />
+    <span class="info"></span>
+    <p class="tip">Tip: To get content of phone's clipboard, after copying
+      text on phone, bring Send to Phone app to the foreground and then
+      press Get button above.</p>
+  </div>
+
+  <div class="page" id="notes">
+    <p>Create new or update existing note.</p>
+    <div id="form" class="clearfix">
+    <input id="noteId" type="text" value="" placeholder="Id" disabled="true" />
+    <textarea placeholder="Insert note content here"></textarea>
+    <div id="colorPicker"></div>
+    </div>
+    <br/>
+    <button id="createNote">Create new note</button>
+    <button id="updateNote">Update existing note</button>
+    <button id="getNotes">Refresh list of notes</button>
+    <img class="loader" src="loader.gif" />
+    <span class="info"></span>
+    <br/>
+    <table><tr><td class="empty">Empty</td></tr></table>
+  </div>
+
+  <div class="page" id="about">
+    <h2>About</h2>
+	<p>Send to Phone <br/>version: 2.0</p>
+    <p>Mobile app and Firefox add-on that allows you to send URLs and text
+      between PC and your mobile via WiFi.</p>
+    <h2>Firefox</h2>
+    <p>Add-on can be downloaded directly form
+      <a href="https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/">
+        Mozilla repository</a>.</p>
+
+    <h2>Bugs & feature requests</h2>
+    <p>If you have any special requirements, feature requests or if you find
+      any bug, please report it using
+      <a href="https://github.com/mkiol/SendToJolla/issues">this</a> form.</p>
+
+    <h2>Copyright & source code</h2>
+    <p>Copyright &copy; 2015 by Michal Kosciesza</p>
+    <p>Sent to Phone is distributed under
+      <a href="https://www.mozilla.org/MPL/2.0/">
+        Mozilla Public License Version 2.0</a>.</p>
+    <p>Source code is available on
+      <a href="https://github.com/mkiol/SendToJolla">GitHub</a>.</p>
+  </div>
+
+</body>
+</html>

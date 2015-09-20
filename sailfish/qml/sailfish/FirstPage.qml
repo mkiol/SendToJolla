@@ -41,7 +41,7 @@ Page {
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                 color: Theme.primaryColor
-                text: server.running ? qsTr("Server is running. Use below URL to configure client application.") :
+                text: server.running ? qsTr("Server is running.") :
                                        qsTr("Server is not running.")
                 wrapMode: Text.WordWrap
             }
@@ -50,7 +50,7 @@ Page {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                 visible: server.running
                 color: Theme.secondaryColor
-                text: qsTr("Tip #1: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
+                text: qsTr("Tip #1: To open Web Client, go to below URL address in your favorite web browser.")
                 wrapMode: Text.WordWrap
             }
 
@@ -58,7 +58,15 @@ Page {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                 visible: server.running
                 color: Theme.secondaryColor
-                text: qsTr("Tip #2: To send phone's clipboard data, after copying bring %1 to the foreground.").arg(APP_NAME)
+                text: qsTr("Tip #2: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
+                wrapMode: Text.WordWrap
+            }
+
+            Label {
+                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                visible: server.running
+                color: Theme.secondaryColor
+                text: qsTr("Tip #3: To send phone's clipboard data, after copying bring %1 to the foreground.").arg(APP_NAME)
                 wrapMode: Text.WordWrap
             }
 

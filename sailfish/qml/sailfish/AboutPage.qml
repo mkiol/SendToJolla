@@ -78,7 +78,17 @@ Page {
                 anchors.left: parent.left; anchors.right: parent.right
                 font.pixelSize: Theme.fontSizeExtraSmall
                 textFormat: Text.RichText
-                text: "Copyright &copy; 2015 Michał Kościesza"
+                text: "Copyright &copy; 2015 Michal Kosciesza"
+            }
+
+            Item {
+                height: Theme.paddingLarge
+            }
+
+            Button {
+                text: qsTr("Changelog")
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: pageStack.push(Qt.resolvedUrl("ChangelogPage.qml"))
             }
 
             Item {

@@ -15,9 +15,11 @@
 #include <QObject>
 #include <QString>
 #include <QNetworkConfigurationManager>
+#include <QByteArray>
 
 #ifdef SAILFISH
 #include <QClipboard>
+#include <QSqlDatabase>
 #endif
 
 #include "qhttpserver/qhttpserver.h"
@@ -41,7 +43,9 @@ public slots:
     void handle(QHttpRequest *req, QHttpResponse *resp);
 
 private slots:
-    void bodyReceived();
+    void bodyReceivedForSetClipboard();
+    void bodyReceivedForUpdateNote();
+    void bodyReceivedForCreateNote();
 #ifdef SAILFISH
     void clipboardChanged(QClipboard::Mode);
 #endif
@@ -54,15 +58,26 @@ signals:
 private:
     QHttpServer *server;
     QNetworkConfigurationManager ncm;
+
 #ifdef SAILFISH
     QClipboard *clipboard;
+    QSqlDatabase notesDB;
+    QString getNotesDBfile();
+    bool openNotesDB();
+    void closeNotesDB();
 #endif
+
     QString clipboardData;
 
     bool isListening;
     void launchBrowser(QString data);
     void setClipboard(QString data);
     QString getClipboard();
+    QByteArray getNotes();
+    QByteArray getNote(int id);
+    bool createNote(const QString &color, const QString &body);
+    bool updateNote(int id, const QString &color, const QString &body);
+    bool getWebContent(const QString &file, QByteArray &data);
     bool isRunning();
     void stopServer();
 };

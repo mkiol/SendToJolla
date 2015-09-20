@@ -1,0 +1,158 @@
+/*
+  Copyright (C) 2015 Michal Kosciesza <michal@mkiol.net>
+
+  This file is part of SendToPhone application.
+
+  This Source Code Form is subject to the terms of
+  the Mozilla Public License, v.2.0. If a copy of
+  the MPL was not distributed with this file, You can
+  obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+body {
+  background-color: white;
+  color: black;
+  font-family: sans-serif;
+  margin: 10px;
+}
+p, div {
+  font-size: 11pt;
+}
+h1 {
+  font-weight: bold;
+  font-size: 12pt;
+}
+h2 {
+  font-weight: bold;
+  font-size: 11pt;
+}
+input, textarea {
+  padding: 5px;
+  margin-right: 5px;
+  width: 300px;
+}
+table {
+    margin: 15px 0px;
+    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+th, td {
+    border-bottom: 1px solid #D0D0D0;
+    padding: 10px;
+    text-align: left;
+}
+tr:nth-child(2n) {
+    background-color: WhiteSmoke;
+}
+.tip {
+  font-size: 11pt;
+  color: gray;
+}
+.error {
+  color: red;
+}
+img.loader {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+/* Clipboard */
+
+#clipboard textarea {
+  height: 120px;
+  margin-bottom: 10px;
+}
+
+/* Notes */
+
+.colorRow {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  background-image: url("dot.png");
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.pickedColor {
+  border: 2px solid gray;
+}
+.textRow {
+  min-width: 280px;
+}
+.empty {
+  color: gray;
+  font-style: italic;
+}
+#colorPicker {
+  float:left;
+}
+#colorPicker div a {
+  display:block;
+  height:100%;
+  width:100%;
+}
+#form {
+  width: 100%;
+}
+#notes table tr td a {
+  display:block;
+  height:100%;
+  width:100%;
+}
+#notes input {
+  width: 30px;
+  margin-bottom: 10px;
+  vertical-align: top;
+  float: left;
+}
+#notes textarea {
+  height: 200px;
+  margin-bottom: 10px;
+  float: left;
+}
+
+/* Layout */
+
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Menu */
+
+div#menu {
+  width: 100%;
+}
+
+div#menu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+div#menu li {
+  float:left;
+}
+div#menu a {
+  display: block;
+  width: 100px;
+}
+div#menu a:link, div#menu a:visited {
+  font-weight: bold;
+  color: white;
+  background-color: DarkOrange;
+  text-align: center;
+  padding: 6px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+div#menu a:hover, div#menu a:active {
+  background-color: OrangeRed;
+}
+div#menu a.active {
+  background-color: OrangeRed;
+}
