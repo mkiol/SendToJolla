@@ -1,11 +1,11 @@
 # Send To Phone
 
-Mobile app and Firefox add-on that allows you to send
-URLs and text between Firefox and your mobile via WiFi.
+Mobile app, Web client and Firefox add-on that allows you to send
+URLs and text between PC and your mobile via WiFi.
 
-This app is for those who want to, in simple and handy way, 
-send text or URLs between Firefox and mobile phone. 
-To make it work, only Wi-Fi and local LAN network is used, 
+This app is for those who want to, in simple, secure and handy way,
+send text or URLs between PC and mobile phone.
+To make it work, only Wi-Fi and local LAN network is used,
 so your data will not be transferred to any third parties.
 
 ## Downloads
@@ -16,7 +16,7 @@ so your data will not be transferred to any third parties.
 
 ## API description
 
-*Send To Phone* implements HTTP server that expose an API. 
+*Send To Phone* implements HTTP server that expose an API.
 API is public and can be used by anyone who want to create client application.
 
 API description is located [here](https://github.com/mkiol/SendToJolla/blob/master/API.md).
