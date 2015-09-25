@@ -12,10 +12,12 @@
 body {
   background-color: white;
   color: black;
-  font-family: sans-serif;
+  font-family: Sans-serif;
   margin: 10px;
+  margin-bottom: 50px;
 }
 p, div {
+  font-weight: normal;
   font-size: 11pt;
 }
 h1 {
@@ -26,10 +28,24 @@ h2 {
   font-weight: bold;
   font-size: 11pt;
 }
+h3 {
+  font-weight: normal;
+  font-size: 11pt;
+}
 input, textarea {
   padding: 5px;
+  margin-top: 0;
+  margin-left: 0;
   margin-right: 5px;
-  width: 300px;
+  margin-bottom: 5px;
+  width: 350px;
+}
+button {
+  padding: 1px;
+  margin-right: 5px;
+}
+li {
+  margin: 10px;
 }
 table {
     margin: 15px 0px;
@@ -50,8 +66,28 @@ tr:nth-child(2n) {
   font-size: 11pt;
   color: gray;
 }
+.info {
+  padding: 5px;
+  background-color: WhiteSmoke;
+  border: 1px solid Silver;
+  color: DarkGreen;
+}
 .error {
   color: red;
+}
+.icon {
+  width: 24px;
+  height: 24px;
+}
+.version {
+  font-family: Monospace;
+  padding: 2px;
+  background-color: WhiteSmoke;
+  border: 1px solid Silver;
+  color: Black;
+}
+.logname {
+ font-weight: bold;
 }
 img.loader {
   display: inline-block;
@@ -59,11 +95,20 @@ img.loader {
   vertical-align: middle;
 }
 
+/* Bookmarks */
+
+#bookmarkId {
+  width: 25px;
+}
+#bookmarkName {
+  width: 300px;
+}
+
 /* Clipboard */
 
 #clipboard textarea {
   height: 120px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 /* Notes */
@@ -104,14 +149,12 @@ img.loader {
   width:100%;
 }
 #notes input {
-  width: 30px;
-  margin-bottom: 10px;
+  width: 25px;
   vertical-align: top;
   float: left;
 }
 #notes textarea {
   height: 200px;
-  margin-bottom: 10px;
   float: left;
 }
 
@@ -121,6 +164,10 @@ img.loader {
   content: "";
   display: table;
   clear: both;
+}
+.section {
+  border-top: 1px solid WhiteSmoke;
+  margin-top: 20px;
 }
 
 /* Menu */
@@ -136,6 +183,7 @@ div#menu ul {
 }
 div#menu li {
   float:left;
+  margin: 0px;
 }
 div#menu a {
   display: block;

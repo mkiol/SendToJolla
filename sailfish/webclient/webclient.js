@@ -9,10 +9,9 @@
   obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-// API server URL
-var serverURL = document.URL;
-if (serverURL.charAt(serverURL.length - 1) == '/')
-  serverURL = serverURL.substr(0, serverURL.length - 1);
+// Global vars
+var serverURL;
+var VERSION = "2.0";
 
 // Checks if URL syntax is valid
 // Source: http://dzone.com/snippets/validate-url-regexp
@@ -21,60 +20,128 @@ function isUrl(s) {
   return re.test(s);
 }
 
+function getServerUrl() {
+  return window.location.protocol +
+    "//" + window.location.host +
+    "/" + window.location.pathname.split('/')[1];
+}
+
 $(document).ready(function() {
 
+  serverURL = getServerUrl();
+
   // Initial reset
-  $("img.loader").hide();
+  $(".loader").hide();
+  $(".info").hide();
   $("div.page").hide();
-  $("div#browser").show();
-  $("a#browserMenuItem").addClass("active");
+  $(".version").text(VERSION);
 
   // --- Menu
 
-  $("a#browserMenuItem").click(function() {
+  var page = window.location.hash == "" ? "#browser" : window.location.hash;
+  $(page).show();
+  $(page + "MenuItem").addClass("active");
+
+  $("#menu ul li a").click(function() {
     $("div#menu ul li a").removeClass("active");
     $(this).addClass("active");
     $("div.page").hide();
-    $("div#browser").show();
-  });
-  $("a#clipboardMenuItem").click(function() {
-    $("div#menu ul li a").removeClass("active");
-    $(this).addClass("active");
-    $("div.page").hide();
-    $("div#clipboard").show();
-  });
-  $("a#notesMenuItem").click(function() {
-    $("div#menu ul li a").removeClass("active");
-    $(this).addClass("active");
-    $("div.page").hide();
-    $("div#notes").show();
-  });
-  $("a#aboutMenuItem").click(function() {
-    $("div#menu ul li a").removeClass("active");
-    $(this).addClass("active");
-    $("div.page").hide();
-    $("div#about").show();
+    $($(this).attr("href")).show();
+	  $("html, body").animate({scrollTop:0},"fast");
   });
 
-  // --- Open URL action
+  // --- Bookmarks
 
-  // Calls Open URL API
+  var bookmarksList;
+
+  $("#updateBookmark").hide();
+  $("#deleteBookmark").hide();
+
+  function clearDeleteBookmark() {
+	setTimeout(function() {
+  		var button = $("#deleteBookmark");
+  		button.data("firstclickdone", false);
+  		button.text("Delete bookmark");
+  	}, 1000);
+  }
+
+  var getBookmarksAPICall = function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var table = $("#bookmarks table");
+
+    $("#bookmarks table tr").remove();
+    info.removeClass("error");
+    info.hide();
+
+    loader.show();
+    $.get(serverURL + "/get-bookmarks/", function(data, status) {
+      loader.hide();
+      var ok = status == "success" || status == "nocontent" || status == "notmodified";
+      if (!ok) info.addClass("error");
+      info.text(ok ? data == "" ? "OK, You don't have any bookmarks." : "OK" : "Something goes wrong!");
+      info.show();
+
+      bookmarksList = data;
+      if (ok) {
+        if (data == "") {
+      		$("#updateBookmark").hide();
+      		$("#deleteBookmark").hide();
+      		$("#bookmarkId").val("");
+          table.append('<tr><td class="empty">Empty</td></tr>');
+        } else {
+            if (data.length > 0) {
+              for (var i in data) {
+                var row = $("<tr></tr>");
+    			      row.append($("<td></td>").text(data[i].id));
+                row.append($("<td></td>").append($("<img/>")
+                .attr("src",data[i].icon == undefined || data[i].icon == "" ?
+                            "icon-launcher-bookmark.png" : data[i].icon)
+                .addClass("icon")));
+                row.append($("<td></td>").append($('<a href="#"></a>')
+                .data("bookmarkId",data[i].id)
+                .text(data[i].title == "" ?
+                      data[i].url.length > 50 ? data[i].url.substring(0,50) : data[i].url :
+                      data[i].title.length > 50 ? data[i].title.substring(0,50) : data[i].title)
+                .click(function (){
+      				    var id = $(this).data("bookmarkId") - 1;
+          				$("#bookmarkId").val(bookmarksList[id].id);
+          				$("#bookmarkName").val(bookmarksList[id].title);
+          				$("#bookmarkUrl").val(bookmarksList[id].url);
+          				$("#updateBookmark").show();
+          				$("#deleteBookmark").show();
+    			      })));
+                table.append(row);
+              }
+            } else {
+        			$("#updateBookmark").hide();
+        			$("#deleteBookmark").hide();
+        			$("#bookmarkId").val("");
+    			    table.append('<tr><td class="empty">Empty</td></tr>');
+    		    }
+        }
+      }
+    });
+  };
+
   var openUrlAPICall = function() {
-    var info = $("#browser span.info");
-    var loader = $("#browser img.loader");
-    var url = $("#browser input").val();
+    var info = $("#openurl span.info");
+    var loader = $("#openurl img.loader");
+    var url = $("#openurl input").val();
 
     info.removeClass("error");
-    info.text("");
+    info.hide();
 
     if (url == "") {
       info.addClass("error");
-      info.text("URL is not specified.");
+      info.text("URL is not set!");
+	    info.show();
       return;
     }
     if (!isUrl(url)) {
       info.addClass("error");
-      info.text("URL is invalid.");
+      info.text("URL is invalid!");
+	    info.show();
       return;
     }
 
@@ -84,22 +151,195 @@ $(document).ready(function() {
       var ok = status == "success" || status == "nocontent" || status == "notmodified";
       if (!ok) info.addClass("error");
       info.text(ok ? "OK" : "Something goes wrong!");
+	    info.show();
     });
 
   }
 
-  $("#browser input").focus(function() {
+  $("#openurl input").focus(function() {
     var info = $("#browser span.info");
-    info.text("");
+	  info.hide();
   });
 
-  $("#browser input").bind('keyup', function(e) {
+  $("#openurl input").bind('keyup', function(e) {
     if (e.keyCode == 13) {
       openUrlAPICall();
     }
   });
 
-  $("button#openUrl").click(openUrlAPICall);
+  $("#createBookmark").click(function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var title = $("#bookmarkName").val();
+    var url = $("#bookmarkUrl").val();
+
+    $("#updateBookmark").hide();
+    $("#deleteBookmark").hide();
+    $("#bookmarkId").val("");
+
+    info.removeClass("error");
+    info.hide();
+
+    if (title == "") {
+      info.addClass("error");
+      info.text("Bookmark title is not set!");
+      info.show();
+      return;
+    }
+
+    if (url == "") {
+      info.addClass("error");
+      info.text("Bookmark URL is not set!");
+      info.show();
+      return;
+    }
+
+    if (!isUrl(url)) {
+      info.addClass("error");
+      info.text("Bookmark URL is invalid!");
+      info.show();
+      return;
+    }
+
+    var content = {"title": title, "url": url};
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: serverURL + "/create-bookmark",
+      data: JSON.stringify(content),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getBookmarksAPICall();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+      },
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json'
+    });
+  });
+
+  $("#updateBookmark").click(function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var title = $("#bookmarkName").val();
+    var url = $("#bookmarkUrl").val();
+    var id = $("#bookmarkId").val();
+
+    info.removeClass("error");
+    info.hide();
+
+    if (id < 0) {
+      info.addClass("error");
+      info.text("Bookmark ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (title == "") {
+      info.addClass("error");
+      info.text("Bookmark title is not set!");
+      info.show();
+      return;
+    }
+
+    if (url == "") {
+      info.addClass("error");
+      info.text("Bookmark URL is not set!");
+      info.show();
+      return;
+    }
+
+    if (!isUrl(url)) {
+      info.addClass("error");
+      info.text("Bookmark URL is invalid!");
+      info.show();
+      return;
+    }
+
+    var content = {"title": title, "url": url};
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: serverURL + "/update-bookmark/" + id,
+      data: JSON.stringify(content),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getBookmarksAPICall();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+      },
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json'
+    });
+  });
+
+  $("#deleteBookmark").data("firstclickdone",false).click(function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+	  var id = $("#bookmarkId").val();
+
+    info.removeClass("error");
+    info.hide();
+
+  	if (id == "" || id < 1) {
+  	  info.addClass("error");
+  	  info.text("Bookmark ID is unknown!");
+  	  info.show();
+  	  return;
+  	}
+
+  	if (!$(this).data("firstclickdone")) {
+  		$(this).data("firstclickdone",true);
+  		$(this).text("Confirm bookmark deletion");
+  		clearDeleteBookmark();
+  		return;
+  	}
+
+    $("#bookmarkId").val("");
+    $("#bookmarkName").val("");
+    $("#bookmarkUrl").val("");
+    $("#updateBookmark").hide();
+    $(this).hide();
+
+    loader.show();
+    $.get(serverURL + "/delete-bookmark/" + id, function(data, status) {
+      loader.hide();
+      var ok = status == "success" || status == "nocontent" || status == "notmodified";
+      if (ok) {
+        getBookmarksAPICall();
+      } else {
+        info.addClass("error");
+        info.text("Something goes wrong!");
+        info.show();
+      }
+    });
+
+  });
+
+  $("#bookmarkName").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  $("#bookmarkUrl").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  $("#openUrl").click(openUrlAPICall);
+  $("#getBookmarks").click(getBookmarksAPICall);
 
   // --- Clipboard actions
 
@@ -108,7 +348,7 @@ $(document).ready(function() {
     var loader = $("#clipboard img.loader");
 
     info.removeClass("error");
-    info.text("");
+    info.hide();
 
     loader.show();
     $.get(serverURL + "/get-clipboard/", function(data, status) {
@@ -116,6 +356,7 @@ $(document).ready(function() {
       var ok = status == "success" || status == "nocontent" || status == "notmodified";
       if (!ok) info.addClass("error");
       info.text(ok ? data == "" ? "OK, Clipboard is empty." : "OK" : "Something goes wrong!");
+	  info.show();
       $("#clipboard textarea").val(data);
     });
   });
@@ -125,8 +366,15 @@ $(document).ready(function() {
     var loader = $("#clipboard img.loader");
     var content = $("#clipboard textarea").val();
 
-    info.removeClass("error");
-    info.text("");
+	info.removeClass("error");
+    info.hide();
+
+	if (content == "") {
+      info.addClass("error");
+      info.text("Clipboard content is empty!");
+	  info.show();
+      return;
+    }
 
     loader.show();
     $.post(serverURL + "/set-clipboard/", content, function(data, status) {
@@ -134,12 +382,12 @@ $(document).ready(function() {
       var ok = status == "success" || status == "nocontent" || status == "notmodified";
       if (!ok) info.addClass("error");
       info.text(ok ? "OK" : "Something goes wrong!");
+	  info.show();
     });
   });
 
   $("#clipboard textarea").focus(function() {
-    var info = $("#clipboard span.info");
-    info.text("");
+    $(".info").removeClass("error").hide();
   });
 
   // --- Notes actions
@@ -150,8 +398,18 @@ $(document).ready(function() {
     "#88cc00", "#00b315", "#00bf9f",
     "#005fcc", "#0016de", "#bb00cc"];
   setPickedColor(0);
-  $("button#updateNote").hide();
+
   $("#noteId").val("");
+  $("#updateNote").hide();
+  $("#deleteNote").hide();
+
+  function clearDeleteNote() {
+  setTimeout(function() {
+      var button = $("#deleteNote");
+      button.data("firstclickdone", false);
+      button.text("Delete note");
+    }, 1000);
+  }
 
   function setPickedColor(colorId) {
     if (colorId < 0 && colorId > 8) {
@@ -185,7 +443,7 @@ $(document).ready(function() {
 
     $("#notes table tr").remove();
     info.removeClass("error");
-    info.text("");
+    info.hide();
 
     loader.show();
     $.get(serverURL + "/get-notes-list/", function(data, status) {
@@ -193,20 +451,28 @@ $(document).ready(function() {
       var ok = status == "success" || status == "nocontent" || status == "notmodified";
       if (!ok) info.addClass("error");
       info.text(ok ? data == "" ? "OK, You don't have any notes." : "OK" : "Something goes wrong!");
-
+      info.show();
       if (data == "") {
-        $("button#updateNote").hide();
+        $("#updateNote").hide();
         $("#noteId").val("");
         table.append('<tr><td class="empty">Empty</td></tr>');
       } else {
         if (data.length > 0) {
           for (var i in data) {
             var row = $("<tr></tr>");
-            row.append($("<td></td>").append($('<a href="#"></a>').data("noteid",data[i].id).text(data[i].id).click(openNoteAPICall)));
-            row.append($("<td></td>").addClass("colorRow").css("background-color",data[i].color));
-            row.append($("<td></td>").addClass("textRow").append($('<a href="#"></a>').data("noteid",data[i].id).text(data[i].text).click(openNoteAPICall)));
+            row.append($("<td></td>").text(data[i].id));
+            row.append($("<td></td>").addClass("colorRow")
+              .css("background-color", data[i].color));
+            row.append($("<td></td>").addClass("textRow")
+              .append($('<a href="#"></a>').data("noteid", data[i].id)
+                .text(data[i].text == "" ? "Empty note" : data[i].text)
+                .click(openNoteAPICall)));
             table.append(row);
           }
+        } else {
+          $("#updateNote").hide();
+          $("#noteId").val("");
+          table.append('<tr><td class="empty">Empty</td></tr>');
         }
       }
 
@@ -219,7 +485,7 @@ $(document).ready(function() {
     var id = $(this).data("noteid");
 
     info.removeClass("error");
-    info.text("");
+    info.hide();
 
     loader.show();
     $.get(serverURL + "/get-note/" + id, function(data, status) {
@@ -227,80 +493,87 @@ $(document).ready(function() {
       var ok = status == "success" || status == "nocontent" || status == "notmodified";
       if (!ok) info.addClass("error");
       info.text(ok ? "OK" : "Something goes wrong!");
-
+      info.show();
       $("#notes textarea").val(data.text);
       $("#notes #noteId").val(data.id);
       var colorId = getColorId(data.color);
       if (colorId >= 0 && colorId < 10)
         setPickedColor(colorId);
-      $("button#updateNote").show();
+      $("#updateNote").show();
+      $("#deleteNote").show();
     })
-
-  }
+  };
 
   $("button#getNotes").click(getNotesAPICall);
 
-    $("button#updateNote").click(function() {
-      var info = $("#notes span.info");
-      var loader = $("#notes img.loader");
-      var content = $("#notes textarea").val();
-      var id = $("#noteId").val();
-
-      info.removeClass("error");
-      info.text("");
-
-      if (id < 1) {
-        info.addClass("error");
-        info.text("Note ID is unknown!");
-        return;
-      }
-
-      if (pickedColor < 0) {
-        info.addClass("error");
-        info.text("Note color is not set!");
-        return;
-      }
-
-      if (content == "") {
-        info.addClass("error");
-        info.text("Note content is empty!");
-        return;
-      }
-
-      loader.show();
-      $.post(serverURL + "/update-note/" + id + "/" + encodeURIComponent(availableColors[pickedColor]), content, function(data, status) {
-        loader.hide();
-        var ok = status == "success" || status == "nocontent" || status == "notmodified";
-        if (!ok) {
-          info.text("Something goes wrong!");
-          info.addClass("error");
-        } else {
-          // Refresh notes list
-          getNotesAPICall();
-        }
-      });
-});
-
-  $("button#createNote").click(function() {
+  $("button#updateNote").click(function() {
     var info = $("#notes span.info");
     var loader = $("#notes img.loader");
     var content = $("#notes textarea").val();
-
-    $("button#updateNote").hide();
-    $("#noteId").val("");
+    var id = $("#noteId").val();
 
     info.removeClass("error");
-    info.text("");
+    info.hide();
+
+    if (id < 1) {
+      info.addClass("error");
+      info.text("Note ID is unknown!");
+      info.show();
+      return;
+    }
 
     if (pickedColor < 0) {
       info.addClass("error");
       info.text("Note color is not set!");
+      info.show();
       return;
     }
 
     if (content == "") {
       info.addClass("error");
       info.text("Note content is empty!");
+      info.show();
+      return;
+    }
+
+    loader.show();
+    $.post(serverURL + "/update-note/" + id + "/" + encodeURIComponent(availableColors[pickedColor]), content, function(data, status) {
+      loader.hide();
+      var ok = status == "success" || status == "nocontent" || status == "notmodified";
+      if (!ok) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      } else {
+        // Refresh notes list
+        getNotesAPICall();
+      }
+    });
+  });
+
+  $("button#createNote").click(function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var content = $("#notes textarea").val();
+
+    $("#updateNote").hide();
+    $("#deleteNote").hide();
+    $("#noteId").val("");
+
+    info.removeClass("error");
+    info.hide();
+
+    if (pickedColor < 0) {
+      info.addClass("error");
+      info.text("Note color is not set!");
+      info.show();
+      return;
+    }
+
+    if (content == "") {
+      info.addClass("error");
+      info.text("Note content is empty!");
+      info.show();
       return;
     }
 
@@ -311,11 +584,62 @@ $(document).ready(function() {
       if (!ok) {
         info.text("Something goes wrong!");
         info.addClass("error");
+        info.show();
       } else {
         // Refresh notes list
         getNotesAPICall();
       }
     });
-});
+  });
+
+  $("#deleteNote").data("firstclickdone",false).click(function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var id = $("#noteId").val();
+
+    info.removeClass("error");
+    info.hide();
+
+    if (id == "" || id < 1) {
+      info.addClass("error");
+      info.text("Note ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (!$(this).data("firstclickdone")) {
+      $(this).data("firstclickdone",true);
+      $(this).text("Confirm note deletion");
+      clearDeleteNote();
+      return;
+    }
+
+    $("#noteId").val("");
+    $("#notes textarea").val("");
+    $("#updateNote").hide();
+    $(this).hide();
+
+    loader.show();
+    $.get(serverURL + "/delete-note/" + id, function(data, status) {
+      loader.hide();
+      var ok = status == "success" || status == "nocontent" || status == "notmodified";
+      if (ok) {
+        getNotesAPICall();
+      } else {
+        info.addClass("error");
+        info.text("Something goes wrong!");
+        info.show();
+      }
+    });
+
+  });
+
+  $("#noteId").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  $("#notes textarea").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
 
 });

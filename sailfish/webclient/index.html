@@ -13,42 +13,69 @@
 -->
 
 <head>
-  <title>Send To Phone Web Client</title>
+  <title>Send To Phone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <link rel="stylesheet" type="text/css" href="default.css">
+  <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"/>
+  <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png"/>
+  <link rel="stylesheet" type="text/css" href="default.css"/>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="webclient.js"></script>
 </head>
 
 <body>
-  <h1>Send to Phone Web Client</h1>
+  <h1>Send to Phone</h1>
   <div id="menu" class="clearfix">
     <ul>
-      <li><a id="browserMenuItem" href="#">Browser</a></li>
-      <li><a id="clipboardMenuItem" href="#">Clipboard</a></li>
-      <li><a id="notesMenuItem" href="#">Notes</a></li>
-      <li><a id="aboutMenuItem" href="#">About</a></li>
+      <li><a id="browserMenuItem" href="#browser">Browser</a></li>
+      <li><a id="clipboardMenuItem" href="#clipboard">Clipboard</a></li>
+      <li><a id="notesMenuItem" href="#notes">Notes</a></li>
+      <li><a id="aboutMenuItem" href="#about">About</a></li>
     </ul>
   </div>
 
   <div class="page" id="browser">
+   <div id="openurl">
+    <h2>Open URL</h2>
     <p>Open the specified URL in phone's default browser.</p>
-    <input type="text" value="" placeholder="Insert URL here" />
-    <button id="openUrl">Open</button>
-    <img class="loader" src="loader.gif" />
-    <span class="info"></span>
+    <p>
+		<input type="text" value="" placeholder="Insert URL here" />
+		<button id="openUrl">Open</button>
+		<img class="loader" src="loader.gif" />
+		<span class="info"></span>
+	</p>
+	</div>
+	<div id="bookmarks" class="section">
+		<h2>Bookmarks</h2>
+		<p>Create new or update existing bookmark.</p>
+		<p>
+			<input id="bookmarkId" type="text" value="" placeholder="Id" disabled="true" />
+			<input id="bookmarkName" type="text" value="" placeholder="Title" />
+			<input id="bookmarkUrl" type="text" value="" placeholder="URL" />
+		</p>
+		<p>
+			<button id="createBookmark">Create new bookmark</button>
+			<button id="updateBookmark">Update existing bookmark</button>
+			<button id="deleteBookmark">Delete bookmark</button>
+			<button id="getBookmarks">Refresh list of bookmarks</button>
+			<img class="loader" src="loader.gif" />
+			<span class="info"></span>
+		</p>
+		<p><table><tr><td class="empty">Empty</td></tr></table></p>
+	</div>
   </div>
 
   <div class="page" id="clipboard">
     <p>Set or get the contents of the phone's clipboard.</p>
     <textarea placeholder="Insert clipboard content here"></textarea>
-    <br/>
+    <p>
     <button id="setClip">Set</button>
     <button id="getClip">Get</button>
     <img class="loader" src="loader.gif" />
     <span class="info"></span>
+	</p>
     <p class="tip">Tip: To get content of phone's clipboard, after copying
-      text on phone, bring Send to Phone app to the foreground and then
+      text on phone, bring <i>Send to Phone</i> app to the foreground and then
       press Get button above.</p>
   </div>
 
@@ -59,38 +86,60 @@
     <textarea placeholder="Insert note content here"></textarea>
     <div id="colorPicker"></div>
     </div>
-    <br/>
+    <p>
     <button id="createNote">Create new note</button>
     <button id="updateNote">Update existing note</button>
+    <button id="deleteNote">Delete note</button>
     <button id="getNotes">Refresh list of notes</button>
     <img class="loader" src="loader.gif" />
     <span class="info"></span>
-    <br/>
-    <table><tr><td class="empty">Empty</td></tr></table>
+    </p>
+    <p><table><tr><td class="empty">Empty</td></tr></table></p>
   </div>
 
   <div class="page" id="about">
     <h2>About</h2>
-	<p>Send to Phone <br/>version: 2.0</p>
-    <p>Mobile app and Firefox add-on that allows you to send URLs and text
-      between PC and your mobile via WiFi.</p>
+	<img src="icon-64.png" />
+	<p><i>Send to Phone</i></p>
+	<p>version: <span class="version"></span></p>
+    <p>Web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone.</p>
+	<div class="section">
     <h2>Firefox</h2>
     <p>Add-on can be downloaded directly form
       <a href="https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/">
         Mozilla repository</a>.</p>
+    </div>
 
+	<div class="section">
     <h2>Bugs & feature requests</h2>
     <p>If you have any special requirements, feature requests or if you find
       any bug, please report it using
-      <a href="https://github.com/mkiol/SendToJolla/issues">this</a> form.</p>
+      <a href="https://github.com/mkiol/SendToJolla/issues">this form</a> or send <a href="mailto:sendtophone@mkiol.net">e-mail</a>.</p>
+	</div>
 
+    <div class="section">
     <h2>Copyright & source code</h2>
     <p>Copyright &copy; 2015 by Michal Kosciesza</p>
-    <p>Sent to Phone is distributed under
+    <p><i>Sent to Phone</i> is distributed under
       <a href="https://www.mozilla.org/MPL/2.0/">
         Mozilla Public License Version 2.0</a>.</p>
     <p>Source code is available on
       <a href="https://github.com/mkiol/SendToJolla">GitHub</a>.</p>
+    </div>
+
+	<div class="section">
+  <h2>Changelog</h2>
+  <h3>version: 2.0</h3>
+	<ul>
+		<li>Web-based client. This is an alternative way to use <i>Send to Phone</i>,
+    especially for those who don't use Firefox. To open Web client, go to
+		<i>Server URL</i> address in your favorite browser.</li>
+    <li>Support of Bookmarks management. It provides the possibility to add new,
+    delete or edit bookmarks of the native browser.</li>
+		<li>Support of Notes. It allows to save text as a new note, delete or
+		edit existing note.</li>
+	</ul>
+	</div>
   </div>
 
 </body>
