@@ -13,9 +13,19 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 CoverBackground {
-    Image {
+    Column {
         anchors.centerIn: parent
-        source: "icon.png"
+        spacing: Theme.paddingMedium
+
+        Image {
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "icon.png"
+        }
+
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: APP_NAME
+        }
     }
 }
 

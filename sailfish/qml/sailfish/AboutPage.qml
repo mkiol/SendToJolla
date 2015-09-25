@@ -54,7 +54,7 @@ Page {
                 horizontalAlignment: Text.AlignHCenter
                 anchors.left: parent.left; anchors.right: parent.right
                 font.pixelSize: Theme.fontSizeSmall
-                text: qsTr("An app that allows to send urls and text from PC to your Jolla phone.");
+                text: qsTr("Web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone.");
             }
 
             Label {

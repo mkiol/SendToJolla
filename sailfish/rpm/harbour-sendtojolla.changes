@@ -5,6 +5,15 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Fri Sep 25 2015 Michal Kosciesza <michal@mkiol.net> 2.0-1
+- Bookmarks management
+- Notes: Delete note
+- Web GUI polishing
+
+* Fri Sep 18 2015 Michal Kosciesza <michal@mkiol.net> 2.0-0
+- Web Client
+- Notes management
+
 * Thu Mar 19 2015 Michal Kosciesza <michal@mkiol.net> 1.2-0
 - Renamed to 'Send to Phone'
 

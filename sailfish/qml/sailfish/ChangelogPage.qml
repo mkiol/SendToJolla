@@ -29,13 +29,18 @@ Page {
             }
 
             LogItem {
-                title: 'Web Client'
-                description: "Now, you can use Send to Phone directly through browser. To open Web Client, go to Server URL address in your favorite browser. This is alternative to Firefox add-on, especially for those who don't use Mozilla's browser.";
+                title: 'Web-based client'
+                description: "This is an alternative way to use Send to Phone, especially for those who don't use Firefox. To open Web client, go to 'Server URL' address in your favorite browser."
             }
 
             LogItem {
                 title: 'Notes'
-                description: "Few features were added enabling simple notes management tasks. There is possibility to save text as a new note or update existing note. Currently, note related actions are available only via Web Client interface.";
+                description: "Provides simple notes management functions. It allows to save text as a new note, delete or edit existing note.";
+            }
+
+            LogItem {
+                title: 'Bookmarks'
+                description: "Provides the possibility to add new, delete or edit bookmarks of the native SailfishOS browser."
             }
 
             Item {

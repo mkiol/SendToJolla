@@ -1,10 +1,10 @@
 # Send To Phone
 
-Mobile app, Web client and Firefox add-on that allows you to send
-URLs and text between PC and your mobile via WiFi.
+Mobile app, Web client and Firefox add-on that simplifies clipboard,
+notes & bookmarks transfer between the PC and your phone.
 
 This app is for those who want to, in simple, secure and handy way,
-send text or URLs between PC and mobile phone.
+send text data between PC and mobile phone.
 To make it work, only Wi-Fi and local LAN network is used,
 so your data will not be transferred to any third parties.
 

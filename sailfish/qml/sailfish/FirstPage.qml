@@ -50,7 +50,7 @@ Page {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                 visible: server.running
                 color: Theme.secondaryColor
-                text: qsTr("Tip #1: To open Web Client, go to below URL address in your favorite web browser.")
+                text: qsTr("Tip #1: To open Web client, go to below URL address in your favorite web browser.")
                 wrapMode: Text.WordWrap
             }
 
@@ -119,34 +119,6 @@ Page {
                 wrapMode: Text.WordWrap
             }
 
-            /*ComboBox {
-                label: qsTr("Browser")
-                currentIndex: {
-                    switch (settings.browser) {
-                    case "sailfish-browser":
-                        return 0;
-                    case "firefox":
-                        return 1;
-                    }
-                    return 0;
-                }
-
-                menu: ContextMenu {
-                    MenuItem { text: qsTr("Sailfish browser") }
-                    MenuItem { text: qsTr("Firefox") }
-                }
-
-                onCurrentIndexChanged: {
-                    switch (currentIndex) {
-                    case 0:
-                        settings.browser = "sailfish-browser";
-                        return;
-                    case 1:
-                        settings.browser = "firefox";
-                        return;
-                    }
-                }
-            }*/
         }
     }
 }

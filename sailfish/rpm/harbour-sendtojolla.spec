@@ -12,8 +12,8 @@ Name:       harbour-sendtojolla
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
-Summary:    An app that allows you to send URLs and text between Firefox and your Jolla phone via WiFi.
-Version:    1.2
+Summary:    An app that allows you to send URLs and text between PC and your Jolla phone via WiFi.
+Version:    2.0
 Release:    0
 Group:      Qt/Qt
 License:    LICENSE
@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  desktop-file-utils
 
 %description
-An app that allows you to send URLs and text between Firefox and your Jolla phone via WiFi.
+Web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone
 
 
 %prep
