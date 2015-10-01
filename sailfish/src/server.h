@@ -16,6 +16,7 @@
 #include <QString>
 #include <QNetworkConfigurationManager>
 #include <QByteArray>
+#include <QMap>
 
 #ifdef SAILFISH
 #include <QClipboard>
@@ -60,7 +61,9 @@ signals:
 
 private:
     QHttpServer *server;
+    QMap<QHttpRequest*,QHttpResponse*> respMap;
     QNetworkConfigurationManager ncm;
+    QString clipboardData;
 
 #ifdef SAILFISH
     QClipboard *clipboard;
@@ -72,8 +75,6 @@ private:
     void closeNotesDB();
 #endif
 
-    QString clipboardData;
-
     bool isListening;
     void launchBrowser(QString data);
     void setClipboard(QString data);
@@ -83,10 +84,10 @@ private:
     QByteArray getNote(int id);
     bool deleteBookmark(int id);
     bool deleteNote(int id);
-    bool createNote(const QString &color, const QString &body);
+    bool createNote(const QByteArray &json);
     bool createBookmark(const QByteArray &json);
     bool updateBookmark(int id, const QByteArray &json);
-    bool updateNote(int id, const QString &color, const QString &body);
+    bool updateNote(int id, const QByteArray &json);
     bool getWebContent(const QString &file, QByteArray &data);
     bool isRunning();
     void stopServer();

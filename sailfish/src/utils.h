@@ -26,7 +26,6 @@ class Utils : public QObject
 
 public:
     explicit Utils(QObject *parent = 0);
-static QString escapeJSON(const QString& input);
 
 #ifdef BB10
     Q_INVOKABLE bool checkOSVersion(int major, int minor, int patch = 0, int build = 0);

@@ -71,7 +71,7 @@ Page {
             }
 
             ListItem {
-                enabled: true
+                enabled: server.running
                 onClicked: showMenu()
 
                 Label {

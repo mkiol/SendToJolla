@@ -3,7 +3,7 @@ TARGET = harbour-sendtojolla
 DEFINES += SAILFISH
 
 ## sailfishapp.prf ##
-QT += quick qml network
+QT += quick qml network sql
 target.path = /usr/bin
 qml.files = qml/sailfish
 qml.path = /usr/share/$${TARGET}/qml
@@ -11,7 +11,9 @@ desktop.files = $${TARGET}.desktop
 desktop.path = /usr/share/applications
 icon.files = $${TARGET}.png
 icon.path = /usr/share/icons/hicolor/86x86/apps
-INSTALLS += target qml desktop icon
+webclient.path = /usr/share/$${TARGET}
+webclient.files = webclient
+INSTALLS += target qml desktop icon webclient
 CONFIG += link_pkgconfig
 PKGCONFIG += sailfishapp
 INCLUDEPATH += /usr/include/sailfishapp

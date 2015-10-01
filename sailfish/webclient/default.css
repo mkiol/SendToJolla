@@ -132,8 +132,8 @@ img.loader {
   color: gray;
   font-style: italic;
 }
-#colorPicker {
-  float:left;
+#colorPicker div {
+  float: left;
 }
 #colorPicker div a {
   display:block;
@@ -148,14 +148,13 @@ img.loader {
   height:100%;
   width:100%;
 }
-#notes input {
+#noteId {
   width: 25px;
   vertical-align: top;
-  float: left;
 }
 #notes textarea {
   height: 200px;
-  float: left;
+  width: 400px;
 }
 
 /* Layout */

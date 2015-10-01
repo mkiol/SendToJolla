@@ -12,13 +12,27 @@
 #include <QDebug>
 #include <QStringList>
 #include <QUrl>
+#include <QDir>
 #include <QFile>
-#include <QTextStream>
+#include <QFileInfoList>
+#include <QSignalMapper>
 
 #ifdef BB10
 #include <bps/navigator.h>
 #include <bb/system/Clipboard>
+#include <bb/pim/notebook/Notebook>
+#include <bb/pim/account/Account>
+#include <bb/pim/account/Service>
+#include <bb/pim/account/AccountService>
+#include <bb/pim/notebook/NotebookService>
 #include <QByteArray>
+#include <QtGui/QDesktopServices>
+
+#include "QJson/serializer.h"
+#include "QJson/parser.h"
+
+using namespace bb::pim::account;
+using namespace bb::pim::notebook;
 #endif
 
 #ifdef SAILFISH
@@ -26,13 +40,15 @@
 #include <QGuiApplication>
 #include <QSqlQuery>
 #include <QSqlError>
-#include <QFileInfoList>
-#include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QTextStream>
+#include <QVariantMap>
+#include <QVariantList>
+#include "sailfishapp.h"
 #endif
 
 #include <QHostAddress>
@@ -44,7 +60,6 @@
 
 #include "server.h"
 #include "settings.h"
-#include "sailfishapp.h"
 #include "utils.h"
 
 Server::Server(QObject *parent) :
@@ -67,7 +82,9 @@ Server::Server(QObject *parent) :
 
 Server::~Server()
 {
+#ifdef SAILFISH
     closeNotesDB();
+#endif
     delete server;
 }
 
@@ -154,12 +171,24 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
     QStringList path = req->url().path().split("/");
 
     Settings* s = Settings::instance();
-    if (path.length() > 2 && path.at(1) == s->getCookie()) {
+    if (path.length() > 1 && path.at(1) == s->getCookie()) {
 
         // Redirection server_url/cookie -> server_url/cookie/
         if (path.length() == 2) {
             resp->setHeader("Location", s->getCookie() + "/");
             sendResponse(req, resp, 301);
+            return;
+        }
+
+        if (path.length() > 2 && path.at(2) == "get-platform") {
+#ifdef SAILFISH
+            sendResponse(req, resp, 200, "text/plain; charset=utf-8", "sailfish");
+#elif BB10
+            sendResponse(req, resp, 200, "text/plain; charset=utf-8", "blackberry");
+#else
+            sendResponse(req, resp, 200, "text/plain; charset=utf-8", "unknown");
+#endif
+            emit newEvent(QString("%1 request from %2").arg(path.at(2)).arg(req->remoteAddress()));
             return;
         }
 
@@ -190,23 +219,26 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
             return;
         }
 
-        if (path.length() > 4 && path.at(2) == "update-note" && req->method() == QHttpRequest::HTTP_POST) {
+        if (path.length() > 3 && path.at(2) == "update-note" && req->method() == QHttpRequest::HTTP_POST) {
+            respMap.insert(req, resp);
             connect(req, SIGNAL(end()), this, SLOT(bodyReceivedForUpdateNote()));
-            sendResponse(req, resp);
+            req->storeBody();
             emit newEvent(QString("%1 request from %2").arg(path.at(2)).arg(req->remoteAddress()));
             return;
         }
 
-        if (path.length() > 3 && path.at(2) == "create-note" && req->method() == QHttpRequest::HTTP_POST) {
+        if (path.length() > 2 && path.at(2) == "create-note" && req->method() == QHttpRequest::HTTP_POST) {
+            respMap.insert(req, resp);
             connect(req, SIGNAL(end()), this, SLOT(bodyReceivedForCreateNote()));
-            sendResponse(req, resp);
+            req->storeBody();
             emit newEvent(QString("%1 request from %2").arg(path.at(2)).arg(req->remoteAddress()));
             return;
         }
 
         if (path.length() > 2 && path.at(2)=="create-bookmark" && req->method()==QHttpRequest::HTTP_POST) {
+            respMap.insert(req, resp);
             connect(req, SIGNAL(end()), this, SLOT(bodyReceivedForCreateBookmark()));
-            sendResponse(req, resp);
+            req->storeBody();
             emit newEvent(QString("%1 request from %2").arg(path.at(2)).arg(req->remoteAddress()));
             return;
         }
@@ -227,8 +259,9 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
         }
 
         if (path.length() > 3 && path.at(2) == "update-bookmark" && req->method()==QHttpRequest::HTTP_POST) {
+            respMap.insert(req, resp);
             connect(req, SIGNAL(end()), this, SLOT(bodyReceivedForUpdateBookmark()));
-            sendResponse(req, resp);
+            req->storeBody();
             emit newEvent(QString("%1 request from %2").arg(path.at(2)).arg(req->remoteAddress()));
             return;
         }
@@ -241,8 +274,9 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
         }
 
         if (path.length() > 2 && path.at(2) == "set-clipboard" && req->method() == QHttpRequest::HTTP_POST) {
+            respMap.insert(req, resp);
             connect(req, SIGNAL(end()), this, SLOT(bodyReceivedForSetClipboard()));
-            sendResponse(req, resp);
+            req->storeBody();
             emit newEvent(QString("%1 request from %2").arg(path.at(2)).arg(req->remoteAddress()));
             return;
         }
@@ -268,12 +302,12 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
                                                     "text/html; charset=utf-8";
 
                 sendResponse(req, resp, 200, contentType, data);
-                emit newEvent(QString("Web client request from %1").arg(req->remoteAddress()));
+                //emit newEvent(QString("Web client request from %1").arg(req->remoteAddress()));
                 return;
             }
 
             sendResponse(req, resp, 404);
-            emit newEvent(tr("%1 request from %2").arg(filename, req->remoteAddress()));
+            //emit newEvent(tr("%1 request from %2").arg(filename, req->remoteAddress()));
             return;
         }
 
@@ -288,7 +322,6 @@ void Server::handle(QHttpRequest *req, QHttpResponse *resp)
 
 void Server::sendResponse(QHttpRequest *req, QHttpResponse *resp, int status, const QString &contentType, const QByteArray &data)
 {
-    req->storeBody();
     if (status == 204 || data.isEmpty()) {
         resp->setHeader("Content-Length", "0");
     } else {
@@ -302,51 +335,76 @@ void Server::sendResponse(QHttpRequest *req, QHttpResponse *resp, int status, co
 
 void Server::bodyReceivedForSetClipboard() {
     QHttpRequest* req = dynamic_cast<QHttpRequest*>(sender());
+    QHttpResponse* resp = respMap.take(req);
+
     setClipboard(QString(req->body()));
+    sendResponse(req, resp);
 }
 
 void Server::bodyReceivedForUpdateNote() {
     QHttpRequest* req = dynamic_cast<QHttpRequest*>(sender());
+    QHttpResponse* resp = respMap.take(req);
 
     QStringList path = req->url().path().split("/");
-    if (path.length()>4 && path.at(2)=="update-note" && req->method()==QHttpRequest::HTTP_POST) {
-        if (!updateNote(path.at(3).toInt(),QUrl::fromPercentEncoding(path.at(4).toUtf8()),QString(req->body()))) {
+    if (path.length()>3 && path.at(2)=="update-note" && req->method()==QHttpRequest::HTTP_POST) {
+        if (!updateNote(path.at(3).toInt(),req->body())) {
             qWarning() << "Error updatig note with id:" << path.at(3).toInt();
+            sendResponse(req, resp, 400);
+            return;
         }
     }
+
+    sendResponse(req, resp);
 }
 
 void Server::bodyReceivedForCreateNote() {
     QHttpRequest* req = dynamic_cast<QHttpRequest*>(sender());
+    QHttpResponse* resp = respMap.take(req);
 
     QStringList path = req->url().path().split("/");
-    if (path.length() > 3 && path.at(2) == "create-note" && req->method()==QHttpRequest::HTTP_POST) {
-        if (!createNote(QUrl::fromPercentEncoding(path.at(3).toUtf8()),QString(req->body()))) {
+    if (path.length() > 2 && path.at(2) == "create-note" && req->method()==QHttpRequest::HTTP_POST) {
+        if (!createNote(req->body())) {
             qWarning() << "Error creating new note";
+            sendResponse(req, resp, 400);
+            return;
         }
     }
+
+    sendResponse(req, resp);
 }
 
 void Server::bodyReceivedForCreateBookmark() {
     QHttpRequest* req = dynamic_cast<QHttpRequest*>(sender());
+    qDebug() << "1" << req->body();
+    QHttpResponse* resp = respMap.take(req);
 
     QStringList path = req->url().path().split("/");
     if (path.length() > 2 && path.at(2) == "create-bookmark" && req->method()==QHttpRequest::HTTP_POST) {
+        qDebug() << "2" << req->body();
         if (!createBookmark(req->body())) {
             qWarning() << "Error creating new bookmark";
+            sendResponse(req, resp, 400);
+            return;
         }
     }
+
+    sendResponse(req, resp);
 }
 
 void Server::bodyReceivedForUpdateBookmark() {
     QHttpRequest* req = dynamic_cast<QHttpRequest*>(sender());
+    QHttpResponse* resp = respMap.take(req);
 
     QStringList path = req->url().path().split("/");
     if (path.length() > 3 && path.at(2) == "update-bookmark" && req->method()==QHttpRequest::HTTP_POST) {
         if (!updateBookmark(path.at(3).toInt(), req->body())) {
             qWarning() << "Error updating bookmark";
+            sendResponse(req, resp, 400);
+            return;
         }
     }
+
+    sendResponse(req, resp);
 }
 
 
@@ -412,7 +470,13 @@ QString Server::getClipboard()
 
 bool Server::getWebContent(const QString &filename, QByteArray &data)
 {
+#ifdef SAILFISH
     QFile file(SailfishApp::pathTo("webclient/" + (filename == "" ? "index.html" : filename)).toLocalFile());
+#elif BB10
+    QFile file(QDir::currentPath()+"/app/native/webclient/" + (filename == "" ? "index.html" : filename));
+#else
+    return false;
+#endif
 
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Could not open" << filename << "for reading: " << file.errorString();
@@ -428,6 +492,7 @@ bool Server::getWebContent(const QString &filename, QByteArray &data)
 
 QByteArray Server::getNotes()
 {
+#ifdef SAILFISH
     if (!notesDB.isOpen()) {
         qWarning() << "Notes DB is not open!";
         return "";
@@ -445,7 +510,7 @@ QByteArray Server::getNotes()
             QJsonObject obj;
             obj.insert("id",query.value(0).toInt());
             obj.insert("color",query.value(1).toString());
-            obj.insert("text",text);
+            obj.insert("title",text);
             array.append(obj);
 
         }
@@ -455,10 +520,49 @@ QByteArray Server::getNotes()
     }
 
     return QJsonDocument(array).toJson(QJsonDocument::Compact);
+#elif BB10
+    NotebookService service;
+    Notebook notebook = service.defaultNotesNotebook();
+    NotebookEntryFilter filter;
+    filter.setParentNotebookId(notebook.id());
+
+    QList<NotebookEntry> list = service.notebookEntries(filter);
+
+    if (list.isEmpty()) {
+        return "";
+    }
+
+    QVariantList jsonList;
+    QList<NotebookEntry>::iterator it = list.begin();
+    int i = 1;
+    while(it != list.end()) {
+        QVariantMap map;
+        map.insert("id", i);
+        QString title = (*it).title();
+        title = title.length() <= 50 ? title : title.left(50);
+        map.insert("title", title);
+        jsonList.append(map);
+        ++it; ++i;
+    }
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(jsonList, &ok);
+
+    if (!ok) {
+      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+      return "";
+    }
+
+    return json;
+#else
+    return "";
+#endif
 }
 
 QByteArray Server::getNote(int id)
 {
+#ifdef SAILFISH
     if (!notesDB.isOpen()) {
         qWarning() << "Notes DB is not open!";
         return "";
@@ -471,23 +575,60 @@ QByteArray Server::getNote(int id)
             QJsonObject obj;
             obj.insert("id",QJsonValue(id));
             obj.insert("color",query.value(0).toString());
-            obj.insert("text",query.value(1).toString());
+            obj.insert("body",query.value(1).toString());
             return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 
         }
     } else {
         qWarning() << "SQL execution error:" << query.lastError().text();
     }
+#elif BB10
+    NotebookService service;
+    Notebook notebook = service.defaultNotesNotebook();
+    NotebookEntryFilter filter;
+    filter.setParentNotebookId(notebook.id());
 
+    QList<NotebookEntry> list = service.notebookEntries(filter);
+
+    if (list.isEmpty()) {
+        qWarning() << "List of notes is empty!";
+        return "";
+    }
+
+    if (list.length() < id || id < 1) {
+        qWarning() << "Note ID is invalid!";
+        return "";
+    }
+
+    NotebookEntry entry = list[id-1];
+    QVariantMap map;
+    map.insert("id", id);
+    map.insert("title", entry.title());
+    map.insert("body", entry.description().plainText());
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(map, &ok);
+
+    if (!ok) {
+        qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+        return "";
+    }
+
+    return json;
+#else
     return "";
+#endif
 }
 
 bool Server::createBookmark(const QByteArray &json)
 {
+#ifdef SAILFISH
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
         qWarning() << "Can not parse bookmark data!" << parseError.errorString();
+        qDebug() << json;
         return false;
     }
 
@@ -498,8 +639,8 @@ bool Server::createBookmark(const QByteArray &json)
 
     QJsonObject obj = doc.object();
 
-    if (obj["url"].isUndefined() || obj["url"].toString().isEmpty() ||
-        obj["title"].isUndefined() || obj["title"].toString().isEmpty()) {
+    if (!obj["url"].isString() || obj["url"].toString().isEmpty() ||
+        !obj["title"].isString() || obj["title"].toString().isEmpty()) {
         qWarning() << "Bookmark data is not valid!";
         return false;
     }
@@ -520,10 +661,14 @@ bool Server::createBookmark(const QByteArray &json)
     }
 
     return true;
+#else
+    return false;
+#endif
 }
 
 bool Server::updateBookmark(int id, const QByteArray &json)
 {
+#ifdef SAILFISH
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
@@ -560,10 +705,14 @@ bool Server::updateBookmark(int id, const QByteArray &json)
     }
 
     return true;
+#else
+    return false;
+#endif
 }
 
 bool Server::deleteBookmark(int id)
 {
+#ifdef SAILFISH
     QJsonArray newArray = readBookmarks();
 
     if (id < 1 || newArray.size() < id) {
@@ -579,8 +728,51 @@ bool Server::deleteBookmark(int id)
     }
 
     return true;
+#else
+    return false;
+#endif
 }
 
+QByteArray Server::getBookmarks()
+{
+#ifdef SAILFISH
+    QJsonArray newArr;
+    QJsonArray arr = readBookmarks();
+    QJsonArray::iterator it = arr.begin();
+    int i = 1;
+    while (it != arr.end()) {
+        if ((*it).isObject()) {
+            QJsonObject obj = (*it).toObject();
+            QJsonObject newObj;
+            newObj.insert("id",QJsonValue(i));
+            newObj.insert("title",obj["title"]);
+            newObj.insert("url",obj["url"]);
+
+            QString icon = obj["favicon"].toString();
+            if (icon.startsWith("http://",Qt::CaseInsensitive) ||
+                icon.startsWith("https://",Qt::CaseInsensitive))
+                newObj.insert("icon",obj["favicon"]);
+            /*else
+                newObj.insert("icon",QJsonValue(QJsonValue::String));*/
+
+            newArr.append(newObj);
+            ++i;
+            ++it;
+        }
+    }
+
+    if (newArr.isEmpty()) {
+        qWarning() << "No bookmarks!";
+        return "";
+    }
+
+    return QJsonDocument(newArr).toJson(QJsonDocument::Compact);
+#else
+    return "";
+#endif
+}
+
+#ifdef SAILFISH
 bool Server::writeBookmarks(const QJsonArray &array)
 {
     QFile file(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
@@ -603,7 +795,6 @@ bool Server::writeBookmarks(const QJsonArray &array)
         qWarning() << "Can not create bookmarks backup!";
         return false;
     }*/
-
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qWarning() << "Can not open bookmarks file!" << file.errorString();
@@ -652,42 +843,6 @@ QJsonArray Server::readBookmarks()
     return doc.array();
 }
 
-QByteArray Server::getBookmarks()
-{
-    QJsonArray newArr;
-    QJsonArray arr = readBookmarks();
-    QJsonArray::iterator it = arr.begin();
-    int i = 1;
-    while (it != arr.end()) {
-        if ((*it).isObject()) {
-            QJsonObject obj = (*it).toObject();
-            QJsonObject newObj;
-            newObj.insert("id",QJsonValue(i));
-            newObj.insert("title",obj["title"]);
-            newObj.insert("url",obj["url"]);
-
-            QString icon = obj["favicon"].toString();
-            if (icon.startsWith("http://",Qt::CaseInsensitive) ||
-                icon.startsWith("https://",Qt::CaseInsensitive))
-                newObj.insert("icon",obj["favicon"]);
-            /*else
-                newObj.insert("icon",QJsonValue(QJsonValue::String));*/
-
-            newArr.append(newObj);
-            ++i;
-            ++it;
-        }
-    }
-
-    if (newArr.isEmpty()) {
-        qWarning() << "No bookmarks!";
-        return "";
-    }
-
-    return QJsonDocument(newArr).toJson(QJsonDocument::Compact);
-}
-
-
 QString Server::getNotesDBfile()
 {
     QString dirName = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
@@ -729,8 +884,36 @@ bool Server::openNotesDB()
     return true;
 }
 
-bool Server::createNote(const QString &color, const QString &body)
+void Server::closeNotesDB()
 {
+    notesDB.close();
+    QSqlDatabase::removeDatabase("qt_sql_sendtojolla_connection");
+}
+#endif
+
+bool Server::createNote(const QByteArray &json)
+{
+#ifdef SAILFISH
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "Can not parse note data!" << parseError.errorString();
+        return false;
+    }
+
+    if (!doc.isObject()) {
+        qWarning() << "Note data is not JSON object!";
+        return false;
+    }
+
+    QJsonObject obj = doc.object();
+
+    if (!obj["color"].isString() || obj["color"].toString().isEmpty() ||
+        !obj["body"].isString() || obj["body"].toString().isEmpty()) {
+        qWarning() << "Note data is not valid!";
+        return false;
+    }
+
     if (!notesDB.isOpen()) {
         qWarning() << "Notes DB is not open!";
         return false;
@@ -745,8 +928,8 @@ bool Server::createNote(const QString &color, const QString &body)
     query1.prepare("UPDATE notes SET pagenr = pagenr + 1 WHERE pagenr >= 1");
     QSqlQuery query2(notesDB);
     query2.prepare("INSERT INTO notes (pagenr, color, body) VALUES (1, ?, ?)");
-    query2.addBindValue(color);
-    query2.addBindValue(body);
+    query2.addBindValue(obj["color"].toString());
+    query2.addBindValue(obj["body"].toString());
 
     if(!query1.exec()) {
         qWarning() << "SQL execution error:" << query1.lastError().text();
@@ -767,10 +950,68 @@ bool Server::createNote(const QString &color, const QString &body)
     }
 
     return true;
+#elif BB10
+    QJson::Parser parser;
+    bool ok;
+    QVariant result = parser.parse(json, &ok);
+
+    if (!ok) {
+        qWarning() << "An error occurred during parsing JSON!";
+        return false;
+    }
+
+    if (result.type() != QVariant::Map) {
+        qWarning() << "JSON is not an object!";
+        return false;
+    }
+
+    QVariantMap obj = result.toMap();
+
+    if (!obj["title"].type() == QVariant::String ||
+         obj["title"].toString().isEmpty()) {
+            qWarning() << "Note data is not valid!";
+            return false;
+    }
+
+    NotebookEntry entry;
+    entry.setTitle(obj["title"].toString());
+    NotebookEntryDescription desc;
+    desc.setText(obj["body"].toString());
+    entry.setDescription(desc);
+
+    NotebookService service;
+    Notebook notebook = service.defaultNotesNotebook();
+    service.addNotebookEntry(&entry, notebook.id());
+
+    return true;
+#else
+    return false;
+#endif
 }
 
-bool Server::updateNote(int id, const QString &color, const QString &body)
+bool Server::updateNote(int id, const QByteArray &json)
 {
+#ifdef SAILFISH
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "Can not parse note data!" << parseError.errorString();
+        return false;
+    }
+
+    if (!doc.isObject()) {
+        qWarning() << "Note data is not JSON object!";
+        return false;
+    }
+
+    QJsonObject obj = doc.object();
+
+    if (!obj["color"].isString() || obj["color"].toString().isEmpty() ||
+        !obj["body"].isString() || obj["body"].toString().isEmpty()) {
+        qWarning() << "Note data is not valid!";
+        return false;
+    }
+
     if (!notesDB.isOpen()) {
         qWarning() << "Notes DB is not open!";
         return false;
@@ -778,8 +1019,8 @@ bool Server::updateNote(int id, const QString &color, const QString &body)
 
     QSqlQuery query(notesDB);
     query.prepare("UPDATE notes SET body = ?, color = ? WHERE pagenr = ?");
-    query.addBindValue(body);
-    query.addBindValue(color);
+    query.addBindValue(obj["body"].toString());
+    query.addBindValue(obj["color"].toString());
     query.addBindValue(id);
 
     if(!query.exec()) {
@@ -788,10 +1029,66 @@ bool Server::updateNote(int id, const QString &color, const QString &body)
     }
 
     return true;
+#elif BB10
+    NotebookService service;
+    Notebook notebook = service.defaultNotesNotebook();
+    NotebookEntryFilter filter;
+    filter.setParentNotebookId(notebook.id());
+
+    QList<NotebookEntry> list = service.notebookEntries(filter);
+
+    if (list.isEmpty()) {
+        qWarning() << "List of notes is empty!";
+        return false;
+    }
+
+    if (list.length() < id || id < 1) {
+        qWarning() << "Note ID is invalid!";
+        return false;
+    }
+
+    QJson::Parser parser;
+    bool ok;
+    QVariant result = parser.parse(json, &ok);
+
+    if (!ok) {
+        qWarning() << "An error occurred during parsing JSON!";
+        return false;
+    }
+
+    if (result.type() != QVariant::Map) {
+        qWarning() << "JSON is not an object!";
+        return false;
+    }
+
+    QVariantMap obj = result.toMap();
+
+    if (!obj["title"].type() == QVariant::String ||
+         obj["title"].toString().isEmpty()) {
+        qWarning() << "Note data is not valid!";
+        return false;
+    }
+
+    NotebookEntry entry = list[id-1];
+    entry.setTitle(obj["title"].toString());
+    NotebookEntryDescription desc;
+    desc.setText(obj["body"].toString());
+    entry.setDescription(desc);
+
+    if (service.updateNotebookEntry(entry) != NotebookServiceResult::Success) {
+        qWarning() << "Note updating error!";
+        return false;
+    }
+
+    return true;
+#else
+    return false;
+#endif
 }
 
 bool Server::deleteNote(int id)
 {
+#ifdef SAILFISH
     if (!notesDB.isOpen()) {
         qWarning() << "Notes DB is not open!";
         return false;
@@ -828,12 +1125,34 @@ bool Server::deleteNote(int id)
     }
 
     return true;
-}
+#elif BB10
+    NotebookService service;
+    Notebook notebook = service.defaultNotesNotebook();
+    NotebookEntryFilter filter;
+    filter.setParentNotebookId(notebook.id());
 
-void Server::closeNotesDB()
-{
-    notesDB.close();
-    QSqlDatabase::removeDatabase("qt_sql_sendtojolla_connection");
+    QList<NotebookEntry> list = service.notebookEntries(filter);
+
+    if (list.isEmpty()) {
+        qWarning() << "List of notes is empty!";
+        return false;
+    }
+
+    if (list.length() < id || id < 1) {
+        qWarning() << "Note ID is invalid!";
+        return false;
+    }
+
+    NotebookEntryId entryId = list[id-1].id();
+    if (service.deleteNotebookEntry(entryId) != NotebookServiceResult::Success) {
+        qWarning() << "Note deletion error!";
+        return false;
+    }
+
+    return true;
+#else
+    return false;
+#endif
 }
 
 bool Server::isRunning()

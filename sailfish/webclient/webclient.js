@@ -11,6 +11,7 @@
 
 // Global vars
 var serverURL;
+var platformName;
 var VERSION = "2.0";
 
 // Checks if URL syntax is valid
@@ -36,9 +37,32 @@ $(document).ready(function() {
   $("div.page").hide();
   $(".version").text(VERSION);
 
+  // Get platform name
+  $.get(serverURL + "/get-platform", function(data, status) {
+    var ok = status == "success" || status == "nocontent" || status == "notmodified";
+    if (!ok) {
+      var info = $(".info");
+      info.addClass("error");
+      info.text("Something goes wrong!");
+      info.show();
+    } else {
+      platformName = data;
+      if (platformName == "blackberry") {
+        $(".bb-hide").hide();
+      }
+      if (platformName == "sailfish") {
+        $(".sailfish-hide").hide();
+        setPickedColor(0);
+      }
+    }
+  });
+
   // --- Menu
 
-  var page = window.location.hash == "" ? "#browser" : window.location.hash;
+  var page = window.location.hash;
+  if (page != "#browser" && page != "#clipboard" && page != "#notes" && page != "#about")
+    page = "#browser";
+
   $(page).show();
   $(page + "MenuItem").addClass("active");
 
@@ -219,6 +243,7 @@ $(document).ready(function() {
       error: function(xhr, status, error) {
         info.text("Something goes wrong!");
         info.addClass("error");
+        info.show();
       },
       contentType: "application/json; charset=utf-8",
       dataType: 'json'
@@ -281,6 +306,7 @@ $(document).ready(function() {
       error: function(xhr, status, error) {
         info.text("Something goes wrong!");
         info.addClass("error");
+        info.show();
       },
       contentType: "application/json; charset=utf-8",
       dataType: 'json'
@@ -397,9 +423,10 @@ $(document).ready(function() {
     "#cc0000", "#cc7700", "#ccbb00",
     "#88cc00", "#00b315", "#00bf9f",
     "#005fcc", "#0016de", "#bb00cc"];
-  setPickedColor(0);
 
   $("#noteId").val("");
+  $("#noteTitle").val("");
+  $("#notes textarea").val("");
   $("#updateNote").hide();
   $("#deleteNote").hide();
 
@@ -415,11 +442,14 @@ $(document).ready(function() {
     if (colorId < 0 && colorId > 8) {
       colorId = 0;
     }
+    pickedColor = colorId;
     var colorPicker = $("#colorPicker");
     $("#colorPicker div").remove();
-    pickedColor = colorId;
     for (var i in availableColors) {
-      var dot = $("<div></div>").addClass("colorRow").css("background-color",availableColors[i]).append($("<a href='#'></a>").data("colorid",i).click(function() {
+      var dot = $("<div></div>").addClass("colorRow")
+      .css("background-color", availableColors[i])
+      .append($("<a href='#'></a>").data("colorid", i)
+      .click(function() {
         setPickedColor($(this).data("colorid"));
       }));
       if (i == pickedColor)
@@ -461,11 +491,13 @@ $(document).ready(function() {
           for (var i in data) {
             var row = $("<tr></tr>");
             row.append($("<td></td>").text(data[i].id));
-            row.append($("<td></td>").addClass("colorRow")
-              .css("background-color", data[i].color));
+            if (platformName == "sailfish") {
+              row.append($("<td></td>").addClass("colorRow")
+                .css("background-color", data[i].color));
+            }
             row.append($("<td></td>").addClass("textRow")
               .append($('<a href="#"></a>').data("noteid", data[i].id)
-                .text(data[i].text == "" ? "Empty note" : data[i].text)
+                .text(data[i].title == "" ? "Empty note" : data[i].title)
                 .click(openNoteAPICall)));
             table.append(row);
           }
@@ -494,11 +526,12 @@ $(document).ready(function() {
       if (!ok) info.addClass("error");
       info.text(ok ? "OK" : "Something goes wrong!");
       info.show();
-      $("#notes textarea").val(data.text);
-      $("#notes #noteId").val(data.id);
+      $("#notes textarea").val(data.body);
+      $("#noteId").val(data.id);
       var colorId = getColorId(data.color);
       if (colorId >= 0 && colorId < 10)
         setPickedColor(colorId);
+      $("#noteTitle").val(data.title);
       $("#updateNote").show();
       $("#deleteNote").show();
     })
@@ -510,6 +543,7 @@ $(document).ready(function() {
     var info = $("#notes span.info");
     var loader = $("#notes img.loader");
     var content = $("#notes textarea").val();
+    var title = $("#noteTitle").val();
     var id = $("#noteId").val();
 
     info.removeClass("error");
@@ -522,9 +556,16 @@ $(document).ready(function() {
       return;
     }
 
-    if (pickedColor < 0) {
+    if (platformName == "sailfish" && pickedColor < 0) {
       info.addClass("error");
       info.text("Note color is not set!");
+      info.show();
+      return;
+    }
+
+    if (platformName == "blackberry" && title == "") {
+      info.addClass("error");
+      info.text("Note title is not set!");
       info.show();
       return;
     }
@@ -536,24 +577,40 @@ $(document).ready(function() {
       return;
     }
 
+    var body;
+    if (platformName == "sailfish")
+      body = {"color": availableColors[pickedColor], "body": content};
+    else
+      body = {"title": title, "body": content};
+
     loader.show();
-    $.post(serverURL + "/update-note/" + id + "/" + encodeURIComponent(availableColors[pickedColor]), content, function(data, status) {
-      loader.hide();
-      var ok = status == "success" || status == "nocontent" || status == "notmodified";
-      if (!ok) {
+    $.ajax({
+      type: 'POST',
+      url: serverURL + "/update-note/" + id,
+      data: JSON.stringify(body),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getNotesAPICall();
+      },
+      error: function(xhr, status, error) {
         info.text("Something goes wrong!");
         info.addClass("error");
         info.show();
-      } else {
-        // Refresh notes list
-        getNotesAPICall();
-      }
+      },
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json'
     });
+
   });
 
   $("button#createNote").click(function() {
     var info = $("#notes span.info");
     var loader = $("#notes img.loader");
+    var title = $("#noteTitle").val();
     var content = $("#notes textarea").val();
 
     $("#updateNote").hide();
@@ -563,9 +620,16 @@ $(document).ready(function() {
     info.removeClass("error");
     info.hide();
 
-    if (pickedColor < 0) {
+    if (platformName == "sailfish" && pickedColor < 0) {
       info.addClass("error");
       info.text("Note color is not set!");
+      info.show();
+      return;
+    }
+
+    if (platformName == "blackberry" && title == "") {
+      info.addClass("error");
+      info.text("Note title is not set!");
       info.show();
       return;
     }
@@ -577,19 +641,34 @@ $(document).ready(function() {
       return;
     }
 
+    var body;
+    if (platformName == "sailfish")
+      body = {"color": availableColors[pickedColor], "body": content};
+    else
+      body = {"title": title, "body": content};
+
     loader.show();
-    $.post(serverURL + "/create-note/" + encodeURIComponent(availableColors[pickedColor]), content, function(data, status) {
-      loader.hide();
-      var ok = status == "success" || status == "nocontent" || status == "notmodified";
-      if (!ok) {
+    $.ajax({
+      type: 'POST',
+      url: serverURL + "/create-note",
+      data: JSON.stringify(body),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getNotesAPICall();
+      },
+      error: function(xhr, status, error) {
         info.text("Something goes wrong!");
         info.addClass("error");
         info.show();
-      } else {
-        // Refresh notes list
-        getNotesAPICall();
-      }
+      },
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json'
     });
+
   });
 
   $("#deleteNote").data("firstclickdone",false).click(function() {
@@ -615,6 +694,7 @@ $(document).ready(function() {
     }
 
     $("#noteId").val("");
+    $("#noteTitle").val("");
     $("#notes textarea").val("");
     $("#updateNote").hide();
     $(this).hide();

@@ -19,7 +19,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"/>
   <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png"/>
   <link rel="stylesheet" type="text/css" href="default.css"/>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="jquery.min.js"></script>
   <script src="webclient.js"></script>
 </head>
 
@@ -45,7 +45,7 @@
 		<span class="info"></span>
 	</p>
 	</div>
-	<div id="bookmarks" class="section">
+	<div id="bookmarks" class="section, bb-hide">
 		<h2>Bookmarks</h2>
 		<p>Create new or update existing bookmark.</p>
 		<p>
@@ -74,25 +74,26 @@
     <img class="loader" src="loader.gif" />
     <span class="info"></span>
 	</p>
-    <p class="tip">Tip: To get content of phone's clipboard, after copying
+    <p class="tip bb-hide">Tip: To get content of phone's clipboard, after copying
       text on phone, bring <i>Send to Phone</i> app to the foreground and then
       press Get button above.</p>
   </div>
 
   <div class="page" id="notes">
     <p>Create new or update existing note.</p>
-    <div id="form" class="clearfix">
-    <input id="noteId" type="text" value="" placeholder="Id" disabled="true" />
-    <textarea placeholder="Insert note content here"></textarea>
-    <div id="colorPicker"></div>
-    </div>
     <p>
-    <button id="createNote">Create new note</button>
-    <button id="updateNote">Update existing note</button>
-    <button id="deleteNote">Delete note</button>
-    <button id="getNotes">Refresh list of notes</button>
-    <img class="loader" src="loader.gif" />
-    <span class="info"></span>
+      <input id="noteId" type="text" value="" placeholder="Id" disabled="true" />
+      <input id="noteTitle" type="text" value="" placeholder="Title" class="sailfish-hide" />
+    </p>
+    <p><textarea placeholder="Insert note content here"></textarea></p>
+    <p><div id="colorPicker" class="clearfix bb-hide"></div></p>
+    <p>
+      <button id="createNote">Create new note</button>
+      <button id="updateNote">Update existing note</button>
+      <button id="deleteNote">Delete note</button>
+      <button id="getNotes">Refresh list of notes</button>
+      <img class="loader" src="loader.gif" />
+      <span class="info"></span>
     </p>
     <p><table><tr><td class="empty">Empty</td></tr></table></p>
   </div>
