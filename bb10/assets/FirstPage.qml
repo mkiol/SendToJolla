@@ -46,7 +46,7 @@ Page {
                     
                     Label {
                         text: server.running ? 
-                        qsTr("Server is running. Use below URL to configure Firefox add-on.") :
+                        qsTr("Server is running.") :
                         qsTr("Server is not running.")
                         multiline: true
                     }
@@ -54,10 +54,17 @@ Page {
                     Label {
                         visible: server.running
                         textStyle.color: utils.secondaryText()
-                        text: qsTr("Go to Firefox add-on's preferences and fill out the 'Server URL' field with the URL displayed below.")
+                        text: qsTr("Tip #1: To open Web client, go to below URL address in your favorite web browser.")
                         multiline: true
                     }
-
+                    
+                    Label {
+                        visible: server.running
+                        textStyle.color: utils.secondaryText()
+                        text: qsTr("Tip #2: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
+                        multiline: true
+                    }
+                    
                     Label {
                         id: urlLabel
                         text: server.getServerUrl()
@@ -90,13 +97,4 @@ Page {
         }
     }
 
-    /*actions: ActionItem {
-        title: qsTr("Second page") + Retranslate.onLocaleOrLanguageChanged
-        ActionBar.placement: ActionBarPlacement.OnBar
-        
-        onTriggered: {
-            // A second Page is created and pushed when this action is triggered.
-            navigationPane.push(secondPageDefinition.createObject());
-        }
-    }*/
 }

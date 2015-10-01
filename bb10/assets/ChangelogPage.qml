@@ -24,6 +24,27 @@ Page {
         ScrollView {
             Container {
                 Header {
+                    title: qsTr("Version %1").arg("2.0")
+                }
+                
+                Container {
+                    leftPadding: utils.du(2)
+                    rightPadding: utils.du(2)
+                    topPadding: utils.du(2)
+                    bottomPadding: utils.du(2)
+                    
+                    LogItem {
+                        title: 'Web-based client'
+                        description: "This is an alternative way to use Send to Phone, especially for those who don't use Firefox. To open Web client, go to 'Server URL' address in your favorite browser."
+                    }
+                    
+                    LogItem {
+                        title: 'Notes'
+                        description: "Provides simple notes management functions. It allows to save text as a new note, delete or edit existing note."
+                    }
+                }
+                
+                Header {
                     title: qsTr("Version %1").arg("1.1")
                 }
 
@@ -35,7 +56,7 @@ Page {
 
                     LogItem {
                         title: 'Initial version for BlackBerry'
-                        description: 'This is first version of Sent to Berry for BlackBerry 10.'
+                        description: 'This is first version of Sent to Phone for BlackBerry.'
                     }
                 }
             }

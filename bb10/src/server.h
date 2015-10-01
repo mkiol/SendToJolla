@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2015 Michal Kosciesza <michal@mkiol.net>
 
-  This file is part of SendToJolla application.
+  This file is part of SendToPhone application.
 
   This Source Code Form is subject to the terms of
   the Mozilla Public License, v.2.0. If a copy of
@@ -15,9 +15,13 @@
 #include <QObject>
 #include <QString>
 #include <QNetworkConfigurationManager>
+#include <QByteArray>
+#include <QMap>
 
 #ifdef SAILFISH
 #include <QClipboard>
+#include <QSqlDatabase>
+#include <QJsonDocument>
 #endif
 
 #include "qhttpserver/qhttpserver.h"
@@ -41,7 +45,11 @@ public slots:
     void handle(QHttpRequest *req, QHttpResponse *resp);
 
 private slots:
-    void bodyReceived();
+    void bodyReceivedForSetClipboard();
+    void bodyReceivedForUpdateNote();
+    void bodyReceivedForCreateNote();
+    void bodyReceivedForCreateBookmark();
+    void bodyReceivedForUpdateBookmark();
 #ifdef SAILFISH
     void clipboardChanged(QClipboard::Mode);
 #endif
@@ -53,18 +61,39 @@ signals:
 
 private:
     QHttpServer *server;
+    QMap<QHttpRequest*,QHttpResponse*> respMap;
     QNetworkConfigurationManager ncm;
+    QString clipboardData;
+
 #ifdef SAILFISH
     QClipboard *clipboard;
+    QSqlDatabase notesDB;
+    QString getNotesDBfile();
+    QJsonArray readBookmarks();
+    bool writeBookmarks(const QJsonArray &array);
+    bool openNotesDB();
+    void closeNotesDB();
 #endif
-    QString clipboardData;
 
     bool isListening;
     void launchBrowser(QString data);
     void setClipboard(QString data);
     QString getClipboard();
+    QByteArray getNotes();
+    QByteArray getBookmarks();
+    QByteArray getNote(int id);
+    bool deleteBookmark(int id);
+    bool deleteNote(int id);
+    bool createNote(const QByteArray &json);
+    bool createBookmark(const QByteArray &json);
+    bool updateBookmark(int id, const QByteArray &json);
+    bool updateNote(int id, const QByteArray &json);
+    bool getWebContent(const QString &file, QByteArray &data);
     bool isRunning();
     void stopServer();
+    void sendResponse(QHttpRequest *req, QHttpResponse *resp, int status = 204,
+                      const QString &contentType = "",
+                      const QByteArray &data = "");
 };
 
 #endif // SERVER_H

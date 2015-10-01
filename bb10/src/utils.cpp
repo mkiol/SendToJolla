@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2015 Michal Kosciesza <michal@mkiol.net>
 
-  This file is part of SendToJolla application.
+  This file is part of SendToPhone application.
 
   This Source Code Form is subject to the terms of
   the Mozilla Public License, v.2.0. If a copy of
@@ -10,6 +10,7 @@
 */
 
 #include <QDebug>
+#include <QTextStream>
 
 #ifdef BB10
 #include <QtGui/QApplication>

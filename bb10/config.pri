@@ -43,6 +43,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/Notification.qml) \
         $$quote($$BASEDIR/assets/PaddingLabel.qml) \
         $$quote($$BASEDIR/assets/SettingsPage.qml) \
+        $$quote($$BASEDIR/assets/changelog.png) \
         $$quote($$BASEDIR/assets/ic_save.png) \
         $$quote($$BASEDIR/assets/icon.png) \
         $$quote($$BASEDIR/assets/main.qml)

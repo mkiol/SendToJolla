@@ -22,7 +22,7 @@ Page {
         appearance: TitleBarAppearance.Plain
     }
     
-    /*actions: [
+    actions: [
         ActionItem {
             title: qsTr("Changelog")
             ActionBar.placement: ActionBarPlacement.OnBar
@@ -31,7 +31,7 @@ Page {
                 nav.push(changelogPage.createObject());
             }
         }
-    ]*/
+    ]
 
     ScrollView {
 
@@ -66,7 +66,7 @@ Page {
             PaddingLabel {
                 horizontalAlignment: HorizontalAlignment.Center
                 textStyle.textAlign: TextAlign.Center
-                text: qsTr("An app that allows you to send URLs and text between PC and your BlackBerry phone via WiFi.")
+                text: qsTr("Web app and Firefox add-on that simplifies clipboard & notes transfer between the PC and your phone via WiFi")
             }
 
             PaddingLabel {

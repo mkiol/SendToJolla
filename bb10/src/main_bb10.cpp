@@ -23,7 +23,7 @@ using namespace bb::cascades;
 static const char *APP_NAME = "Send to Phone";
 static const char *AUTHOR = "Michal Kosciesza <michal@mkiol.net>";
 static const char *PAGE = "https://github.com/mkiol/SendToJolla";
-static const char *VERSION = "1.1";
+static const char *VERSION = "2.0";
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {

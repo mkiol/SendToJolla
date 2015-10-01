@@ -52,7 +52,7 @@
     <!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade.
          Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
          An updated version of application must have a versionNumber value higher than the previous version. Required. -->
-    <versionNumber>1.1</versionNumber>
+    <versionNumber>2.0</versionNumber>
 
     <!-- Fourth digit segment of the package version. First three segments are taken from the
          <versionNumber> element.  Must be an integer from 0 to 2^16-1 -->
@@ -68,7 +68,7 @@
     <!-- <copyright></copyright> -->
 
     <!--  Name of author which is used for signing. Must match the developer name of your development certificate. -->
-    <description>An app that allows you to send URLs and text between Firefox and your BlackBerry phone via WiFi.</description>
+    <description>Web app and Firefox add-on that simplifies clipboard &amp; notes transfer between the PC and your phone via WiFi</description>
     <icon>
        <image>sendtophone96.png</image>
        <image>sendtophone90.png</image>
@@ -99,9 +99,11 @@
     <asset path="sendtophone90.png">sendtophone90.png</asset>
     <asset path="sendtophone110.png">sendtophone110.png</asset>
     <asset path="sendtophone144.png">sendtophone144.png</asset>
+    <asset path="webclient">webclient</asset>
 
     <!-- Request permission to execute native code.  Required for native applications. -->
     <permission system="true">run_native</permission>
+    <permission>access_pimdomain_notebooks</permission>
     <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib"/>
 
 </qnx>
