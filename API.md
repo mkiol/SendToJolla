@@ -1,4 +1,4 @@
-# *Send to Phone* API description
+# *Send to Phone* API description (deprecated)
 
 *Send To Phone* implements HTTP server that expose an API for client applications.
 
