@@ -27,11 +27,36 @@
 #include <QtCore/QList>
 #endif
 
+#ifdef SAILFISH
+#ifdef CONTACTS
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <grp.h>
+#include <pwd.h>
+#include <unistd.h>
+#endif
+#endif
+
 #include "utils.h"
 
 Utils::Utils(QObject *parent) :
     QObject(parent)
 {}
+
+#ifdef SAILFISH
+#ifdef CONTACTS
+void Utils::setPrivileged(bool privileged)
+{
+    //setuid(getpwnam("nemo")->pw_uid);
+    if (privileged)
+        setgid(getgrnam("privileged")->gr_gid);
+    else
+        setgid(getgrnam("users")->gr_gid);
+}
+#endif
+#endif
 
 #ifdef BB10
 // Source: http://hecgeek.blogspot.com/2014/10/blackberry-10-multiple-os-versions-from.html

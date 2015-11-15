@@ -24,6 +24,14 @@ PullDownMenu {
     }
 
     MenuItem {
+        text: qsTr("Help")
+
+        onClicked: {
+            pageStack.push(Qt.resolvedUrl("HelpPage.qml"));
+        }
+    }
+
+    MenuItem {
         text: qsTr("Settings")
 
         onClicked: {

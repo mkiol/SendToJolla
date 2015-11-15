@@ -5,6 +5,11 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Nov 15 2015 Michal Kosciesza <michal@mkiol.net> 2.1-1
+- Contact API
+- Proxy connection mode
+- E2E encryption
+
 * Mon Sep 28 2015 Michal Kosciesza <michal@mkiol.net> 2.0-4
 - Note API update
 

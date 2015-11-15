@@ -56,6 +56,24 @@ QString Settings::getBrowser()
     return settings.value("browser", "sailfish-browser").toString();
 }
 
+void Settings::setCryptKey(QByteArray value)
+{
+    if (getCryptKey() != value) {
+        settings.setValue("cryptkey", value);
+        emit cryptKeyChanged();
+    }
+}
+
+QByteArray Settings::getCryptKey()
+{
+    QByteArray key = settings.value("cryptkey", "").toByteArray();
+    if (key == "") {
+        key = getRandomString().toUtf8();
+        settings.setValue("cryptkey", key);
+    }
+    return key;
+}
+
 void Settings::setCookie(QString value)
 {
     if (getCookie() != value) {
@@ -77,6 +95,71 @@ QString Settings::getCookie()
 void Settings::generateCookie()
 {
     setCookie(getRandomString());
+}
+
+void Settings::setProxyUrl(QString value)
+{
+    if (getProxyUrl() != value) {
+        settings.setValue("proxyurl", value);
+        emit proxyUrlChanged();
+    }
+}
+
+QString Settings::getProxyUrl()
+{
+    return settings.value("proxyurl", "").toString();
+}
+
+void Settings::setIgnoreSSL(bool value)
+{
+    if (isIgnoreSSL() != value) {
+        settings.setValue("ignoressl", value);
+        emit ignoreSSLChanged();
+    }
+}
+
+bool Settings::isIgnoreSSL()
+{
+    return settings.value("ignoressl", false).toBool();
+}
+
+void Settings::setStartProxy(bool value)
+{
+    if (getStartProxy() != value) {
+        settings.setValue("startproxy", value);
+        emit startProxyChanged();
+    }
+}
+
+bool Settings::getStartProxy()
+{
+    return settings.value("startproxy", false).toBool();
+}
+
+void Settings::setStartLocalServer(bool value)
+{
+    if (getStartLocalServer() != value) {
+        settings.setValue("startlocalserver", value);
+        emit startLocalServerChanged();
+    }
+}
+
+bool Settings::getStartLocalServer()
+{
+    return settings.value("startlocalserver", true).toBool();
+}
+
+void Settings::setCrypt(bool value)
+{
+    if (getCrypt() != value) {
+        settings.setValue("crypt", value);
+        emit cryptChanged();
+    }
+}
+
+bool Settings::getCrypt()
+{
+    return settings.value("crypt", false).toBool();
 }
 
 // Source: https://stackoverflow.com/questions/18862963/qt-c-random-string-generation

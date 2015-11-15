@@ -25,6 +25,25 @@ Page {
         model: VisualItemModel {
 
             SectionHeader {
+                text: qsTr("Version %1").arg("2.1")
+            }
+
+            LogItem {
+                title: 'Contacts'
+                description: "Provides contacts management functions. It allows to add new, delete or edit contacts. Due to Jolla Store constraints, this feature is only available in OpenRepos package."
+            }
+
+            LogItem {
+                title: 'Proxy connection mode'
+                description: "Enables connection when phone and browser are not in the same local network. To make it possible, simple `proxy.php` script has to be deployed on external WWW server."
+            }
+
+            LogItem {
+                title: 'End-to-end encryption'
+                description: "Data transfer between server and client app (e.g. web browser) can be encrypted. This fetaure especially makes sense in the case of use Proxy connection mode without SSL protection."
+            }
+
+            SectionHeader {
                 text: qsTr("Version %1").arg("2.0")
             }
 

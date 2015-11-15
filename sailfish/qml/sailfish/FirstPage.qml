@@ -9,14 +9,17 @@
   obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-import QtQuick 2.0
+import QtQuick 2.2
 import Sailfish.Silica 1.0
 
 Page {
     id: root
 
     Component.onCompleted: {
-        server.startServer();
+        if (settings.startLocalServer)
+            server.startLocalServer();
+        if (settings.startProxy)
+            server.connectProxy();
     }
 
     SilicaFlickable {
@@ -41,14 +44,57 @@ Page {
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                 color: Theme.primaryColor
-                text: server.running ? qsTr("Server is running.") :
-                                       qsTr("Server is not running.")
+                text: qsTr("Mark below what connection mode you want to enable.")
                 wrapMode: Text.WordWrap
             }
 
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                visible: server.running
+                color: Theme.secondaryColor
+                text: qsTr("To be able to use Proxy mode, fill 'Proxy URL' in the settings.")
+                wrapMode: Text.WordWrap
+                visible: settings.proxyUrl == ""
+            }
+
+            TextSwitch {
+                text: qsTr("Local server")
+                automaticCheck: false
+                checked: server.localServerRunning
+                onClicked: {
+                    if (server.localServerRunning)
+                        server.stopLocalServer();
+                    else
+                        server.startLocalServer();
+                }
+            }
+
+            TextSwitch {
+                text: qsTr("Proxy")
+                automaticCheck: false
+                checked: server.proxyOpen
+                enabled: settings.proxyUrl != "";
+                busy: server.proxyBusy;
+                onClicked: {
+                    if (!server.proxyBusy) {
+                        if (server.proxyOpen)
+                            server.disconnectProxy();
+                        else
+                            server.connectProxy();
+                    }
+                }
+            }
+
+            Label {
+                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                visible: server.localServerRunning || server.proxyOpen
+                color: Theme.secondaryColor
+                text: qsTr("To open Web client, go to one of URL addresses below in your favorite web browser.")
+                wrapMode: Text.WordWrap
+            }
+
+            /*Label {
+                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                visible: server.localServerRunning || server.proxyOpen
                 color: Theme.secondaryColor
                 text: qsTr("Tip #1: To open Web client, go to below URL address in your favorite web browser.")
                 wrapMode: Text.WordWrap
@@ -56,7 +102,7 @@ Page {
 
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                visible: server.running
+                visible: server.localServerRunning || server.proxyOpen
                 color: Theme.secondaryColor
                 text: qsTr("Tip #2: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
                 wrapMode: Text.WordWrap
@@ -64,42 +110,72 @@ Page {
 
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                visible: server.running
+                visible: server.localServerRunning || server.proxyOpen
                 color: Theme.secondaryColor
                 text: qsTr("Tip #3: To send phone's clipboard data, after copying bring %1 to the foreground.").arg(APP_NAME)
                 wrapMode: Text.WordWrap
-            }
+            }*/
 
             ListItem {
-                enabled: server.running
+                id: urlList
+                enabled: server.localServerRunning || server.proxyOpen
+                visible: enabled
                 onClicked: showMenu()
+                contentHeight: col.height + 2 * Theme.paddingLarge
 
-                Label {
-                    id: urlLabel
-                    anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                    color: Theme.highlightColor
-                    text: server.getServerUrl()
+                Column {
+                    id: col
+                    anchors {left: parent.left; right: parent.right; topMargin: Theme.paddingLarge; bottomMargin:Theme.paddingLarge;}
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: server.running
+                    spacing: Theme.paddingMedium
+
+                    Label {
+                        id: localServerUrlLabel
+                        anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                        color: Theme.highlightColor
+                        text: server.getLocalServerUrl()
+                        wrapMode: Text.WordWrap
+                        visible: server.localServerRunning
+                    }
+
+                    Label {
+                        id: proxyUrlLabel
+                        anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                        color: Theme.highlightColor
+                        text: server.getWebClientProxyUrl()
+                        wrapMode: Text.WordWrap
+                        visible: server.proxyOpen
+                    }
                 }
 
                 Connections {
                     target: settings
                     onCookieChanged: {
-                        urlLabel.text = server.getServerUrl();
+                        localServerUrlLabel.text = server.getLocalServerUrl();
+                        proxyUrlLabel.text = server.getWebClientProxyUrl();
                     }
                 }
 
                 menu: ContextMenu {
-                    enabled: server.running
+                    enabled: server.localServerRunning
                     MenuItem {
                         text: qsTr("Generate new URL")
                         onClicked: {
-                            settings.generateCookie();
+                            urlList.remorseAction("Generating new URL", function() {
+                                settings.generateCookie();
+                            });
                         }
                     }
                 }
             }
+
+            /*Label {
+                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
+                visible: server.proxyOpen
+                color: Theme.highlightColor
+                text: server.getWebClientProxyUrl()
+                wrapMode: Text.WordWrap
+            }*/
 
             Connections {
                 target: server

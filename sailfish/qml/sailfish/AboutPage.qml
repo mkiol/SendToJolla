@@ -61,15 +61,10 @@ Page {
                 wrapMode: Text.WordWrap
                 horizontalAlignment: Text.AlignHCenter
                 anchors.left: parent.left; anchors.right: parent.right
-                font.pixelSize: Theme.fontSizeExtraSmall
-                text: PAGE
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        Qt.openUrlExternally(PAGE);
-                    }
-                }
+                font.pixelSize: Theme.fontSizeMedium
+                text: "<a href='" + PAGE + "'>Project website</a>"
+                textFormat: Text.StyledText
+                onLinkActivated: Qt.openUrlExternally(link)
             }
 
             Label {

@@ -25,6 +25,11 @@ class Utils : public QObject
     Q_OBJECT
 
 public:
+
+#ifdef SAILFISH
+    static void setPrivileged(bool privileged);
+#endif
+
     explicit Utils(QObject *parent = 0);
 
 #ifdef BB10
