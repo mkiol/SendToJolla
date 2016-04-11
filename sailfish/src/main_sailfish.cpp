@@ -45,7 +45,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(view->engine(), SIGNAL(quit()), QCoreApplication::instance(), SLOT(quit()));
 
-    view->setSource(SailfishApp::pathTo("qml/sailfish/main.qml"));
+    view->setSource(SailfishApp::pathTo("qml/main.qml"));
 
     view->show();
 

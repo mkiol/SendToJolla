@@ -14,7 +14,7 @@ Name:       harbour-sendtojolla
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    An app that allows you to send URLs and text between PC and your Jolla phone.
 Version:    2.1
-Release:    1
+Release:    2
 Group:      Qt/Qt
 License:    LICENSE
 URL:        https://github.com/mkiol/SendToJolla
@@ -63,9 +63,9 @@ desktop-file-install --delete-original       \
 
 %files
 %defattr(-,root,root,-)
-%attr(4755, root, root) %{_bindir}/*
+%{_bindir}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/86x86/apps/%{name}.png
+%{_datadir}/icons/hicolor/*/apps/%{name}.png
 # >> files
 # << files

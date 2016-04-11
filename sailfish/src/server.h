@@ -114,12 +114,14 @@ private:
     QString getClipboard();
     QByteArray getNotes();
     QByteArray getBookmarks();
+    QByteArray getBookmarksFile();
     QByteArray getNote(int id);
     bool deleteBookmark(int id);
     bool deleteNote(int id);
     bool createNote(const QByteArray &json);
     bool createBookmark(const QByteArray &json);
     bool updateBookmark(int id, const QByteArray &json);
+    bool setBookmarksFile(const QByteArray &data);
     bool updateNote(int id, const QByteArray &json);
     bool getWebContent(const QString &file, QByteArray &data);
     bool isRunning();

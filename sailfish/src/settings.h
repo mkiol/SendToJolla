@@ -28,6 +28,7 @@ class Settings: public QObject
     Q_PROPERTY (bool startLocalServer READ getStartLocalServer WRITE setStartLocalServer NOTIFY startLocalServerChanged)
     Q_PROPERTY (bool startProxy READ getStartProxy WRITE setStartProxy NOTIFY startProxyChanged)
     Q_PROPERTY (bool crypt READ getCrypt WRITE setCrypt NOTIFY cryptChanged)
+    Q_PROPERTY (bool proxy READ getProxy WRITE setProxy NOTIFY proxyChanged)
 
 public:
     static Settings* instance();
@@ -55,6 +56,9 @@ public:
     void setStartProxy(bool value);
     bool getStartProxy();
 
+    void setProxy(bool value);
+    bool getProxy();
+
     void setStartLocalServer(bool value);
     bool getStartLocalServer();
 
@@ -69,6 +73,7 @@ signals:
     void ignoreSSLChanged();
     void startLocalServerChanged();
     void startProxyChanged();
+    void proxyChanged();
     void cryptKeyChanged();
     void cryptChanged();
 

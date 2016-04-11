@@ -37,61 +37,62 @@ body {
   background-color: white;
   color: black;
   font-family: Sans-serif;
-  margin: 10px;
-  margin-bottom: 50px;
+  margin: 0;
+  margin-bottom: 4em;
+  margin-top: 0;
 }
 p, div {
   font-weight: normal;
-  font-size: 11pt;
+  font-size: 1em;
 }
 h1 {
   font-weight: bold;
-  font-size: 12pt;
+  font-size: 1.5em;
 }
 h2 {
   font-weight: bold;
-  font-size: 11pt;
+  font-size: 1em;
 }
 h3 {
   font-weight: normal;
-  font-size: 11pt;
+  font-size: 1em;
 }
 input, textarea {
-  padding: 5px;
+  padding: 0.5em;
   margin-top: 0;
   margin-left: 0;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  width: 350px;
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+  width: 30em;
 }
 button {
-  padding: 1px;
-  margin-right: 5px;
+  padding: 0.1em;
+  margin-right: 0.5em;
 }
 li {
-  margin: 10px;
+  margin: 1em;
 }
 table {
-    margin: 15px 0px;
+    margin: 1em 0px;
     border-top: 1px solid #CCC;
     border-bottom: 1px solid #CCC;
     border-collapse: collapse;
-    border-spacing: 0px;
+    border-spacing: 0;
 }
 th, td {
     border-bottom: 1px solid #D0D0D0;
-    padding: 10px;
+    padding: 1em;
     text-align: left;
 }
 tr:nth-child(2n) {
     background-color: WhiteSmoke;
 }
 .tip {
-  font-size: 11pt;
+  font-size: 1em;
   color: gray;
 }
 .info {
-  padding: 5px;
+  padding: 0.5em;
   background-color: WhiteSmoke;
   border: 1px solid Silver;
   color: DarkGreen;
@@ -105,7 +106,7 @@ tr:nth-child(2n) {
 }
 .version {
   font-family: Monospace;
-  padding: 2px;
+  padding: 0.2em;
   background-color: WhiteSmoke;
   border: 1px solid Silver;
   color: Black;
@@ -131,8 +132,8 @@ img.loader {
 /* Clipboard */
 
 #clipboard textarea {
-  height: 120px;
-  margin-bottom: 5px;
+  height: 10em;
+  margin-bottom: 0.5em;
 }
 
 /* Notes */
@@ -177,37 +178,36 @@ img.loader {
   vertical-align: top;
 }
 #notes textarea {
-  height: 200px;
-  width: 400px;
+  height: 10em;
 }
 
 /* Contacts */
 
 #contactFirstName, #contactLastName, #contactFilter  {
-  width: 200px;
+  width: 15em;
   vertical-align: center;
 }
 #contacts {
   vertical-align: center;
 }
 #contacts input[type=tel]  {
-  width: 150px;
+  width: 15em;
 }
 #contacts input[type=email]  {
-  width: 200px;
+  width: 15em;
 }
 #contactId {
-  width: 25px;
+  width: 2em;
 }
 #contacts textarea {
-  height: 100px;
-  width: 400px;
+  height: 10em;
+  width: 35em;
 }
 #contactAvatar {
   width: 150px;
   border: 1px solid Silver;
-  margin-right: 10px;
-  margin-bottom: 8px;
+  margin-right: 1em;
+  margin-bottom: 0.7em;
   float: left;
 }
 #contacts .overflow div {
@@ -218,41 +218,48 @@ img.loader {
 }
 
 /* Crypt */
-
 #key {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  font-weight: normal;
-  font-size: 10pt;
+  background-color: WhiteSmoke;
+  padding: 0.5em;
+  width: 100%;
+  display: block;
 }
 #key input {
-  width: 150px;
+  width: 200px;
+  vertical-align: center;
+  padding: 0.5em;
+  margin: 0;
 }
 
 /* Layout */
-
 .clearfix:after {
   content: "";
   display: table;
   clear: both;
+  heigh: 35px;
 }
 .overflow {
   overflow: auto;
 }
 .section {
   border-top: 1px solid #D0D0D0;
-  margin-top: 20px;
+  margin-top: 2em;
 }
 .subsection {
   border-left: 10px solid #D0D0D0;
-  padding-left: 10px;
+  padding-left: 1em;
+}
+.page {
+  margin: 0.5em;
 }
 
 /* Menu */
 
 div#menu {
+  /*position: fixed;*/
+  top: 0; left: 0;
   width: 100%;
+  background-color: DarkOrange;
 }
 div#menu ul {
   list-style-type: none;
@@ -261,18 +268,21 @@ div#menu ul {
 }
 div#menu li {
   float:left;
-  margin: 0px;
+  margin: 0;
+  display: table; position: relative; overflow: hidden;
 }
 div#menu a {
   display: block;
-  width: 100px;
+  width: 7em;
+  height: 20px;
+  padding: 5px;
+  display: table-cell; vertical-align: middle;
 }
 div#menu a:link, div#menu a:visited {
   font-weight: bold;
   color: white;
   background-color: DarkOrange;
   text-align: center;
-  padding: 6px;
   text-decoration: none;
   text-transform: uppercase;
 }
@@ -284,7 +294,7 @@ div#menu a.active {
 }
 </style>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="jquery.min.js"></script>
 
 <script>
 /*
@@ -334,7 +344,7 @@ var VERSION = "2.1";
 // Checks if URL syntax is valid
 // Source: http://dzone.com/snippets/validate-url-regexp
 function isUrl(s) {
-  var re = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+  var re = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
   return re.test(s);
 }
 
@@ -442,42 +452,6 @@ function decrypt(data) {
   return readUTF8String(array.join(''));
 }
 
-// XOR encryption
-/*function encrypt(data) {
-  var key = $("#key input").val().trim();
-  var e_data = "";
-  for (var i = 0; i < data.length; i++) {
-    e_data += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  var obj = {id: "encrypted_container", algorithm: "XOR1", data: btoa(e_data)};
-  return obj;
-}
-
-// XOR decryption
-function decrypt(data) {
-
-  // Validating
-  if (typeof data.id == "undefined" || data.id != "encrypted_container")
-    return "undefined";
-  if (typeof data.algorithm == "undefined" || data.algorithm != "XOR1")
-    return "unknown_algorithm";
-  if (typeof data.data == "undefined")
-    return "no_data";
-
-  var u_data = atob(data.data);
-  
-  var key = $("#key input").val().trim();
-  if (key.length == 0)
-    return u_data;
-    
-  var d_data = String();
-  for (var i = 0; i < u_data.length; i++) {
-    d_data += String.fromCharCode(u_data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  
-  return d_data;
-}*/
-
 function getServerUrl() {
   
   var url = window.location.protocol + "//" + window.location.host + window.location.pathname;
@@ -508,6 +482,14 @@ function loadImages() {
   $(".loader").attr("src",getAPIUrl("web-client","loader.gif"));
 }
 
+function resetInfo() {
+  $(".loader").hide();
+  $(".info").hide();
+  $(".info").removeClass("error");
+  $("#bookmarksbackup :file").val("");
+  $("#bookmarksbackup a").remove();
+}
+
 $(document).ready(function() {
   
   serverURL = getServerUrl();
@@ -516,8 +498,7 @@ $(document).ready(function() {
   loadImages();
   
   // Initial reset
-  $(".loader").hide();
-  $(".info").hide();
+  resetInfo();
   $("div.page").hide();
   $("#key").hide();
   $("#key input").val("");
@@ -568,8 +549,142 @@ $(document).ready(function() {
     $($(this).attr("href")).show();
 	  $("html, body").animate({scrollTop:0},"fast");
   });
+  
+  // --- Bookmarks backup
+  
+  
+  var getBookmarksFileAPICall = function() {
+    var info = $("#bookmarksbackup span.info");
+    var loader = $("#bookmarksbackup img.loader");
+    
+    resetInfo();
+    
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+	info.text("Password for encryption is not defined!");
+	info.addClass("error");
+	info.show();
+	return;
+      }
+    }
 
-  // --- Bookmarks
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-bookmarks-file"),
+      complete: function() {
+	loader.hide();
+      },
+      error: function(xhr, status, error) {
+	info.text("Something goes wrong!");
+	info.addClass("error");
+	info.show();
+      },
+      success: function(data) {
+      
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+          
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = $.parseJSON(d_data);
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+	}
+	
+	data = JSON.stringify(data);
+	
+	info.text(data === "" ? "OK, It seems no bookmarks are defined." : "OK");
+	info.show();
+	
+	if (data !== "") {
+          var blob = new Blob([data], {type: 'application/json'});
+          var url = URL.createObjectURL(blob); 
+          $("#dbP").append($("<a download='bookmarks.json'>bookmarks.json</a>").attr("href",url));
+        }
+      }
+    });
+  }
+  
+  var setBookmarksFileAPICall = function() {
+    var info = $("#bookmarksbackup span.info");
+    var loader = $("#bookmarksbackup img.loader");
+    var file = $("#bookmarksbackup :file");
+    
+    if (file[0].files.length == 0) {
+        info.text("Bookmarks file is not selected!");
+        info.addClass("error");
+        info.show();
+        return;
+    }
+    
+    var filef = file[0].files[0];
+    var reader = new FileReader();
+    
+    reader.onload = function(event){
+      var data = event.target.result;
+      try {
+        JSON.parse(data);
+      }
+      catch(e) {
+        info.text("Bookmarks file is invalid!");
+        info.addClass("error");
+        info.show();
+        return;
+      }
+      
+      if (encryptionEnabled) {
+        content = encrypt(data);
+      }
+      
+      loader.show();
+      $.ajax({
+        type: 'POST',
+        url: getAPIUrl("set-bookmarks-file"),
+        data: data,
+        complete: function() {
+          loader.hide();
+        },
+        success: function(data) {
+          info.text("OK");
+          info.show();
+          getBookmarksAPICall();
+        },
+        error: function(xhr, status, error) {
+          info.text("Something goes wrong!");
+          info.addClass("error");
+          info.show();
+        },
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json'
+      });
+    };
+    
+    reader.onerror = function(event){
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+    };
+    
+    reader.readAsText(filef);
+    resetInfo();
+  };
+  
+  $("#downloadBookmarks").click(getBookmarksFileAPICall);
+  $("#uploadBookmarks").click(setBookmarksFileAPICall);
+
+  // --- Bookmarks management
 
   var bookmarksList;
 
@@ -589,6 +704,8 @@ $(document).ready(function() {
     var loader = $("#bookmarks img.loader");
     var table = $("#bookmarks table");
     
+    resetInfo();
+    
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
@@ -600,8 +717,6 @@ $(document).ready(function() {
     }
 
     $("#bookmarks table tr").remove();
-    info.removeClass("error");
-    info.hide();
 
     loader.show();
     $.ajax({
@@ -665,6 +780,7 @@ $(document).ready(function() {
 		$("#bookmarkId").val(bookmarksList[id].id);
 		$("#bookmarkName").val(bookmarksList[id].title);
 		$("#bookmarkUrl").val(bookmarksList[id].url);
+		$("#bookmarkIcon").val(bookmarksList[id].icon == undefined ? "" : bookmarksList[id].icon);
 		$("#updateBookmark").show();
 		$("#deleteBookmark").show();
 	      })));
@@ -686,9 +802,8 @@ $(document).ready(function() {
     var info = $("#openurl span.info");
     var loader = $("#openurl img.loader");
     var url = $("#openurl input").val();
-
-    info.removeClass("error");
-    info.hide();
+    
+    resetInfo();
 
     if (url == "") {
       info.addClass("error");
@@ -738,13 +853,13 @@ $(document).ready(function() {
     var loader = $("#bookmarks img.loader");
     var title = $("#bookmarkName").val();
     var url = $("#bookmarkUrl").val();
+    var icon = $("#bookmarkIcon").val();
 
     $("#updateBookmark").hide();
     $("#deleteBookmark").hide();
     $("#bookmarkId").val("");
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (title == "") {
       info.addClass("error");
@@ -767,6 +882,15 @@ $(document).ready(function() {
       return;
     }
     
+    if (!isUrl(icon)) {
+      if (icon.lastIndexOf("data:image/", 0) !== 0) {
+        info.addClass("error");
+        info.text("Icon is invalid!");
+        info.show();
+        return;
+      }
+    }
+    
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
@@ -777,7 +901,7 @@ $(document).ready(function() {
       }
     }
 
-    var content = {"title": title, "url": url};
+    var content = {"title": title, "url": url, "icon": icon};
     if (encryptionEnabled) {
       content = encrypt(JSON.stringify(content));
     }
@@ -811,10 +935,10 @@ $(document).ready(function() {
     var title = $("#bookmarkName").val();
     var url = $("#bookmarkUrl").val();
     var id = $("#bookmarkId").val();
+    var icon = $("#bookmarkIcon").val();
 
-    info.removeClass("error");
-    info.hide();
-
+    resetInfo();
+    
     if (id < 0) {
       info.addClass("error");
       info.text("Bookmark ID is unknown!");
@@ -843,6 +967,15 @@ $(document).ready(function() {
       return;
     }
     
+    if (!isUrl(icon)) {
+      if (icon.lastIndexOf("data:image/", 0) !== 0) {
+        info.addClass("error");
+        info.text("Icon is invalid!");
+        info.show();
+        return;
+      }
+    }
+    
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
@@ -853,11 +986,11 @@ $(document).ready(function() {
       }
     }
 
-    var content = {"title": title, "url": url};
+    var content = {"title": title, "url": url, "icon": icon};
     if (encryptionEnabled) {
       content = encrypt(JSON.stringify(content));
     }
-
+    
     loader.show();
     $.ajax({
       type: 'POST',
@@ -884,10 +1017,9 @@ $(document).ready(function() {
   $("#deleteBookmark").data("firstclickdone",false).click(function() {
     var info = $("#bookmarks span.info");
     var loader = $("#bookmarks img.loader");
-	  var id = $("#bookmarkId").val();
+    var id = $("#bookmarkId").val();
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (id == "" || id < 1) {
       info.addClass("error");
@@ -907,6 +1039,7 @@ $(document).ready(function() {
     $("#bookmarkName").val("");
     $("#bookmarkUrl").val("");
     $("#updateBookmark").hide();
+
     $(this).hide();
 
     loader.show();
@@ -955,8 +1088,7 @@ $(document).ready(function() {
       }
     }
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     loader.show();
     
@@ -998,8 +1130,7 @@ $(document).ready(function() {
     var loader = $("#clipboard img.loader");
     var content = $("#clipboard textarea").val();
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (content == "") {
       info.addClass("error");
@@ -1104,6 +1235,8 @@ $(document).ready(function() {
     var loader = $("#notes img.loader");
     var table = $("#notes table");
     
+    resetInfo();
+    
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
@@ -1115,8 +1248,6 @@ $(document).ready(function() {
     }
 
     $("#notes table tr").remove();
-    info.removeClass("error");
-    info.hide();
 
     loader.show();
     $.ajax({
@@ -1190,6 +1321,8 @@ $(document).ready(function() {
     var loader = $("#notes img.loader");
     var id = $(this).data("noteid");
     
+    resetInfo();
+    
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
@@ -1199,9 +1332,6 @@ $(document).ready(function() {
 	return;
       }
     }
-
-    info.removeClass("error");
-    info.hide();
 
     loader.show();
     $.ajax({
@@ -1270,8 +1400,7 @@ $(document).ready(function() {
     var title = $("#noteTitle").val();
     var id = $("#noteId").val();
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (id < 1) {
       info.addClass("error");
@@ -1355,8 +1484,7 @@ $(document).ready(function() {
     $("#deleteNote").hide();
     $("#noteId").val("");
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (platformName == "sailfish" && pickedColor < 0) {
       info.addClass("error");
@@ -1428,8 +1556,7 @@ $(document).ready(function() {
     var loader = $("#notes img.loader");
     var id = $("#noteId").val();
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (id == "" || id < 1) {
       info.addClass("error");
@@ -1510,8 +1637,7 @@ $(document).ready(function() {
     var table = $("#contacts table");
     var filter = $("#contactFilter").val();
     
-    $("#contacts span.info").hide();
-    $("#contacts img.loader").hide();
+    resetInfo();
     
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
@@ -1524,8 +1650,6 @@ $(document).ready(function() {
     }
 
     $("#contacts table tr").remove();
-    info.removeClass("error");
-    info.hide();
 
     loader.show();
     $.ajax({
@@ -1597,8 +1721,7 @@ $(document).ready(function() {
     var phones = $("#contactPhones");
     var emails = $("#contactEmails");
     
-    $("#contacts span.info").hide();
-    $("#contacts img.loader").hide();
+    resetInfo();
     
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
@@ -1609,9 +1732,6 @@ $(document).ready(function() {
 	return;
       }
     }
-
-    info.removeClass("error");
-    info.hide();
 
     loader.show();
     $.ajax({
@@ -1846,8 +1966,7 @@ $(document).ready(function() {
     var firstName = $("#contactFirstName").val().trim();
     var lastName = $("#contactLastName").val().trim();
     
-    $("#contacts span.info").hide();
-    $("#contacts img.loader").hide();
+    resetInfo();
     
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
@@ -1863,9 +1982,6 @@ $(document).ready(function() {
     $("#deleteContact").hide();
     $("#contactId").val("");
     $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
-    
-    info.removeClass("error");
-    info.hide();
     
     if (firstName.length + lastName.length < 1) {
       info.addClass("error");
@@ -1909,8 +2025,7 @@ $(document).ready(function() {
     var lastName = $("#contactLastName").val().trim();
     var id = $("#contactId").val();
     
-    $("#contacts span.info").hide();
-    $("#contacts img.loader").hide();
+    resetInfo();
     
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
@@ -1921,9 +2036,6 @@ $(document).ready(function() {
 	return;
       }
     }
-
-    info.removeClass("error");
-    info.hide();
     
     if (id == "") {
       info.addClass("error");
@@ -2037,8 +2149,7 @@ $(document).ready(function() {
     var loader = $("#contactsLoader");
     var id = $("#contactId").val();
 
-    info.removeClass("error");
-    info.hide();
+    resetInfo();
 
     if (id == "") {
       info.addClass("error");
@@ -2082,9 +2193,6 @@ $(document).ready(function() {
 </head>
 
 <body>
-  <h1>Send to Phone</h1>
-  <div id="key">Password for encryption: <input type="password" value="" placeholder="Insert password here" /></div>
-  </div>
   <div id="menu" class="clearfix">
     <ul>
       <li><a id="browserMenuItem" href="#browser">Browser</a></li>
@@ -2094,36 +2202,45 @@ $(document).ready(function() {
       <li><a id="aboutMenuItem" href="#about">About</a></li>
     </ul>
   </div>
+  <div id="key"><input type="password" value="" placeholder="Insert password here" /></div>
 
   <div class="page" id="browser">
-   <div id="openurl">
-    <h2>Open URL</h2>
-    <p>Open the specified URL in phone's default browser.</p>
-    <p>
-      <input type="text" value="" placeholder="Insert URL here" />
-      <button id="openUrl">Open</button>
-      <img class="loader"/>
-      <span class="info"></span>
-    </p>
+    <div id="openurl">
+      <h2>Open URL</h2>
+      <p>Open the specified URL in phone's default browser.</p>
+      <p>
+        <input type="text" value="" placeholder="Insert URL here" />
+        <button id="openUrl">Open</button>
+        <img class="loader"/>
+        <span class="info"></span>
+      </p>
     </div>
-      <div id="bookmarks" class="section bb-hide">
-	<h2>Bookmarks</h2>
-	<p>Create new or update existing bookmark.</p>
-	<p>
-	  <input id="bookmarkId" type="text" value="" placeholder="Id" disabled="true" />
-	  <input id="bookmarkName" type="text" value="" placeholder="Title" />
-	  <input id="bookmarkUrl" type="text" value="" placeholder="URL" />
-	</p>
-	<p>
-	  <button id="createBookmark">Create new bookmark</button>
-	  <button id="updateBookmark">Update existing bookmark</button>
-	  <button id="deleteBookmark">Delete bookmark</button>
-	  <button id="getBookmarks">Refresh list of bookmarks</button>
-	  <img class="loader"/>
-	  <span class="info"></span>
-	</p>
-	<p><table><tr><td class="empty">Empty</td></tr></table></p>
-      </div>
+    <div id="bookmarksbackup" class="section bb-hide">
+      <h2>Bookmarks backup</h2>
+      <p>Download or upload bookmarks file.</p>
+      <p id="dbP"><button id="downloadBookmarks">Download bookmarks</button></p>
+      <p><button id="uploadBookmarks">Upload bookmarks</button><input name="file" type="file" /></p>
+      <p><img class="loader"/><span class="info"></span></p>
+    </div>
+    <div id="bookmarks" class="section bb-hide">
+      <h2>Bookmarks management</h2>
+      <p>Create new or update existing bookmark.</p>
+      <p>
+        <input id="bookmarkId" type="text" value="" placeholder="Id" disabled="true" />
+        <input id="bookmarkName" type="text" value="" placeholder="Title" />
+        <input id="bookmarkUrl" type="text" value="" placeholder="URL" />
+        <input id="bookmarkIcon" type="text" value="" placeholder="Icon" />
+      </p>
+      <p>
+        <button id="createBookmark">Create new bookmark</button>
+        <button id="updateBookmark">Update existing bookmark</button>
+        <button id="deleteBookmark">Delete bookmark</button>
+        <button id="getBookmarks">Refresh list of bookmarks</button>
+        <img class="loader"/>
+        <span class="info"></span>
+      </p>
+      <p><table><tr><td class="empty">Empty</td></tr></table></p>
+    </div>
   </div>
 
   <div class="page" id="clipboard">
@@ -2236,10 +2353,11 @@ $(document).ready(function() {
       <ul>
 	<li>Support for Contacts management. It provides the possibility to add new,
 	delete or edit contacts. Due to Jolla Store constraints, this feature is only available in OpenRepos package.</li>
-	<li>Proxy connection mode. Enables connection when phone and browser are not in the same local network. 
-	To make it possible, simple `proxy.php` script has to be deployed on external WWW server.</li>
+	<!--<li>Proxy connection mode. Enables connection when phone and browser are not in the same local network. 
+	To make it possible, simple `proxy.php` script has to be deployed on external WWW server.</li>-->
 	<li>End-to-end encryption. Data transfer between server and client app (e.g. web browser) can be encrypted. 
 	This fetaure especially makes sense in the case of use Proxy connection mode without SSL protection.</li>
+        <li>Bookmarks backup. All bookmarks can be downloaded as a single file.</li>
       </ul>
       <h3>version: 2.0</h3>
       <ul>

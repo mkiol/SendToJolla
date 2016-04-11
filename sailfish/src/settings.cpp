@@ -133,7 +133,11 @@ void Settings::setStartProxy(bool value)
 
 bool Settings::getStartProxy()
 {
+#ifdef PROXY
     return settings.value("startproxy", false).toBool();
+#else
+    return false;
+#endif
 }
 
 void Settings::setStartLocalServer(bool value)
@@ -142,6 +146,19 @@ void Settings::setStartLocalServer(bool value)
         settings.setValue("startlocalserver", value);
         emit startLocalServerChanged();
     }
+}
+
+void Settings::setProxy(bool value)
+{
+}
+
+bool Settings::getProxy()
+{
+#ifdef PROXY
+    return true;
+#else
+    return false;
+#endif
 }
 
 bool Settings::getStartLocalServer()

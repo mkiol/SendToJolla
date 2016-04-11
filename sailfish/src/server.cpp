@@ -102,12 +102,14 @@ Server::Server(QObject *parent) :
     openNotesDB();
 #endif
 
+#ifdef PROXY
     // Proxy
     connect(&proxy, SIGNAL(dataReceived(QByteArray)), this, SLOT(proxyDataReceived(QByteArray)));
     connect(&proxy, SIGNAL(openChanged()), this, SLOT(proxyOpenHandler()));
     connect(&proxy, SIGNAL(error(int)), this, SLOT(proxyErrorHandler(int)));
     connect(&proxy, SIGNAL(closingChanged()), this, SLOT(proxyBusyHandler()));
     connect(&proxy, SIGNAL(openingChanged()), this, SLOT(proxyBusyHandler()));
+#endif
 
     // Local server
     server = new QHttpServer;
@@ -308,6 +310,12 @@ void Server::handleProxy(const QJsonObject &obj)
             return;
         }
 
+        if (api == "get-bookmarks-file") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+            sendProxyResponse(uid, 200, "application/json; charset=utf-8", getBookmarksFile(), s->getCrypt());
+            return;
+        }
+
         if (api == "get-notes-list") {
             emit newEvent(QString("%1 request from %2").arg(api).arg(source));
             sendProxyResponse(uid, 200, "application/json; charset=utf-8", getNotes(), s->getCrypt());
@@ -380,6 +388,28 @@ void Server::handleProxy(const QJsonObject &obj)
 
             if (!updateBookmark(data.toInt(), body)) {
                 qWarning() << "Error updatig bookmark with id:" << data.toInt();
+                sendProxyResponse(uid, 400);
+                return;
+            }
+
+            sendProxyResponse(uid);
+            return;
+        }
+
+        if (api == "set-bookmarks-file") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+
+            if (s->getCrypt()) {
+                body = decrypt(body);
+                if (body.length() == 0) {
+                    qWarning() << "Error decrypting!";
+                    sendProxyResponse(uid, 400, "application/json", "{\"id\": \"error\", \"type\": \"decryption_failed\"}");
+                    return;
+                }
+            }
+
+            if (!setBookmarksFile(body)) {
+                qWarning() << "Error in bookmarks file!";
                 sendProxyResponse(uid, 400);
                 return;
             }
@@ -567,6 +597,17 @@ void Server::bodyReceived()
 
     //qDebug() << "bodyReceived, url: " << req->url().toString();
 
+    // Hack for jquery.min.js
+    if (req->url().toString() == "/jquery.min.js") {
+        QByteArray body;
+        if (getWebContent("jquery.min.js", body)) {
+            sendResponse(req, resp, 200, "application/x-javascript; charset=utf-8", body);
+            return;
+        }
+        sendResponse(req, resp, 404);
+        return;
+    }
+
     QUrlQuery query(req->url());
     if (query.hasQueryItem("app")) {
         handleLocalServerNewApi(req, resp);
@@ -652,6 +693,12 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
             return;
         }
 
+        if (api == "get-bookmarks-file") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+            sendResponse(req, resp, 200, "application/json", getBookmarksFile(), s->getCrypt());
+            return;
+        }
+
         if (api == "get-notes-list") {
             emit newEvent(QString("%1 request from %2").arg(api).arg(source));
             sendResponse(req, resp, 200, "application/json", getNotes(), s->getCrypt());
@@ -724,6 +771,28 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
 
             if (!updateBookmark(data.toInt(), body)) {
                 qWarning() << "Error updatig bookmark with id:" << data.toInt();
+                sendResponse(req, resp, 400);
+                return;
+            }
+
+            sendResponse(req, resp);
+            return;
+        }
+
+        if (api == "set-bookmarks-file") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+
+            if (s->getCrypt()) {
+                body = decrypt(body);
+                if (body.length() == 0) {
+                    qWarning() << "Error decrypting!";
+                    sendResponse(req, resp, 400, "application/json", "{\"id\": \"error\", \"type\": \"decryption_failed\"}");
+                    return;
+                }
+            }
+
+            if (!setBookmarksFile(body)) {
+                qWarning() << "Error in bookmark file!";
                 sendResponse(req, resp, 400);
                 return;
             }
@@ -1347,7 +1416,16 @@ bool Server::createBookmark(const QByteArray &json)
     }
 
     QJsonObject newObj;
-    QString icon = obj["icon"].isString() && !obj["icon"].toString().isEmpty() ? obj["icon"].toString() : "icon-launcher-bookmark";
+    QString icon;
+    if (obj["icon"].isString() &&
+        (obj["icon"].toString().startsWith("http://",Qt::CaseInsensitive) ||
+        obj["icon"].toString().startsWith("https://",Qt::CaseInsensitive) ||
+        obj["icon"].toString().startsWith("data:image/",Qt::CaseInsensitive))) {
+        icon = obj["icon"].toString();
+    } else {
+        icon = "icon-launcher-bookmark";
+    }
+
     newObj.insert("favicon", icon);
     newObj.insert("url", obj["url"]);
     newObj.insert("title", obj["title"]);
@@ -1392,8 +1470,16 @@ bool Server::updateBookmark(int id, const QByteArray &json)
     }
 
     QJsonObject oldObj = newArray.at(id-1).toObject();
-    if (obj["icon"].isString() && !obj["icon"].toString().isEmpty())
-        oldObj["favicon"] = obj["icon"];
+    /*if (obj["icon"].isString() && !obj["icon"].toString().isEmpty())
+        oldObj["favicon"] = obj["icon"];*/
+
+    QJsonValue icon = QJsonValue::fromVariant("icon-launcher-bookmark");
+
+    if (!obj["icon"].isNull())
+        if (obj["icon"].toString().startsWith("http://",Qt::CaseInsensitive) ||
+            obj["icon"].toString().startsWith("https://",Qt::CaseInsensitive) ||
+            obj["icon"].toString().startsWith("data:image/",Qt::CaseInsensitive))
+            oldObj["favicon"] = (obj["icon"].toString().isEmpty()) ? icon : obj["icon"];
     if (obj["title"].isString() && !obj["title"].toString().isEmpty())
         oldObj["title"] = obj["title"];
     if (obj["url"].isString() && !obj["url"].toString().isEmpty())
@@ -1434,6 +1520,49 @@ bool Server::deleteBookmark(int id)
 #endif
 }
 
+QByteArray Server::getBookmarksFile()
+{
+#ifdef SAILFISH
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
+            "/org.sailfishos/sailfish-browser/bookmarks.json");
+
+    if (!file.exists()) {
+        qWarning() << "Bookmarks file doesn't exist!" << file.fileName();
+        return "";
+    }
+
+    if(!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Can not open bookmarks file!" << file.errorString();
+        return "";
+    }
+
+    return file.readAll();
+#else
+    return "";
+#endif
+}
+
+bool Server::setBookmarksFile(const QByteArray &data)
+{
+#ifdef SAILFISH
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data,&parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "Can not parse bookmarks file!" << parseError.errorString();
+        return false;
+    }
+
+    if (!doc.isArray()) {
+        qWarning() << "Bookmarks file is not JSON array!";
+        return false;
+    }
+
+    return writeBookmarks(doc.array());
+#else
+    return false;
+#endif
+}
+
 QByteArray Server::getBookmarks()
 {
 #ifdef SAILFISH
@@ -1451,10 +1580,9 @@ QByteArray Server::getBookmarks()
 
             QString icon = obj["favicon"].toString();
             if (icon.startsWith("http://",Qt::CaseInsensitive) ||
-                icon.startsWith("https://",Qt::CaseInsensitive))
-                newObj.insert("icon",obj["favicon"]);
-            /*else
-                newObj.insert("icon",QJsonValue(QJsonValue::String));*/
+                icon.startsWith("https://",Qt::CaseInsensitive) ||
+                icon.startsWith("data:image/",Qt::CaseInsensitive))
+                newObj.insert("icon",icon);
 
             newArr.append(newObj);
             ++i;
