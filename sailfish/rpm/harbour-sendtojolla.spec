@@ -12,7 +12,7 @@ Name:       harbour-sendtojolla
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
-Summary:    An app that allows you to send URLs and text between PC and your Jolla phone.
+Summary:    Clipboard, notes, contacts & bookmarks transfer between the PC and your phone
 Version:    2.1
 Release:    2
 Group:      Qt/Qt
@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  desktop-file-utils
 
 %description
-Web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone
+Web app and Firefox add-on that simplifies clipboard, notes, contacts & bookmarks transfer between the PC and your phone
 
 
 %prep
@@ -63,6 +63,7 @@ desktop-file-install --delete-original       \
 
 %files
 %defattr(-,root,root,-)
+%attr(4755, root, root) %{_bindir}/*
 %{_bindir}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop

@@ -127,7 +127,7 @@ Page {
                         id: localServerUrlLabel
                         anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                         color: Theme.highlightColor
-                        text: server.getLocalServerUrl()
+                        text: server.localServerRunning ? server.getLocalServerUrl() : ""
                         wrapMode: Text.WordWrap
                         visible: server.localServerRunning
                     }
@@ -136,7 +136,7 @@ Page {
                         id: proxyUrlLabel
                         anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                         color: Theme.highlightColor
-                        text: server.getWebClientProxyUrl()
+                        text: server.proxyOpen ? server.getWebClientProxyUrl() : ""
                         wrapMode: Text.WordWrap
                         visible: server.proxyOpen
                     }

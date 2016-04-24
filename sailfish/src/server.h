@@ -17,6 +17,7 @@
 #include <QNetworkConfigurationManager>
 #include <QByteArray>
 #include <QMap>
+#include <QHostAddress>
 
 #ifdef SAILFISH
 #include <QClipboard>
@@ -138,12 +139,15 @@ private:
     void handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp);
     void handleLocalServerOldApi(QHttpRequest *req, QHttpResponse *resp);
     QString getContentType(const QString & file);
+#ifdef CONTACTS
     QByteArray getContacts(const QString & filter);
     QByteArray getContact(int id);
     bool createContact(const QByteArray &json);
     bool updateContact(int id, const QByteArray &json);
     bool deleteContact(int id);
+#endif
     QByteArray getOptions();
+    const QHostAddress getAddress();
 };
 
 #endif // SERVER_H

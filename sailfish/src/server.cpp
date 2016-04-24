@@ -52,7 +52,6 @@ using namespace bb::pim::notebook;
 #include <QVariantMap>
 #include <QVariantList>
 #include <QUrlQuery>
-
 #ifdef CONTACTS
 #include <QtContacts/QContact>
 #include <QtContacts/QContactDetail>
@@ -70,7 +69,6 @@ using namespace bb::pim::notebook;
 #include <QtContacts/QContactActionDescriptor>
 #include <QtContacts/QContactAvatar>
 #endif
-
 #include "sailfishapp.h"
 #endif
 
@@ -85,8 +83,10 @@ using namespace bb::pim::notebook;
 #include "settings.h"
 #include "utils.h"
 
+#ifdef SAILFISH
 #ifdef CONTACTS
 using namespace QtContacts;
+#endif
 #endif
 
 Server::Server(QObject *parent) :
@@ -120,11 +120,13 @@ Server::Server(QObject *parent) :
     Settings* s = Settings::instance();
     connect(s, SIGNAL(cookieChanged()), this, SLOT(cookieChangedHandler()));
 
-#ifdef CONTACTS
     // Contacts
+#ifdef SAILFISH
+#ifdef CONTACTS
     Utils::setPrivileged(true);
     cm = new QContactManager();
     Utils::setPrivileged(false);
+#endif
 #endif
 }
 
@@ -142,6 +144,8 @@ Server::~Server()
 void Server::onlineStateChanged(bool state)
 {
     Settings* s = Settings::instance();
+
+    //qDebug() << "onlineStateChanged" << state;
 
     if (state && !isListening && s->getStartLocalServer()) {
         //qDebug() << "New network conectivity was detected.";
@@ -180,26 +184,47 @@ void Server::stopLocalServer()
     emit newEvent(tr("Local server is stopped"));
 }
 
+const QHostAddress Server::getAddress()
+{
+    for (auto interface : QNetworkInterface::allInterfaces()) {
+        if (interface.isValid() &&
+            !interface.flags().testFlag(QNetworkInterface::IsLoopBack) &&
+            interface.flags().testFlag(QNetworkInterface::IsUp) &&
+            interface.flags().testFlag(QNetworkInterface::IsRunning) &&
+            (interface.name() == "eth0" || interface.name() == "wlan0" || interface.name() == "tether")) {
+                //qDebug() << "interface:" << interface.name();
+                for (auto addr : interface.addressEntries()) {
+                    QHostAddress haddr = addr.ip();
+                    if (haddr.protocol() == QAbstractSocket::IPv4Protocol) {
+                        //qDebug() << addr.ip().toString();
+                        return haddr;
+                    }
+                }
+        }
+    }
+    return QHostAddress();
+}
+
 
 void Server::startLocalServer()
 {
-    bool bearerOk = false;
+    /*bool bearerOk = false;
     QList<QNetworkConfiguration> activeConfigs = ncm.allConfigurations(QNetworkConfiguration::Active);
     QList<QNetworkConfiguration>::iterator i = activeConfigs.begin();
     while (i != activeConfigs.end()) {
         QNetworkConfiguration c = (*i);
-        //qDebug() << c.bearerTypeName() << c.identifier() << c.name();
+        qDebug() << c.bearerTypeName() << c.identifier() << c.name() << c.bearerType();
         if (c.bearerType()==QNetworkConfiguration::BearerWLAN ||
             c.bearerType()==QNetworkConfiguration::BearerEthernet) {
             bearerOk = true;
             break;
         }
         ++i;
-    }
+    }*/
 
-    if (!bearerOk) {
-        //qWarning() << "Local server is failed to start because WLAN is not active.";
-        emit newEvent(tr("Local server is failed to start because WLAN is not active"));
+    if (getAddress().isNull()) {
+        //qWarning() << "Local server is failed to start because WLAN or tethering is not active.";
+        emit newEvent(tr("Local server is failed to start because WLAN or tethering is not active"));
         return;
     }
 
@@ -475,13 +500,10 @@ void Server::handleProxy(const QJsonObject &obj)
             return;
         }
 
+#ifdef CONTACTS
         if (api == "get-contacts") {
             emit newEvent(QString("%1 request from %2").arg(api).arg(source));
-#ifdef CONTACTS
             sendProxyResponse(uid, 200, "application/json", getContacts(data), s->getCrypt());
-#else
-            sendProxyResponse(uid, 404);
-#endif
             return;
         }
 
@@ -493,15 +515,11 @@ void Server::handleProxy(const QJsonObject &obj)
                 return;
             }
 
-#ifdef CONTACTS
             QByteArray json = getContact(data.toInt());
             if (json.isEmpty())
                 sendProxyResponse(uid, 404);
             else
                 sendProxyResponse(uid, 200, "application/json", json, s->getCrypt());
-#else
-            sendProxyResponse(uid, 404);
-#endif
             return;
         }
 
@@ -517,7 +535,6 @@ void Server::handleProxy(const QJsonObject &obj)
                 }
             }
 
-#ifdef CONTACTS
             if (!createContact(body)) {
                 qWarning() << "Error creating contact!";
                 sendProxyResponse(uid, 400);
@@ -525,9 +542,7 @@ void Server::handleProxy(const QJsonObject &obj)
             }
 
             sendProxyResponse(uid);
-#else
-            sendProxyResponse(uid, 404);
-#endif
+
             return;
         }
 
@@ -548,7 +563,6 @@ void Server::handleProxy(const QJsonObject &obj)
                 }
             }
 
-#ifdef CONTACTS
             if (!updateContact(data.toInt(), body)) {
                 qWarning() << "Error updating contact!";
                 sendProxyResponse(uid, 400);
@@ -556,9 +570,7 @@ void Server::handleProxy(const QJsonObject &obj)
             }
 
             sendProxyResponse(uid);
-#else
-            sendProxyResponse(uid, 404);
-#endif
+
             return;
         }
 
@@ -570,7 +582,6 @@ void Server::handleProxy(const QJsonObject &obj)
                 return;
             }
 
-#ifdef CONTACTS
             if (!deleteContact(data.toInt())) {
                 qWarning() << "Error deleting contact!";
                 sendProxyResponse(uid, 400);
@@ -578,11 +589,10 @@ void Server::handleProxy(const QJsonObject &obj)
             }
 
             sendProxyResponse(uid);
-#else
-            sendProxyResponse(uid, 404);
-#endif
+
             return;
         }
+#endif
 
     }
 
@@ -857,13 +867,10 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
             return;
         }
 
+#ifdef CONTACTS
         if (api == "get-contacts") {
             emit newEvent(QString("%1 request from %2").arg(api).arg(source));
-#ifdef CONTACTS
             sendResponse(req, resp, 200, "application/json", getContacts(data), s->getCrypt());
-#else
-            sendResponse(req, resp, 404);
-#endif
             return;
         }
 
@@ -875,15 +882,11 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
                 return;
             }
 
-#ifdef CONTACTS
             QByteArray json = getContact(data.toInt());
             if (json.isEmpty())
                 sendResponse(req, resp, 404);
             else
                 sendResponse(req, resp, 200, "application/json", json, s->getCrypt());
-#else
-            sendResponse(req, resp, 404);
-#endif
             return;
         }
 
@@ -899,7 +902,6 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
                 }
             }
 
-#ifdef CONTACTS
             if (!createContact(body)) {
                 qWarning() << "Error creating contact!";
                 sendResponse(req, resp, 400);
@@ -907,9 +909,7 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
             }
 
             sendResponse(req, resp);
-#else
-            sendResponse(req, resp, 404);
-#endif
+
             return;
         }
 
@@ -930,7 +930,6 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
                 }
             }
 
-#ifdef CONTACTS
             if (!updateContact(data.toInt(), body)) {
                 qWarning() << "Error updating contact!";
                 sendResponse(req, resp, 400);
@@ -938,9 +937,7 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
             }
 
             sendResponse(req, resp);
-#else
-            sendResponse(req, resp, 404);
-#endif
+
             return;
         }
 
@@ -952,7 +949,6 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
                 return;
             }
 
-#ifdef CONTACTS
             if (!deleteContact(data.toInt())) {
                 qWarning() << "Error deleting contact!";
                 sendResponse(req, resp, 400);
@@ -960,11 +956,10 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
             }
 
             sendResponse(req, resp);
-#else
-            sendResponse(req, resp, 404);
-#endif
+
             return;
         }
+#endif
 
     }
 
@@ -1179,17 +1174,14 @@ void Server::sendResponse(QHttpRequest *req, QHttpResponse *resp, int status, co
 
 QString Server::getLocalServerUrl()
 {
-    QString url = "";
+    QHostAddress addr = getAddress();
+
+    if (addr.isNull())
+        return "";
+
     Settings* s = Settings::instance();
-    int port = s->getPort();
 
-    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
-            return QString("http://%1:%2/%3").arg(address.toString()).arg(port).arg(s->getCookie());
-        }
-    }
-
-    return url;
+    return QString("http://%1:%2/%3").arg(addr.toString()).arg(s->getPort()).arg(s->getCookie());
 }
 
 void Server::launchBrowser(QString data)
@@ -2101,10 +2093,10 @@ void Server::cookieChangedHandler()
     }
 }
 
+#ifdef CONTACTS
 QByteArray Server::getContacts(const QString &filter)
 {
 #ifdef SAILFISH
-#ifdef CONTACTS
     QJsonArray array;
 
     QContactSortOrder sort; sort.setDirection(Qt::DescendingOrder);
@@ -2133,16 +2125,11 @@ QByteArray Server::getContacts(const QString &filter)
 #else
     return "";
 #endif
-#else
-    return "";
-#endif
 }
 
 QByteArray Server::getContact(int id)
 {
 #ifdef SAILFISH
-#ifdef CONTACTS
-
     QContact contact = cm->contact(QContactId::fromString(
         "qtcontacts:org.nemomobile.contacts.sqlite::sql-" + QString::number(id)));
 
@@ -2336,16 +2323,11 @@ QByteArray Server::getContact(int id)
 #else
     return "";
 #endif
-#else
-    return "";
-#endif
 }
 
 bool Server::createContact(const QByteArray &json)
 {
 #ifdef SAILFISH
-#ifdef CONTACTS
-
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
@@ -2480,10 +2462,6 @@ bool Server::createContact(const QByteArray &json)
     }
 
     return true;
-
-#else
-    return false;
-#endif
 #else
     return false;
 #endif
@@ -2492,8 +2470,6 @@ bool Server::createContact(const QByteArray &json)
 bool Server::updateContact(int id, const QByteArray &json)
 {
 #ifdef SAILFISH
-#ifdef CONTACTS
-
     QContact contact = cm->contact(QContactId::fromString(
         "qtcontacts:org.nemomobile.contacts.sqlite::sql-" + QString::number(id)));
 
@@ -2651,16 +2627,11 @@ bool Server::updateContact(int id, const QByteArray &json)
 #else
     return false;
 #endif
-#else
-    return false;
-#endif
 }
 
 bool Server::deleteContact(int id)
 {
 #ifdef SAILFISH
-#ifdef CONTACTS
-
     if (!cm->removeContact(QContactId::fromString(
         "qtcontacts:org.nemomobile.contacts.sqlite::sql-" + QString::number(id)))) {
         qWarning() << "Unable to remove contact with id =" << id;
@@ -2668,14 +2639,11 @@ bool Server::deleteContact(int id)
     }
 
     return true;
-
-#else
-    return false;
-#endif
 #else
     return false;
 #endif
 }
+#endif
 
 QByteArray Server::encrypt(const QByteArray & data)
 {
@@ -2867,8 +2835,35 @@ QByteArray Server::getOptions()
 #ifdef SAILFISH
     QJsonObject obj;
     obj.insert("platform",QString("sailfish"));
-    obj.insert("api_version",QString("2.1"));
     obj.insert("encryption_enabled", s->getCrypt());
+    obj.insert("api_version",QString("2.1"));
+
+    QStringList apiList;
+    apiList << "options" <<
+               "open-url" <<
+               "get-clipboard" <<
+               "set-clipboard" <<
+               "get-bookmarks" <<
+               "update-bookmark" <<
+               "create-bookmark" <<
+               "delete-bookmark" <<
+               "get-bookmarks-file" <<
+               "set-bookmarks-file" <<
+               "get-notes-list" <<
+               "get-note" <<
+               "delete-note" <<
+               "update-note" <<
+               "create-note" <<
+#ifdef CONTACTS
+               "get-contacts" <<
+               "get-contact" <<
+               "create-contact" <<
+               "update-contact" <<
+               "delete-contact" <<
+#endif
+               "web-client";
+    obj.insert("api_list", QJsonArray::fromStringList(apiList));
+
     return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 #endif
     return "";

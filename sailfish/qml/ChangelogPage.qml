@@ -30,7 +30,7 @@ Page {
 
             LogItem {
                 title: 'Contacts'
-                description: "Provides contacts management functions. It allows to add new, delete or edit contacts. Due to Jolla Store constraints, this feature is only available in OpenRepos package."
+                description: "Provides contacts management functions. It allows to add new, delete or edit contacts. Due to Jolla Store constraints, this feature is only available in the OpenRepos package."
             }
 
             LogItem {
@@ -47,6 +47,11 @@ Page {
             LogItem {
                 title: 'Bookmarks backup'
                 description: "Option to download all bookmarks as a single file."
+            }
+
+            LogItem {
+                title: 'Connection on WiFi tethering'
+                description: "Enables connection when the client app (e.g. web browser on the laptop) is connected to WiFi Hotspot that is provided by the phone."
             }
 
             SectionHeader {

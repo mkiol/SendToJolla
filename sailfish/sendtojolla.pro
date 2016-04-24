@@ -1,8 +1,9 @@
 TARGET = harbour-sendtojolla
 
-CONFIG += sailfishapp
+CONFIG += c++11 sailfishapp
 
-DEFINES += SAILFISH CONTACTS
+DEFINES += SAILFISH
+DEFINES += CONTACTS
 PKGCONFIG += Qt5Contacts
 
 QT += sql
