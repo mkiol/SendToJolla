@@ -13,6 +13,7 @@
 #include <QByteArray>
 #include <QStringList>
 #include <QTimer>
+#include <QDebug>
 
 #ifdef SAILFISH
 #include <QJsonObject>
@@ -222,6 +223,7 @@ void ProxyClient::errorHandler(QNetworkReply::NetworkError code)
 
 }
 
+#ifdef SAILFISH
 QJsonObject ProxyClient::parseJson(const QByteArray &json)
 {
     QJsonParseError parseError;
@@ -241,6 +243,7 @@ QJsonObject ProxyClient::parseJson(const QByteArray &json)
 
     return doc.object();
 }
+#endif
 
 void ProxyClient::resetReply(QNetworkReply *reply)
 {
@@ -315,7 +318,7 @@ void ProxyClient::inFinishedHandler()
     if (reply->error() == QNetworkReply::NoError) {
 
        //qDebug() << "Network in reply received!" << "Content:" << data;
-
+#ifdef SAILFISH
         QJsonObject obj = parseJson(data);
         if (obj.isEmpty()) {
             qWarning() << "JSON is empty";
@@ -372,6 +375,7 @@ void ProxyClient::inFinishedHandler()
                 return;
             }
         }
+#endif
 
         qWarning() << "Unknown reply!";
         emit error(404);
@@ -420,7 +424,7 @@ void ProxyClient::outFinishedHandler()
     if (reply->error() == QNetworkReply::NoError) {
 
         //qDebug() << "Network out reply received!" << "Content:" << data;
-
+#ifdef SAILFISH
         QJsonObject obj = parseJson(data);
         if (obj.isEmpty()) {
             qWarning() << "JSON is empty";
@@ -449,6 +453,7 @@ void ProxyClient::outFinishedHandler()
                 return;
             }
         }
+#endif
 
         qWarning() << "Unknown reply!";
         resetReply(reply);

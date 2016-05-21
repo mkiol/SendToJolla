@@ -47,7 +47,7 @@ Page {
             }
 
             PaddedLabel {
-                text: qsTr("Web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone.");
+                text: qsTr("Web app that simplifies clipboard, bookmarks, notes & contacts transfer between the PC and your phone via WiFi");
             }
 
             Button {
@@ -70,6 +70,16 @@ Page {
                 horizontalAlignment: Text.AlignLeft
                 textFormat: Text.RichText
                 text: qsTr("This software is distributed under the terms of the Mozilla Public License v.2.0")
+            }
+
+            SectionHeader {
+                text: qsTr("Third party components copyrights")
+            }
+
+            PaddedLabel {
+                horizontalAlignment: Text.AlignLeft
+                textFormat: Text.RichText
+                text: "QHTTPServer - Copyright &copy; 2011-2013 Nikhil Marathe"
             }
 
             Spacer {}

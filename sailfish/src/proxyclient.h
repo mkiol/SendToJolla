@@ -21,7 +21,9 @@
 #include <QSslError>
 #include <QList>
 
+#ifdef SAILFISH
 #include <QJsonObject>
+#endif
 
 class ProxyClient : public QObject
 {
@@ -69,7 +71,9 @@ private:
     bool opened;
 
     bool reconnect();
+#ifdef SAILFISH
     QJsonObject parseJson(const QByteArray &json);
+#endif
     void resetReply(QNetworkReply *reply);
     bool sendOutRequest(const QByteArray &body);
     void setOpen(bool value);

@@ -34,12 +34,6 @@ Page {
             }
 
             LogItem {
-                visible: settings.proxy
-                title: 'Proxy connection mode'
-                description: "Enables connection when phone and browser are not in the same local network. To make it possible, simple `proxy.php` script has to be deployed on external WWW server."
-            }
-
-            LogItem {
                 title: 'End-to-end encryption'
                 description: "Data transfer between server and client app (e.g. web browser) can be encrypted. This fetaure especially makes sense in the case of use Proxy connection mode without SSL protection."
             }

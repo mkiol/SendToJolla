@@ -33,7 +33,9 @@
 #include "qhttpserver/qhttprequest.h"
 #include "qhttpserver/qhttpresponse.h"
 
+#ifdef PROXY
 #include "proxyclient.h"
+#endif
 
 class Server : public QObject
 {
@@ -48,30 +50,31 @@ public:
     ~Server();
 
     Q_INVOKABLE QString getLocalServerUrl();
+    Q_INVOKABLE bool startLocalServer();
+    Q_INVOKABLE void stopLocalServer();
     Q_INVOKABLE QString getProxyUrl();
     Q_INVOKABLE QString getWebClientProxyUrl();
-    Q_INVOKABLE void startLocalServer();
-    Q_INVOKABLE void stopLocalServer();
+#ifdef PROXY
     Q_INVOKABLE void connectProxy();
     Q_INVOKABLE void disconnectProxy();
     Q_INVOKABLE void sendDataToProxy(const QString &data);
+#endif
 
 public slots:
     void handleLocalServer(QHttpRequest *req, QHttpResponse *resp);
+#ifdef PROXY
     void handleProxy(const QJsonObject &obj);
+#endif
 
 private slots:
+#ifdef PROXY
     void proxyOpenHandler();
     void proxyBusyHandler();
     void proxyDataReceived(QByteArray data);
     void proxyErrorHandler(int code);
+#endif
 
     void bodyReceived();
-    /*void bodyReceivedForSetClipboard();
-    void bodyReceivedForUpdateNote();
-    void bodyReceivedForCreateNote();
-    void bodyReceivedForCreateBookmark();
-    void bodyReceivedForUpdateBookmark();*/
 #ifdef SAILFISH
     void clipboardChanged(QClipboard::Mode);
 #endif
@@ -80,7 +83,6 @@ private slots:
 
 signals:
     void newEvent(QString text);
-
     void runningChanged();
     void proxyOpenChanged();
     void proxyBusyChanged();
@@ -93,8 +95,10 @@ private:
     QMap<QHttpRequest*,QHttpResponse*> respMap;
     QNetworkConfigurationManager ncm;
     QString clipboardData;
+#ifdef PROXY
     ProxyClient proxy;
     bool autoStartProxy;
+#endif
 
 #ifdef SAILFISH
     QClipboard *clipboard;
@@ -114,6 +118,7 @@ private:
     void setClipboard(QString data);
     QString getClipboard();
     QByteArray getNotes();
+    QByteArray getAccounts();
     QByteArray getBookmarks();
     QByteArray getBookmarksFile();
     QByteArray getNote(int id);
@@ -132,16 +137,19 @@ private:
                       const QString &contentType = "",
                       const QByteArray &body = "",
                       bool encrypt = false);
+#ifdef PROXY
     void sendProxyResponse(const QString &uid, int status = 204,
                            const QString &contentType = "",
                            const QByteArray &body = "",
                            bool encrypt = false);
+#endif
     void handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp);
     void handleLocalServerOldApi(QHttpRequest *req, QHttpResponse *resp);
     QString getContentType(const QString & file);
 #ifdef CONTACTS
     QByteArray getContacts(const QString & filter);
     QByteArray getContact(int id);
+    QByteArray getContactVCard(int id);
     bool createContact(const QByteArray &json);
     bool updateContact(int id, const QByteArray &json);
     bool deleteContact(int id);

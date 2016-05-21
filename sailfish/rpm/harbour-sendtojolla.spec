@@ -12,9 +12,9 @@ Name:       harbour-sendtojolla
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
-Summary:    Clipboard, notes, contacts & bookmarks transfer between the PC and your phone
+Summary:    Clipboard, bookmarks, notes & contacts transfer between the PC and your phone
 Version:    2.1
-Release:    2
+Release:    3
 Group:      Qt/Qt
 License:    LICENSE
 URL:        https://github.com/mkiol/SendToJolla
@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  desktop-file-utils
 
 %description
-Web app and Firefox add-on that simplifies clipboard, notes, contacts & bookmarks transfer between the PC and your phone
+Web app that simplifies clipboard, bookmarks, notes & contacts transfer between the PC and your phone via WiFi
 
 
 %prep

@@ -1,6 +1,6 @@
 TARGET = harbour-sendtojolla
 
-CONFIG += c++11 sailfishapp
+CONFIG += sailfishapp
 
 DEFINES += SAILFISH
 DEFINES += CONTACTS
@@ -17,7 +17,7 @@ HEADERS += \
     src/utils.h \
     src/proxyclient.h
 
-SOURCES += src/main_sailfish.cpp \
+SOURCES += src/main.cpp \
     src/server.cpp \
     src/settings.cpp \
     src/utils.cpp \

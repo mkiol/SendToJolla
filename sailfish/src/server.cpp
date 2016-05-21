@@ -17,7 +17,8 @@
 #include <QFileInfoList>
 #include <QSignalMapper>
 #include <QCryptographicHash>
-#include <QtMath>
+#include <QPair>
+#include <QList>
 
 #ifdef BB10
 #include <bps/navigator.h>
@@ -26,15 +27,25 @@
 #include <bb/pim/account/Account>
 #include <bb/pim/account/Service>
 #include <bb/pim/account/AccountService>
+#include <bb/pim/account/Provider>
 #include <bb/pim/notebook/NotebookService>
+#include <bb/pim/contacts/ContactService>
+#include <bb/pim/contacts/ContactSearchFilters>
+#include <bb/pim/contacts/Contact>
+#include <bb/pim/contacts/ContactAttribute>
+#include <bb/pim/contacts/ContactBuilder>
+#include <bb/pim/contacts/ContactAttributeBuilder>
+
 #include <QByteArray>
 #include <QtGui/QDesktopServices>
+#include <QtCore/qmath.h>
 
 #include "QJson/serializer.h"
 #include "QJson/parser.h"
 
 using namespace bb::pim::account;
 using namespace bb::pim::notebook;
+using namespace bb::pim::contacts;
 #endif
 
 #ifdef SAILFISH
@@ -52,6 +63,7 @@ using namespace bb::pim::notebook;
 #include <QVariantMap>
 #include <QVariantList>
 #include <QUrlQuery>
+#include <QtMath>
 #ifdef CONTACTS
 #include <QtContacts/QContact>
 #include <QtContacts/QContactDetail>
@@ -78,6 +90,7 @@ using namespace bb::pim::notebook;
 #include <QProcess>
 #include <QNetworkConfiguration>
 #include <QDateTime>
+#include <QNetworkAddressEntry>
 
 #include "server.h"
 #include "settings.h"
@@ -186,27 +199,44 @@ void Server::stopLocalServer()
 
 const QHostAddress Server::getAddress()
 {
-    for (auto interface : QNetworkInterface::allInterfaces()) {
-        if (interface.isValid() &&
-            !interface.flags().testFlag(QNetworkInterface::IsLoopBack) &&
-            interface.flags().testFlag(QNetworkInterface::IsUp) &&
-            interface.flags().testFlag(QNetworkInterface::IsRunning) &&
-            (interface.name() == "eth0" || interface.name() == "wlan0" || interface.name() == "tether")) {
-                //qDebug() << "interface:" << interface.name();
-                for (auto addr : interface.addressEntries()) {
-                    QHostAddress haddr = addr.ip();
-                    if (haddr.protocol() == QAbstractSocket::IPv4Protocol) {
-                        //qDebug() << addr.ip().toString();
-                        return haddr;
-                    }
+    QList<QNetworkInterface> nlist = QNetworkInterface::allInterfaces();
+    //emit newEvent("Server::getAddress");
+    for (QList<QNetworkInterface>::iterator it = nlist.begin(); it != nlist.end(); ++it) {
+        QNetworkInterface interface = *it;
+
+        /*qDebug() << "interface:" << interface.name() << interface.flags().testFlag(QNetworkInterface::IsUp) << interface.flags().testFlag(QNetworkInterface::IsRunning);
+        emit newEvent(interface.name() + " " + (interface.flags().testFlag(QNetworkInterface::IsUp) ? "true" : "false") + " " + (interface.flags().testFlag(QNetworkInterface::IsRunning) ? "true" : "false"));
+        QList<QNetworkAddressEntry> aalist = interface.addressEntries();
+                    for (QList<QNetworkAddressEntry>::iterator it = aalist.begin(); it != aalist.end(); ++it) {
+                        QHostAddress haddr = (*it).ip();
+                        if (haddr.protocol() == QAbstractSocket::IPv4Protocol) {
+                            qDebug() << haddr.toString();
+                            emit newEvent(haddr.toString());
+                        }
+                    }*/
+        if (interface.isValid() && !interface.flags().testFlag(QNetworkInterface::IsLoopBack)
+                && interface.flags().testFlag(QNetworkInterface::IsUp)
+                && interface.flags().testFlag(QNetworkInterface::IsRunning)
+#ifdef SAILFISH
+                && (interface.name() == "eth0" || interface.name() == "wlan0" || interface.name() == "tether")) {
+#elif BB10
+                && (interface.name() == "en0" || interface.name() == "bcm0" || interface.name() == "bcm1")) {
+#endif
+            //qDebug() << "interface:" << interface.name();
+            QList<QNetworkAddressEntry> alist = interface.addressEntries();
+            for (QList<QNetworkAddressEntry>::iterator it = alist.begin(); it != alist.end(); ++it) {
+                QHostAddress haddr = (*it).ip();
+                if (haddr.protocol() == QAbstractSocket::IPv4Protocol) {
+                    //qDebug() << haddr.toString();
+                    return haddr;
                 }
+            }
         }
     }
     return QHostAddress();
 }
 
-
-void Server::startLocalServer()
+bool Server::startLocalServer()
 {
     /*bool bearerOk = false;
     QList<QNetworkConfiguration> activeConfigs = ncm.allConfigurations(QNetworkConfiguration::Active);
@@ -223,18 +253,20 @@ void Server::startLocalServer()
     }*/
 
     if (getAddress().isNull()) {
-        //qWarning() << "Local server is failed to start because WLAN or tethering is not active.";
-        emit newEvent(tr("Local server is failed to start because WLAN or tethering is not active"));
-        return;
+        //qWarning() << "Local server is failed to start because WLAN is not active.";
+        emit newEvent(tr("Local server is failed to start because WLAN is not active"));
+        return false;
     }
 
     Settings* s = Settings::instance();
     int port = s->getPort();
 
+    //qDebug() << "isListening1" << isListening;
     if (isListening != server->listen(port)) {
         isListening = !isListening;
         emit runningChanged();
     }
+    //qDebug() << "isListening2" << isListening;
 
     if (isListening) {
         //qDebug() << "Server listening on" << port << "port.";
@@ -243,8 +275,10 @@ void Server::startLocalServer()
         qWarning() << "Local server is failed to start on" << port << "port";
         emit newEvent(tr("Local server is failed to start on %1 port").arg(port));
     }
-}
 
+    return isListening;
+}
+#ifdef PROXY
 void Server::handleProxy(const QJsonObject &obj)
 {
     Settings* s = Settings::instance();
@@ -599,6 +633,7 @@ void Server::handleProxy(const QJsonObject &obj)
     qWarning() << "Unknown request!";
     sendProxyResponse(uid,404);
 }
+#endif
 
 void Server::bodyReceived()
 {
@@ -618,8 +653,12 @@ void Server::bodyReceived()
         return;
     }
 
+#ifdef SAILFISH
     QUrlQuery query(req->url());
     if (query.hasQueryItem("app")) {
+#elif BB10
+    if (req->url().hasQueryItem("app")) {
+#endif
         handleLocalServerNewApi(req, resp);
     } else {
         handleLocalServerOldApi(req, resp);
@@ -650,12 +689,29 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
     Settings* s = Settings::instance();
 
     QString source = req->remoteAddress();
+
+#ifdef SAILFISH
     QUrlQuery query(req->url());
-
+    QString cookie = query.queryItemValue("app");
+    if (cookie != s->getCookie()) {
+        qWarning() << "Invalid cookie!";
+        sendResponse(req, resp, 404);
+        return;
+    }
     if (query.hasQueryItem("api")) {
-
         QString api = query.queryItemValue("api");
         QString data = query.queryItemValue("data");
+#elif BB10
+    QString cookie = req->url().queryItemValue("app");
+    if (cookie != s->getCookie()) {
+        qWarning() << "Invalid cookie!";
+        sendResponse(req, resp, 404);
+        return;
+    }
+    if (req->url().hasQueryItem("api")) {
+        QString api = req->url().queryItemValue("api");
+        QString data = req->url().queryItemValue("data");
+#endif
         QByteArray body = req->body();
 
         if (api == "open-url") {
@@ -862,8 +918,14 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
                 body = decrypt(body);
             }
 
-            setClipboard(QString(body));
+            setClipboard(QString::fromUtf8(body.constData()));
             sendResponse(req, resp);
+            return;
+        }
+
+        if (api == "get-accounts") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+            sendResponse(req, resp, 200, "application/json", getAccounts(), s->getCrypt());
             return;
         }
 
@@ -887,6 +949,22 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
                 sendResponse(req, resp, 404);
             else
                 sendResponse(req, resp, 200, "application/json", json, s->getCrypt());
+            return;
+        }
+
+        if (api == "get-contact-vcard") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+
+            if (data.isEmpty()) {
+                sendResponse(req, resp, 400);
+                return;
+            }
+
+            QByteArray vc = getContactVCard(data.toInt());
+            if (vc.isEmpty())
+                sendResponse(req, resp, 404);
+            else
+                sendResponse(req, resp, 200, "text/vcard", vc, s->getCrypt());
             return;
         }
 
@@ -1125,6 +1203,7 @@ void Server::handleLocalServer(QHttpRequest *req, QHttpResponse *resp)
     req->storeBody();
 }
 
+#ifdef PROXY
 void Server::sendProxyResponse(const QString &uid, int status, const QString &contentType, const QByteArray &body, bool encrypt)
 {
     QJsonObject newObj;
@@ -1149,6 +1228,7 @@ void Server::sendProxyResponse(const QString &uid, int status, const QString &co
 
     //qDebug() << "Sending HTTP response:" << doc.toJson();
 }
+#endif
 
 void Server::sendResponse(QHttpRequest *req, QHttpResponse *resp, int status, const QString &contentType, const QByteArray &body, bool encrypt)
 {
@@ -1161,9 +1241,19 @@ void Server::sendResponse(QHttpRequest *req, QHttpResponse *resp, int status, co
     } else {
         if (encrypt) {
             nbody = this->encrypt(body);
-            resp->setHeader("Content-Type", "application/json");
+            if (nbody.isEmpty()) {
+                // Something is wrong. Enrypted data cannot be empty.
+                status = 500;
+                resp->setHeader("Content-Length", "0");
+            } else {
+                resp->setHeader("Content-Type", "application/json");
+            }
         } else {
-            resp->setHeader("Content-Type", contentType);
+            if (status == 200 && body.isEmpty()) {
+                status = 204;
+            } else {
+                resp->setHeader("Content-Type", contentType);
+            }
         }
         resp->setHeader("Content-Length", QString::number(nbody.size()));
     }
@@ -1225,7 +1315,7 @@ QString Server::getClipboard()
 #endif
 #ifdef BB10
     bb::system::Clipboard clipboard;
-    return QString(clipboard.value("text/plain"));
+    return QString::fromUtf8(clipboard.value("text/plain").constData());
 #endif
 }
 
@@ -1467,11 +1557,16 @@ bool Server::updateBookmark(int id, const QByteArray &json)
 
     QJsonValue icon = QJsonValue::fromVariant("icon-launcher-bookmark");
 
-    if (!obj["icon"].isNull())
+    if (obj.contains("icon")) {
         if (obj["icon"].toString().startsWith("http://",Qt::CaseInsensitive) ||
             obj["icon"].toString().startsWith("https://",Qt::CaseInsensitive) ||
-            obj["icon"].toString().startsWith("data:image/",Qt::CaseInsensitive))
-            oldObj["favicon"] = (obj["icon"].toString().isEmpty()) ? icon : obj["icon"];
+            obj["icon"].toString().startsWith("data:image/",Qt::CaseInsensitive)) {
+            oldObj["favicon"] = obj["icon"];
+        } else if (obj["icon"].toString().isEmpty()) {
+            oldObj["favicon"] = icon;
+        }
+    }
+
     if (obj["title"].isString() && !obj["title"].toString().isEmpty())
         oldObj["title"] = obj["title"];
     if (obj["url"].isString() && !obj["url"].toString().isEmpty())
@@ -1983,9 +2078,14 @@ bool Server::isRunning()
 
 bool Server::isProxyOpen()
 {
+#ifdef PROXY
     return proxy.isOpen();
+#else
+    return false;
+#endif
 }
 
+#ifdef PROXY
 void Server::proxyDataReceived(QByteArray data)
 {
     //qDebug() << "Data:" << data;
@@ -2067,30 +2167,45 @@ void Server::proxyBusyHandler()
 {
     emit proxyBusyChanged();
 }
+#endif
 
 bool Server::isProxyBusy()
 {
+#ifdef PROXY
     return proxy.isClosing() || proxy.isOpening();
+#else
+    return false;
+#endif
 }
 
 QString Server::getProxyUrl()
 {
+#ifdef PROXY
     Settings* s = Settings::instance();
     return s->getProxyUrl();
+#else
+    return "";
+#endif
 }
 
 QString Server::getWebClientProxyUrl()
 {
+#ifdef PROXY
     Settings* s = Settings::instance();
     return s->getProxyUrl() + "?int=out&app=" + s->getCookie() + "&api=web-client";
+#else
+    return "";
+#endif
 }
 
 void Server::cookieChangedHandler()
 {
+#ifdef PROXY
     if (proxy.isOpen()) {
         autoStartProxy = true;
         proxy.close();
     }
+#endif
 }
 
 #ifdef CONTACTS
@@ -2113,18 +2228,103 @@ QByteArray Server::getContacts(const QString &filter)
         QContactDisplayLabel label = (*it).detail<QContactDisplayLabel>();
         QContactName name = (*it).detail<QContactName>();
 
-        QJsonObject obj;
-        obj.insert("id",id);
         if (!name.firstName().isEmpty() || !name.lastName().isEmpty()) {
+            QJsonObject obj;
+            obj.insert("id",id);
             obj.insert("label", label.label());
             array.append(obj);
         }
     }
 
     return QJsonDocument(array).toJson(QJsonDocument::Compact);
-#else
-    return "";
+#elif BB10
+    QVariantList jsonArray;
+
+    ContactService service;
+
+    QList< QPair<SortColumn::Type,SortOrder::Type> > sortList;
+    sortList << QPair<SortColumn::Type, SortOrder::Type>(SortColumn::FirstName, SortOrder::Ascending);
+    sortList << QPair<SortColumn::Type, SortOrder::Type>(SortColumn::LastName, SortOrder::Ascending);
+
+    QList<Contact> list;
+    if (filter.isEmpty()) {
+        ContactListFilters filters;
+        filters.setLimit(50);
+        filters.setSortBy(sortList);
+        list = service.contacts(filters);
+    } else {
+        ContactSearchFilters filters;
+        filters.setLimit(50);
+        filters.setSearchValue(filter);
+        filters.setSortBy(sortList);
+        list = service.searchContacts(filters);
+    }
+
+    if (!list.isEmpty()) {
+        QList<Contact>::iterator it = list.begin();
+        while(it != list.end()) {
+            /*qDebug() << "Contact: " << (*it).displayName();
+            qDebug() << (*it).firstName() << (*it).lastName();
+            qDebug() << (*it).id();
+            qDebug() << (*it).type();
+
+            QList<ContactAttribute> alist = (*it).attributes();
+            qDebug() << "ContactAttribute list size:" << alist.count();
+            for (QList<ContactAttribute>::iterator ait = alist.begin(); ait != alist.end(); ++ait) {
+                qDebug() << (*ait).label();
+            }*/
+            QVariantMap map;
+            map.insert("id", (*it).id());
+            map.insert("label", (*it).displayName());
+            jsonArray.append(map);
+            ++it;
+        }
+    }
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(jsonArray, &ok);
+
+    if (!ok) {
+      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+      return "";
+    }
+
+    return json;
 #endif
+    return "";
+}
+
+QByteArray Server::getAccounts()
+{
+#ifdef BB10
+    QVariantList jsonArray;
+
+    // Accounts
+    AccountService aservice;
+    QList<Account> aclist = aservice.accounts(Service::Contacts);
+    if (!aclist.isEmpty()) {
+        for (QList<Account>::iterator it = aclist.begin(); it != aclist.end(); ++it) {
+            //qDebug() << (*ait).displayName() << (*ait).id() << (*ait).provider().name();
+            QVariantMap map;
+            map.insert("id", (*it).id());
+            map.insert("label", (*it).displayName().isEmpty() ? (*it).provider().name() : (*it).displayName());
+            jsonArray.append(map);
+        }
+    }
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(jsonArray, &ok);
+
+    if (!ok) {
+      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+      return "";
+    }
+
+    return json;
+#endif
+    return "";
 }
 
 QByteArray Server::getContact(int id)
@@ -2320,14 +2520,164 @@ QByteArray Server::getContact(int id)
             obj.insert("email", (*it).emailAddress());
         }
     }*/
-#else
-    return "";
+#elif BB10
+    /*AccountService aservice;
+    QList<Account> acList = aservice.accounts(Service::Contacts);
+    for (QList<Account>::iterator ait = acList.begin(); ait != acList.end(); ++ait) {
+            qDebug() << (*ait).displayName() << (*ait).id() << (*ait).provider().name();
+    }
+    QList<Provider> apList = aservice.providers();
+    for (QList<Provider>::iterator ait = apList.begin(); ait != apList.end(); ++ait) {
+            qDebug() << (*ait).name();
+    }*/
+
+    // Finding contact with given ID
+    ContactService service;
+    Contact contact = service.contactDetails(id);
+    if (contact.id() < 1) {
+        qWarning() << "Contact with id =" << id << "does not exist!";
+        return "";
+    }
+
+    /*
+    qDebug() << "ContactAttribute list size:" << alist.count();
+    qDebug() << "Contact sourceAccountCount:" << contact.sourceAccountCount();
+    QList<ContactAttribute> alist = contact.attributes();
+    for (QList<ContactAttribute>::iterator ait = alist.begin(); ait != alist.end(); ++ait) {
+        qDebug() << (*ait).attributeDisplayLabel() << (*ait).kind() << (*ait).subKind() << (*ait).label() << (*ait).value();
+    }*/
+
+    QVariantMap obj;
+    obj.insert("id",id);
+
+    // Getting names
+    if (!contact.displayName().isEmpty())
+        obj.insert("label", contact.displayName());
+    if (!contact.firstName().isEmpty())
+        obj.insert("first_name", contact.firstName());
+    if (!contact.lastName().isEmpty())
+        obj.insert("last_name", contact.lastName());
+
+    // Getting avatar
+    if (!contact.smallPhotoFilepath().isEmpty()) {
+        QFile file(contact.smallPhotoFilepath());
+        if (file.exists()) {
+            if(file.open(QIODevice::ReadOnly)) {
+                QByteArray avatarData = "data:image/jpg;base64," + file.readAll().toBase64();
+                obj.insert("avatar", QString(avatarData));
+            } else {
+                qWarning() << "Can not open avatar file!" << file.errorString();
+            }
+        } else {
+            qWarning() << "Avatar file doesn't exist!" << file.fileName();
+        }
+    }
+
+    // Getting account IDs
+    QList<AccountId> aclist = contact.sourceAccountIds();
+    if (!aclist.isEmpty()) {
+        QVariantList array;
+        for (QList<AccountId>::iterator ait = aclist.begin(); ait != aclist.end(); ++ait) {
+            array.append(*ait);
+        }
+        obj.insert("accounts", array);
+    }
+
+    // Getting note
+    QList<ContactAttribute> notes = contact.filteredAttributes(AttributeKind::Note);
+    if (!notes.isEmpty() && !notes[0].value().isEmpty()) {
+        obj.insert("note", notes[0].value());
+    }
+
+    // Getting numbers
+    QList<ContactAttribute> numbers = contact.phoneNumbers();
+    if (!numbers.isEmpty()) {
+        QVariantList array;
+        for (QList<ContactAttribute>::iterator it = numbers.begin(); it != numbers.end(); ++it) {
+            QVariantMap obj; obj.insert("number", (*it).value());
+            AttributeSubKind::Type type = (*it).subKind();
+            switch (type) {
+            case AttributeSubKind::PhoneMobile:
+                obj.insert("type", QString("mobile"));
+                break;
+            case AttributeSubKind::Home:
+                obj.insert("type", QString("home"));
+                break;
+            case AttributeSubKind::Work:
+                obj.insert("type", QString("work"));
+                break;
+            case AttributeSubKind::Other:
+                obj.insert("type", QString("other"));
+                break;
+            }
+            array.append(obj);
+        }
+        obj.insert("phones", array);
+    }
+
+    // Getting emails
+    QList<ContactAttribute> emails = contact.emails();
+    if (!emails.isEmpty()) {
+        QVariantList array;
+        for (QList<ContactAttribute>::iterator it = emails.begin(); it != emails.end(); ++it) {
+            QVariantMap obj; obj.insert("address", (*it).value());
+            AttributeSubKind::Type type = (*it).subKind();
+            switch (type) {
+            case AttributeSubKind::Home:
+                obj.insert("type", QString("home"));
+                break;
+            case AttributeSubKind::Work:
+                obj.insert("type", QString("work"));
+                break;
+            case AttributeSubKind::Other:
+                obj.insert("type", QString("other"));
+                break;
+            }
+            array.append(obj);
+        }
+        obj.insert("emails", array);
+    }
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(obj, &ok);
+
+    if (!ok) {
+      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+      return "";
+    }
+
+    return json;
 #endif
+    return "";
+}
+
+QByteArray Server::getContactVCard(int id)
+{
+#ifdef SAILFISH
+    QContact contact = cm->contact(QContactId::fromString(
+        "qtcontacts:org.nemomobile.contacts.sqlite::sql-" + QString::number(id)));
+
+    if (contact.isEmpty()) {
+        qWarning() << "Contact with id =" << id << "does not exist!";
+        return "";
+    }
+
+    qWarning() << "Not implemented yet :-(";
+
+    return "";
+#elif BB10
+    // Finding contact with given ID
+    ContactService service;
+    return service.contactToVCard(id, VCardPhotoEncoding::BASE64, 0);
+#endif
+    return "";
 }
 
 bool Server::createContact(const QByteArray &json)
 {
 #ifdef SAILFISH
+    // Parsing JSON data
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
@@ -2335,7 +2685,6 @@ bool Server::createContact(const QByteArray &json)
         qDebug() << json;
         return false;
     }
-
     if (!doc.isObject()) {
         qWarning() << "Contact data is not JSON object!";
         return false;
@@ -2363,6 +2712,7 @@ bool Server::createContact(const QByteArray &json)
     contact.saveDetail(&label);
     contact.saveDetail(&name);
 
+    // Note
     if (obj.contains("note") && obj["note"].isString() &&
             !obj["note"].toString().isEmpty()) {
         QContactNote note;
@@ -2370,19 +2720,18 @@ bool Server::createContact(const QByteArray &json)
         contact.saveDetail(&note);
     }
 
+    // Phones
     if (obj["phones"].isArray()) {
         QJsonArray arr = obj["phones"].toArray();
         for (QJsonArray::iterator it = arr.begin(); it != arr.end(); ++it) {
            if ((*it).isObject()) {
                QJsonObject obj = (*it).toObject();
-               if (obj.contains("number") && obj["number"].isString() &&
-                       !obj["number"].toString().isEmpty()) {
+               if (obj.contains("number") && !obj["number"].toString().isEmpty()) {
 
                    QContactPhoneNumber number;
                    number.setNumber(obj["number"].toString());
 
-                   if (obj.contains("context") && obj["context"].isString() &&
-                           !obj["context"].toString().isEmpty()) {
+                   if (obj.contains("context") && !obj["context"].toString().isEmpty()) {
                        QString context = obj["context"].toString();
                        if (context == "work")
                            number.setContexts(QContactDetail::ContextWork);
@@ -2392,8 +2741,7 @@ bool Server::createContact(const QByteArray &json)
                            number.setContexts(QContactDetail::ContextOther);
                    }
 
-                   if (obj.contains("type") && obj["type"].isString() &&
-                           !obj["type"].toString().isEmpty()) {
+                   if (obj.contains("type") && !obj["type"].toString().isEmpty()) {
                        QString type = obj["type"].toString();
                        if (type == "mobile") {
                            QList<int> types;
@@ -2426,19 +2774,17 @@ bool Server::createContact(const QByteArray &json)
         }
     }
 
+    // Emails
     if (obj["emails"].isArray()) {
         QJsonArray arr = obj["emails"].toArray();
         for (QJsonArray::iterator it = arr.begin(); it != arr.end(); ++it) {
            if ((*it).isObject()) {
                QJsonObject obj = (*it).toObject();
-               if (obj.contains("address") && obj["address"].isString() &&
-                       !obj["address"].toString().isEmpty()) {
-
+               if (obj.contains("address") && !obj["address"].toString().isEmpty()) {
                    QContactEmailAddress email;
                    email.setEmailAddress(obj["address"].toString());
 
-                   if (obj.contains("context") && obj["context"].isString() &&
-                           !obj["context"].toString().isEmpty()) {
+                   if (obj.contains("context") && !obj["context"].toString().isEmpty()) {
                        QString context = obj["context"].toString();
                        if (context == "work")
                            email.setContexts(QContactDetail::ContextWork);
@@ -2456,28 +2802,130 @@ bool Server::createContact(const QByteArray &json)
         }
     }
 
+    // Saving new Contact
     if (!cm->saveContact(&contact)) {
         qWarning() << "Error while adding contact, error id:" << cm->error();
         return false;
     }
 
     return true;
-#else
-    return false;
+#elif BB10
+    // Parsing JSON data
+    QJson::Parser parser;
+    bool ok;
+    QVariant result = parser.parse(json, &ok);
+    if (!ok) {
+        qWarning() << "An error occurred during parsing JSON!";
+        return false;
+    }
+    if (result.type() != QVariant::Map) {
+        qWarning() << "JSON is not an object!";
+        return false;
+    }
+
+    QVariantMap obj = result.toMap();
+
+    if (obj["first_name"].toString().isEmpty() && obj["last_name"].toString().isEmpty()) {
+        qWarning() << "Contact data is not valid!";
+        return false;
+    }
+
+    ContactService service;
+    ContactBuilder builder;
+
+    // Adding names
+    QString firstName = obj["first_name"].toString();
+    QString lastName = obj["last_name"].toString();
+    builder.addAttribute(ContactAttributeBuilder().setKind(AttributeKind::Name).setSubKind(AttributeSubKind::NameGiven).setValue(firstName));
+    builder.addAttribute(ContactAttributeBuilder().setKind(AttributeKind::Name).setSubKind(AttributeSubKind::NameSurname).setValue(lastName));
+
+    // Adding note
+    if (obj.contains("note") && obj["note"].type() == QVariant::String) {
+        builder.setNotes(obj["note"].toString());
+    }
+
+    /// Adding phones
+    if (obj["phones"].type() == QVariant::List) {
+        QVariantList array = obj["phones"].toList();
+        for (QVariantList::iterator it = array.begin(); it != array.end(); ++it) {
+            if ((*it).type() == QVariant::Map) {
+                QVariantMap obj = (*it).toMap();
+                if (obj.contains("number") && !obj["number"].toString().isEmpty()) {
+                    ContactAttributeBuilder abuilder;
+                    abuilder.setKind(AttributeKind::Phone).setValue(obj["number"].toString());
+
+                    if (obj.contains("type") && !obj["type"].toString().isEmpty()) {
+                        QString type = obj["type"].toString();
+                        if (type == "mobile") {
+                            abuilder.setSubKind(AttributeSubKind::PhoneMobile);
+                        } else if (type == "home") {
+                            abuilder.setSubKind(AttributeSubKind::Home);
+                        } else if (type == "work") {
+                            abuilder.setSubKind(AttributeSubKind::Work);
+                        } else if (type == "other") {
+                            abuilder.setSubKind(AttributeSubKind::Other);
+                        }
+                    }
+
+                    builder.addAttribute(abuilder);
+                } else {
+                    qWarning() << "Phone without number!";
+                }
+            }
+        }
+    }
+
+    // Adding emails
+    if (obj["emails"].type() == QVariant::List) {
+        QVariantList array = obj["emails"].toList();
+        for (QVariantList::iterator it = array.begin(); it != array.end(); ++it) {
+            if ((*it).type() == QVariant::Map) {
+                QVariantMap obj = (*it).toMap();
+                if (obj.contains("address") && !obj["address"].toString().isEmpty()) {
+                    ContactAttributeBuilder abuilder;
+                    qDebug() << obj["address"].toString();
+                    abuilder.setKind(AttributeKind::Email).setValue(obj["address"].toString());
+
+                    if (obj.contains("type") && !obj["type"].toString().isEmpty()) {
+                        QString type = obj["type"].toString();
+                        qDebug() << type;
+                        if (type == "home") {
+                            abuilder.setSubKind(AttributeSubKind::Home);
+                        } else if (type == "work") {
+                            abuilder.setSubKind(AttributeSubKind::Work);
+                        } else if (type == "other") {
+                            abuilder.setSubKind(AttributeSubKind::Other);
+                        }
+                    }
+
+                    builder.addAttribute(abuilder);
+                } else {
+                    qWarning() << "Email without address!";
+                }
+            }
+        }
+    }
+
+    // Saving new Contact
+    service.createContact(builder, false);
+
+    return true;
 #endif
+    return false;
 }
 
 bool Server::updateContact(int id, const QByteArray &json)
 {
 #ifdef SAILFISH
+    // Finding contact with given ID
     QContact contact = cm->contact(QContactId::fromString(
         "qtcontacts:org.nemomobile.contacts.sqlite::sql-" + QString::number(id)));
-
     if (contact.isEmpty()) {
         qWarning() << "Contact with id =" << id << "does not exist!";
         return false;
     }
 
+    // Parsing JSON data
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
@@ -2485,7 +2933,6 @@ bool Server::updateContact(int id, const QByteArray &json)
         qDebug() << json;
         return false;
     }
-
     if (!doc.isObject()) {
         qWarning() << "Contact data is not JSON object!";
         return false;
@@ -2512,12 +2959,12 @@ bool Server::updateContact(int id, const QByteArray &json)
     }
     contact.saveDetail(&name);
 
-    /*if (obj.contains("note") && obj["note"].isString() &&
-            !obj["note"].toString().isEmpty()) {
+    // Updating note
+    if (obj.contains("note")) {
         QContactNote note;
         note.setNote(obj["note"].toString());
         contact.saveDetail(&note);
-    }*/
+    }
 
     // Deleting all existing phones numbers
     QList<QContactPhoneNumber> ln = contact.details<QContactPhoneNumber>();
@@ -2525,6 +2972,7 @@ bool Server::updateContact(int id, const QByteArray &json)
         contact.removeDetail(&(*it));
     }
 
+    // Adding new phones
     if (obj["phones"].isArray()) {
         QJsonArray arr = obj["phones"].toArray();
         for (QJsonArray::iterator it = arr.begin(); it != arr.end(); ++it) {
@@ -2581,7 +3029,7 @@ bool Server::updateContact(int id, const QByteArray &json)
         }
     }
 
-    // Deleting all existing emials
+    // Deleting all existing emails
     QList<QContactEmailAddress> le = contact.details<QContactEmailAddress>();
     for (QList<QContactEmailAddress>::iterator it = le.begin(); it != le.end(); ++it) {
         contact.removeDetail(&(*it));
@@ -2623,10 +3071,127 @@ bool Server::updateContact(int id, const QByteArray &json)
     }
 
     return true;
+#elif BB10
+    // Finding contact with given ID
+    ContactService service;
+    Contact contact = service.contactDetails(id);
+    if (contact.id() < 1) {
+        qWarning() << "Contact with id =" << id << "does not exist!";
+        return false;
+    }
 
-#else
-    return false;
+    // Parsing JSON data
+    QJson::Parser parser;
+    bool ok;
+    QVariant result = parser.parse(json, &ok);
+    if (!ok) {
+        qWarning() << "An error occurred during parsing JSON!";
+        return false;
+    }
+    if (result.type() != QVariant::Map) {
+        qWarning() << "JSON is not an object!";
+        return false;
+    }
+
+    QVariantMap obj = result.toMap();
+
+    // Checking if contact data is valid
+    if (obj["first_name"].toString().isEmpty() && obj["last_name"].toString().isEmpty()) {
+        qWarning() << "Contact data is not valid!";
+        return false;
+    }
+
+    // Builder for contact edit
+    ContactBuilder builder = contact.edit();
+
+    // Deleting all existing data that will be updated
+    QList<ContactAttribute> alist = contact.attributes();
+    for (QList<ContactAttribute>::iterator ait = alist.begin(); ait != alist.end(); ++ait) {
+        if ((*ait).kind() == AttributeKind::Name && ((*ait).subKind() == AttributeSubKind::NameGiven || (*ait).subKind() == AttributeSubKind::NameSurname)) {
+            builder.deleteAttribute((*ait));
+        } else if ((*ait).kind() == AttributeKind::Phone || (*ait).kind() == AttributeKind::Email) {
+            builder.deleteAttribute((*ait));
+        }
+    }
+
+    // Updating names
+    QString firstName = obj["first_name"].toString();
+    QString lastName = obj["last_name"].toString();
+    builder.addAttribute(ContactAttributeBuilder().setKind(AttributeKind::Name).setSubKind(AttributeSubKind::NameGiven).setValue(firstName));
+    builder.addAttribute(ContactAttributeBuilder().setKind(AttributeKind::Name).setSubKind(AttributeSubKind::NameSurname).setValue(lastName));
+
+    // Updating note
+    if (obj.contains("note") && obj["note"].type() == QVariant::String) {
+        builder.setNotes(obj["note"].toString());
+    }
+
+    // Updating phones
+    if (obj["phones"].type() == QVariant::List) {
+        QVariantList array = obj["phones"].toList();
+        for (QVariantList::iterator it = array.begin(); it != array.end(); ++it) {
+            if ((*it).type() == QVariant::Map) {
+                QVariantMap obj = (*it).toMap();
+                if (obj.contains("number") && !obj["number"].toString().isEmpty()) {
+                    ContactAttributeBuilder abuilder;
+                    abuilder.setKind(AttributeKind::Phone).setValue(obj["number"].toString());
+
+                    if (obj.contains("type") && !obj["type"].toString().isEmpty()) {
+                        QString type = obj["type"].toString();
+                        if (type == "mobile") {
+                            abuilder.setSubKind(AttributeSubKind::PhoneMobile);
+                        } else if (type == "home") {
+                            abuilder.setSubKind(AttributeSubKind::Home);
+                        } else if (type == "work") {
+                            abuilder.setSubKind(AttributeSubKind::Work);
+                        } else if (type == "other") {
+                            abuilder.setSubKind(AttributeSubKind::Other);
+                        }
+                    }
+
+                    builder.addAttribute(abuilder);
+                } else {
+                    qWarning() << "Phone without number!";
+                }
+            }
+        }
+    }
+
+    // Updating emails
+    if (obj["emails"].type() == QVariant::List) {
+        QVariantList array = obj["emails"].toList();
+        for (QVariantList::iterator it = array.begin(); it != array.end(); ++it) {
+            if ((*it).type() == QVariant::Map) {
+                QVariantMap obj = (*it).toMap();
+                if (obj.contains("address") && !obj["address"].toString().isEmpty()) {
+                    ContactAttributeBuilder abuilder;
+                    qDebug() << obj["address"].toString();
+                    abuilder.setKind(AttributeKind::Email).setValue(obj["address"].toString());
+
+                    if (obj.contains("type") && !obj["type"].toString().isEmpty()) {
+                        QString type = obj["type"].toString();
+                        qDebug() << type;
+                        if (type == "home") {
+                            abuilder.setSubKind(AttributeSubKind::Home);
+                        } else if (type == "work") {
+                            abuilder.setSubKind(AttributeSubKind::Work);
+                        } else if (type == "other") {
+                            abuilder.setSubKind(AttributeSubKind::Other);
+                        }
+                    }
+
+                    builder.addAttribute(abuilder);
+                } else {
+                    qWarning() << "Email without address!";
+                }
+            }
+        }
+    }
+
+    service.updateContact(builder);
+
+    return true;
 #endif
+    return false;
 }
 
 bool Server::deleteContact(int id)
@@ -2639,11 +3204,22 @@ bool Server::deleteContact(int id)
     }
 
     return true;
-#else
+#elif BB10
+    // Finding contact with given ID
+    ContactService service;
+    Contact contact = service.contactDetails(id);
+    if (contact.id() < 1) {
+        qWarning() << "Contact with id =" << id << "does not exist!";
+        return false;
+    }
+
+    service.deleteContact(id);
+
+    return true;
+#endif
     return false;
-#endif
 }
-#endif
+#endif // CONTACTS
 
 QByteArray Server::encrypt(const QByteArray & data)
 {
@@ -2651,73 +3227,93 @@ QByteArray Server::encrypt(const QByteArray & data)
     QByteArray key = QCryptographicHash::hash(s->getCryptKey(),QCryptographicHash::Sha1);
 
     QByteArray e_data(data);
-
     char * array = e_data.data();
 
-    int ksize = key.length();
-    int l = e_data.length();
+    int ksize = key.size();
+    int l = e_data.size();
     int counter = l, temp, index;
+
     while (counter > 0) {
         counter--;
-        index = (key.at(counter % ksize) * counter) % l;
+        index = (static_cast<unsigned char>(key.at(counter % ksize)) * counter) % l;
         temp = array[counter];
         array[counter] = array[index];
         array[index] = temp;
     }
 
+    /*int ksize = key.size();
+    int l = data.size();
+
+    char *array = new char[l + 1];
+    strcpy(array, data.constData());
+    qDebug() << ">>>>> l=" << l;
+
+    int counter = l, temp = 0, index = 0;
+    while (counter > 0) {
+        //qDebug() << ">>>>>" << array[counter];
+        counter--;
+        index = (static_cast<unsigned char>(key.at(counter % ksize)) * counter) % l;
+        //qDebug() << ">>>>> counter=" << counter << " index=" << index << "counter % ksize=" << counter % ksize << "key.at()" << static_cast<unsigned char>(key.at(counter % ksize));
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    qDebug() << "enrypted key:";
+    for (int i = 0; i < ksize; ++i) {
+        qDebug() <<  key.at(i) << static_cast<unsigned char>(key.at(i));
+    }
+
+    qDebug() << "enrypted data:";
+    for (int i = 0; i < l; ++i) {
+        qDebug() <<  array[i] << static_cast<unsigned char>(array[i]);
+    }
+
+    qDebug() << ">>>>>77";
+    //return "";
+
+    QByteArray e_data(array);
+
+    //qDebug() << e_data;
+
+    qDebug() << ">>>>>33";*/
+
 #ifdef SAILFISH
+    // Creating JSON container
     QJsonObject obj;
     obj.insert("id",QString("encrypted_container"));
     obj.insert("ver",QString("1"));
     obj.insert("data", QLatin1String(e_data.toBase64()));
     e_data = QJsonDocument(obj).toJson(QJsonDocument::Compact);
-#else
-    e_data = "";
-#endif
-
     return e_data;
-}
-
-
-/*QByteArray Server::encrypt(const QByteArray & data)
-{
-    Settings* s = Settings::instance();
-    QByteArray key = s->getCryptKey();
-
-    QByteArray out;
-
-    int ksize = key.size();
-    if (ksize == 0) {
-        out = data;
-    } else {
-        for (int i = 0; i < data.size(); ++i) {
-            //qDebug() << data.at(i) << "-" << (data.at(i) ^ key.at(i % ksize));
-            out += data.at(i) ^ key.at(i % ksize);
-        }
-    }
-
-#ifdef SAILFISH
-    QJsonObject obj;
+#elif BB10
+    // Creating JSON container
+    QVariantMap obj;
     obj.insert("id",QString("encrypted_container"));
-    obj.insert("algorithm",QString("XOR1"));
-    obj.insert("data", QString(out.toBase64()));
-    out = QJsonDocument(obj).toJson(QJsonDocument::Compact);
-#else
-    out = "";
-#endif
+    obj.insert("ver",QString("1"));
+    obj.insert("data", QLatin1String(e_data.toBase64()));
 
-    return out;
-}*/
+    QJson::Serializer serializer; bool ok;
+    e_data = serializer.serialize(obj, &ok);
+    if (!ok) {
+      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+      return "";
+    }
+    return e_data;
+#endif
+    return "";
+}
 
 QByteArray Server::decrypt(const QByteArray & json)
 {
     QByteArray data;
 
 #ifdef SAILFISH
+    // Parsing JSON data
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Can not parse json data!" << parseError.errorString();
+        qWarning() << "An error occurred during parsing JSON!" << parseError.errorString();
         qDebug() << json;
         return "";
     }
@@ -2745,9 +3341,38 @@ QByteArray Server::decrypt(const QByteArray & json)
         qWarning() << "Data param is missing!";
         return "";
     }
+#elif BB10
+    // Parsing JSON data
+    QJson::Parser parser;
+    bool ok;
+    QVariant result = parser.parse(json, &ok);
+    if (!ok) {
+        qWarning() << "An error occurred during parsing JSON!";
+        return "";
+    }
+    if (result.type() != QVariant::Map) {
+        qWarning() << "Encrypted data is not JSON object!";
+        return "";
+    }
 
-    data = QByteArray::fromBase64(obj["data"].toString().toLocal8Bit());
+    QVariantMap obj = result.toMap();
+
+    if (!obj.contains("id") || obj["id"].toString() != "encrypted_container") {
+        qWarning() << "Encrypted data is not in valid container!";
+        return "";
+    }
+
+    if (!obj.contains("ver") || obj["ver"].toString() != "1") {
+        qWarning() << "Unknown version!";
+        return "";
+    }
+
+    if (!obj.contains("data") || obj["data"].type() != QVariant::String) {
+        qWarning() << "Data param is missing!";
+        return "";
+    }
 #endif
+    data = QByteArray::fromBase64(obj["data"].toString().toLocal8Bit());
 
     Settings* s = Settings::instance();
     QByteArray key = QCryptographicHash::hash(s->getCryptKey(),QCryptographicHash::Sha1);
@@ -2759,7 +3384,7 @@ QByteArray Server::decrypt(const QByteArray & json)
     int counter = 0, temp, index;
     int l = d_data.length();
     while (counter < l) {
-        index = (key.at(counter % ksize) * counter) % l;
+        index = (static_cast<unsigned char>(key.at(counter % ksize)) * counter) % l;
         temp = array[counter];
         array[counter] = array[index];
         array[index] = temp;
@@ -2769,65 +3394,6 @@ QByteArray Server::decrypt(const QByteArray & json)
     return d_data;
 }
 
-/*QByteArray Server::decrypt(const QByteArray & json)
-{
-    QByteArray data;
-
-#ifdef SAILFISH
-    QJsonParseError parseError;
-    QJsonDocument doc = QJsonDocument::fromJson(json, &parseError);
-    if (parseError.error != QJsonParseError::NoError) {
-        qWarning() << "Can not parse json data!" << parseError.errorString();
-        qDebug() << json;
-        return "";
-    }
-
-    if (!doc.isObject()) {
-        qWarning() << "Encrypted data is not JSON object!";
-        return "";
-    }
-
-    QJsonObject obj = doc.object();
-
-    if (!obj.contains("id") || !obj["id"].isString() || obj["id"].toString() != "encrypted_container") {
-        qWarning() << "Encrypted data is not in valid container!";
-        return "";
-    }
-
-    // Supports only XOR algorithm
-    if (!obj.contains("algorithm") || !obj["algorithm"].isString() ||
-            obj["algorithm"].toString() != "XOR1") {
-        qWarning() << "Unknown algorithm!";
-        return "";
-    }
-
-    if (!obj.contains("data") || !obj["data"].isString()) {
-        qWarning() << "Data param is missing!";
-        return "";
-    }
-
-    data = obj["data"].toString().toUtf8();
-#endif
-
-    Settings* s = Settings::instance();
-    QByteArray key = s->getCryptKey();
-
-    QByteArray out = QByteArray::fromBase64(data);
-
-    int ksize = key.size();
-    if (ksize == 0)
-        return out;
-
-    // XOR
-    char * c_out = out.data();
-    int l_out = out.size();
-    for (int i = 0; i < l_out; ++i) {
-        c_out[i] ^= key.at(i % ksize);
-    }
-
-    return out;
-}*/
-
 QByteArray Server::getOptions()
 {
     Settings* s = Settings::instance();
@@ -2835,6 +3401,10 @@ QByteArray Server::getOptions()
 #ifdef SAILFISH
     QJsonObject obj;
     obj.insert("platform",QString("sailfish"));
+#elif BB10
+    QVariantMap obj;
+    obj.insert("platform",QString("bb10"));
+#endif
     obj.insert("encryption_enabled", s->getCrypt());
     obj.insert("api_version",QString("2.1"));
 
@@ -2843,12 +3413,14 @@ QByteArray Server::getOptions()
                "open-url" <<
                "get-clipboard" <<
                "set-clipboard" <<
+#ifdef SAILFISH
                "get-bookmarks" <<
                "update-bookmark" <<
                "create-bookmark" <<
                "delete-bookmark" <<
                "get-bookmarks-file" <<
                "set-bookmarks-file" <<
+#endif
                "get-notes-list" <<
                "get-note" <<
                "delete-note" <<
@@ -2857,14 +3429,33 @@ QByteArray Server::getOptions()
 #ifdef CONTACTS
                "get-contacts" <<
                "get-contact" <<
+#ifdef BB10
+               "get-contact-vcard" <<
+#endif
                "create-contact" <<
                "update-contact" <<
                "delete-contact" <<
 #endif
+#ifdef BB10
+               "get-accounts" <<
+#endif
                "web-client";
+#ifdef SAILFISH
     obj.insert("api_list", QJsonArray::fromStringList(apiList));
 
     return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+#elif BB10
+    obj.insert("api_list", apiList);
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(obj, &ok);
+    if (!ok) {
+        qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+        return "";
+    }
+
+    return json;
 #endif
     return "";
 }

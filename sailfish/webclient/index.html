@@ -435,12 +435,12 @@ function encrypt(data) {
 }
 
 function decrypt(data) {
-  if (typeof data.id == "undefined" || data.id != "encrypted_container")
+  if (data.id === "undefined" || data.id != "encrypted_container")
     return "error";
-  if (typeof data.ver == "undefined" || data.ver != "1")
+  if (data.ver === "undefined" || data.ver != "1")
     return "error";
-  if (typeof data.data == "undefined")
-    return "error";
+  if (data.data === "undefined" || data.data === "")
+    return undefined;
 
   var key = $("#key input").val().trim();
   var shaObj = new jsSHA("SHA-1", "TEXT");
@@ -448,6 +448,7 @@ function decrypt(data) {
   key = shaObj.getHash("BYTES");
 
   var array = atob(data.data).split('');
+
   var counter = 0, temp, index;
   var l = array.length;
   while (counter < l) {
@@ -616,7 +617,7 @@ $(document).ready(function() {
           }
 
           try {
-            data = $.parseJSON(d_data);
+            data = d_data ? $.parseJSON(d_data) : d_data;
           } catch (err) {
             info.text("Decryption failed!");
             info.addClass("error");
@@ -627,10 +628,10 @@ $(document).ready(function() {
 
       	data = JSON.stringify(data);
 
-      	info.text(data === "" ? "OK, It seems no bookmarks are defined." : "OK");
+      	info.text(data === undefined ? "OK, It seems no bookmarks are defined." : "OK");
       	info.show();
 
-      	if (data !== "") {
+      	if (data !== undefined) {
           var blob = new Blob([data], {type: 'application/json'});
           var url = URL.createObjectURL(blob);
           $("#dbP").append($("<a download='bookmarks.json'>bookmarks.json</a>").attr("href",url));
@@ -667,14 +668,14 @@ $(document).ready(function() {
       }
 
       if (encryptionEnabled) {
-        content = encrypt(data);
+        data = encrypt(data);
       }
 
       loader.show();
       $.ajax({
         type: 'POST',
         url: getAPIUrl("set-bookmarks-file"),
-        data: data,
+        data: encryptionEnabled ? JSON.stringify(data) : data,
         complete: function() {
           loader.hide();
         },
@@ -731,10 +732,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -745,12 +746,12 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("get-bookmarks"),
       complete: function() {
-	loader.hide();
+	      loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
 
@@ -765,7 +766,7 @@ $(document).ready(function() {
           }
 
           try {
-            data = $.parseJSON(d_data);
+            data = d_data ? $.parseJSON(d_data) : d_data;
           } catch (err) {
             info.text("Decryption failed!");
             info.addClass("error");
@@ -774,11 +775,11 @@ $(document).ready(function() {
           }
 	}
 
-	info.text(data == "" ? "OK, It seems no bookmarks are defined." : "OK");
+	info.text(data == undefined ? "OK, It seems no bookmarks are defined." : "OK");
 	info.show();
 
 	bookmarksList = data;
-	if (data == "") {
+	if (data == undefined) {
 	  $("#updateBookmark").hide();
 	  $("#deleteBookmark").hide();
 	  $("#bookmarkId").val("");
@@ -798,13 +799,13 @@ $(document).ready(function() {
 	      data[i].url.length > 50 ? data[i].url.substring(0,50) : data[i].url :
 	      data[i].title.length > 50 ? data[i].title.substring(0,50) : data[i].title)
 	      .click(function (){
-		var id = $(this).data("bookmarkId") - 1;
-		$("#bookmarkId").val(bookmarksList[id].id);
-		$("#bookmarkName").val(bookmarksList[id].title);
-		$("#bookmarkUrl").val(bookmarksList[id].url);
-		$("#bookmarkIcon").val(bookmarksList[id].icon == undefined ? "" : bookmarksList[id].icon);
-		$("#updateBookmark").show();
-		$("#deleteBookmark").show();
+      		var id = $(this).data("bookmarkId") - 1;
+      		$("#bookmarkId").val(bookmarksList[id].id);
+      		$("#bookmarkName").val(bookmarksList[id].title);
+      		$("#bookmarkUrl").val(bookmarksList[id].url);
+      		$("#bookmarkIcon").val(bookmarksList[id].icon == undefined ? "" : bookmarksList[id].icon);
+      		$("#updateBookmark").show();
+      		$("#deleteBookmark").show();
 	      })));
 	      table.append(row);
 	    }
@@ -845,16 +846,16 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("open-url",url),
       complete: function() {
-	loader.hide();
+	       loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
-	info.text("OK");
-	info.show();
+      	info.text("OK");
+      	info.show();
       }
     });
   }
@@ -904,7 +905,7 @@ $(document).ready(function() {
       return;
     }
 
-    if (!isUrl(icon)) {
+    if (icon !== "" && !isUrl(icon)) {
       if (icon.lastIndexOf("data:image/", 0) !== 0) {
         info.addClass("error");
         info.text("Icon is invalid!");
@@ -916,10 +917,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -946,8 +947,7 @@ $(document).ready(function() {
         info.addClass("error");
         info.show();
       },
-      contentType: "application/json; charset=utf-8",
-      dataType: 'json'
+      contentType: "application/json; charset=utf-8"
     });
   });
 
@@ -989,7 +989,7 @@ $(document).ready(function() {
       return;
     }
 
-    if (!isUrl(icon)) {
+    if (icon !== "" && !isUrl(icon)) {
       if (icon.lastIndexOf("data:image/", 0) !== 0) {
         info.addClass("error");
         info.text("Icon is invalid!");
@@ -1001,10 +1001,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -1031,8 +1031,7 @@ $(document).ready(function() {
         info.addClass("error");
         info.show();
       },
-      contentType: "application/json; charset=utf-8",
-      dataType: 'json'
+      contentType: "application/json; charset=utf-8"
     });
   });
 
@@ -1069,15 +1068,15 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("delete-bookmark",id),
       complete: function() {
-	loader.hide();
+	      loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
-	getBookmarksAPICall();
+	      getBookmarksAPICall();
       }
     });
 
@@ -1103,10 +1102,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -1118,12 +1117,12 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("get-clipboard"),
       complete: function() {
-	loader.hide();
+	       loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
 
@@ -1138,11 +1137,11 @@ $(document).ready(function() {
           }
 
           data = d_data;
-	}
+	      }
 
-	info.text(data == "" ? "OK, Clipboard is empty." : "OK");
-	info.show();
-	$("#clipboard textarea").val(data);
+      	info.text(data == undefined ? "OK, Clipboard is empty." : "OK");
+      	info.show();
+      	$("#clipboard textarea").val(data);
       }
     });
   });
@@ -1154,7 +1153,7 @@ $(document).ready(function() {
 
     resetInfo();
 
-    if (content == "") {
+    if (content === "") {
       info.addClass("error");
       info.text("Clipboard's content is not defined!");
       info.show();
@@ -1164,35 +1163,35 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
     if (encryptionEnabled) {
-      content = encrypt(JSON.stringify(content));
+      content = encrypt(content);
     }
 
     loader.show();
     $.ajax({
       type: 'POST',
       url: getAPIUrl("set-clipboard"),
-      data: JSON.stringify(content),
+      data: encryptionEnabled ? JSON.stringify(content) : content,
       complete: function() {
-	loader.hide();
+	      loader.hide();
       },
       success: function(data) {
-	info.text("OK");
-	info.show();
+      	info.text("OK");
+      	info.show();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
-      contentType: "application/json; charset=utf-8",
+      contentType: encryptionEnabled ? "application/json; charset=utf-8" : "text/plain; charset=utf-8",
       dataType: 'json'
     });
 
@@ -1276,14 +1275,14 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("get-notes-list"),
       complete: function() {
-	loader.hide();
+	       loader.hide();
       },
       success: function(data) {
 
-	if (encryptionEnabled) {
+      	if (encryptionEnabled) {
           var d_data = decrypt(data);
 
-          if (d_data == "error") {
+          if (d_data === "error") {
             info.text("Decryption failed!");
             info.addClass("error");
             info.show();
@@ -1291,49 +1290,49 @@ $(document).ready(function() {
           }
 
           try {
-            data = $.parseJSON(d_data);
+            data = d_data ? $.parseJSON(d_data) : d_data;
           } catch (err) {
             info.text("Decryption failed!");
             info.addClass("error");
             info.show();
             return;
           }
-	}
+      	}
 
-	info.text(data == "" ? "OK, You don't have any notes." : "OK");
-	info.show();
+      	info.text(data === undefined ? "OK, You don't have any notes." : "OK");
+      	info.show();
 
-	if (data == "") {
-	  $("#updateNote").hide();
-	  $("#noteId").val("");
-	  table.append('<tr><td class="empty">Empty</td></tr>');
-	} else {
-	  if (data.length > 0) {
-	    for (var i in data) {
-	      var row = $("<tr></tr>");
-	      row.append($("<td></td>").text(data[i].id));
-	      if (platformName == "sailfish") {
-		row.append($("<td></td>").addClass("colorRow")
-		.css("background-color", data[i].color));
-	      }
-	      row.append($("<td></td>").addClass("textRow")
-	      .append($('<a href="#"></a>').data("noteid", data[i].id)
-	      .text(data[i].title == "" ? "Empty note" : data[i].title)
-	      .click(openNoteAPICall)));
-	      table.append(row);
-	    }
-	  } else {
-	    $("#updateNote").hide();
-	    $("#noteId").val("");
-	    table.append('<tr><td class="empty">Empty</td></tr>');
-	  }
-	}
+      	if (data == undefined) {
+      	  $("#updateNote").hide();
+      	  $("#noteId").val("");
+      	  table.append('<tr><td class="empty">Empty</td></tr>');
+      	} else {
+      	  if (data.length > 0) {
+      	    for (var i in data) {
+      	      var row = $("<tr></tr>");
+      	      row.append($("<td></td>").text(data[i].id));
+      	      if (platformName == "sailfish") {
+            		row.append($("<td></td>").addClass("colorRow")
+            		.css("background-color", data[i].color));
+      	      }
+      	      row.append($("<td></td>").addClass("textRow")
+      	      .append($('<a href="#"></a>').data("noteid", data[i].id)
+      	      .text(data[i].title == "" ? "Empty note" : data[i].title)
+      	      .click(openNoteAPICall)));
+      	      table.append(row);
+      	    }
+      	  } else {
+      	    $("#updateNote").hide();
+      	    $("#noteId").val("");
+      	    table.append('<tr><td class="empty">Empty</td></tr>');
+      	  }
+      	}
 
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       }
     });
   };
@@ -1348,10 +1347,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -1360,12 +1359,12 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("get-note",id),
       complete: function() {
-	loader.hide();
+	      loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
 
@@ -1380,7 +1379,7 @@ $(document).ready(function() {
           }
 
           try {
-            data = $.parseJSON(d_data);
+            data = d_data ? $.parseJSON(d_data) : d_data;
           } catch (err) {
             info.text("Decryption failed!");
             info.addClass("error");
@@ -1438,7 +1437,7 @@ $(document).ready(function() {
       return;
     }
 
-    if (platformName == "blackberry" && title == "") {
+    if (platformName == "bb10" && title == "") {
       info.addClass("error");
       info.text("Title is not defined!");
       info.show();
@@ -1455,10 +1454,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -1532,10 +1531,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -1605,15 +1604,15 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("delete-note",id),
       complete: function() {
-	loader.hide();
+      	loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
-	getNotesAPICall();
+	      getNotesAPICall();
       }
     });
   });
@@ -1646,11 +1645,17 @@ $(document).ready(function() {
     $("#contactLastName").val("");
     $("#updateContact").hide();
     $("#deleteContact").hide();
+    $("#contactVCardP").hide();
+    $("#contactVCardP a").remove();
     $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
     $("#contactPhones p").remove();
     $("#contactPhones").append($("<p>No phone numbers defined</p>").addClass("empty"));
     $("#contactEmails p").remove();
     $("#contactEmails").append($("<p>No email addresses defined</p>").addClass("empty"));
+  }
+
+  function clearVCard() {
+    $("#contactVCardP a").remove();
   }
 
   var getContactsAPICall = function() {
@@ -1664,10 +1669,10 @@ $(document).ready(function() {
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -1678,11 +1683,11 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("get-contacts", filter),
       complete: function() {
-	loader.hide();
+        loader.hide();
       },
       success: function(data) {
 
-	if (encryptionEnabled) {
+        if (encryptionEnabled) {
           var d_data = decrypt(data);
 
           if (d_data == "error") {
@@ -1693,47 +1698,46 @@ $(document).ready(function() {
           }
 
           try {
-            data = $.parseJSON(d_data);
+            data = d_data ? $.parseJSON(d_data) : d_data;
           } catch (err) {
             info.text("Decryption failed!");
             info.addClass("error");
             info.show();
             return;
           }
-	}
+        }
 
-	info.text(data == "" ? "No contacts matching specific pattern found!" : "OK");
-	info.show();
+        info.text(data == undefined ? "No contacts matching specific pattern found!" : "OK");
+        info.show();
 
-	if (data == "") {
-	  $("#updateContact").hide();
-	  $("#contactId").val("");
-	  table.append('<tr><td class="empty">Empty</td></tr>');
-	} else {
-	  if (data.length > 0) {
-	    for (var i in data) {
-	      var row = $("<tr></tr>");
-	      row.append($("<td></td>").text(data[i].id));
-	      row.append($("<td></td>").addClass("textRow")
-	      .append($('<a href="#"></a>').data("contactid", data[i].id)
-	      .text(data[i].label == "" ? "Empty contact" : data[i].label)
-	      .click(openContactAPICall)));
-	      table.append(row);
-	    }
-	  } else {
-	    $("#updateContact").hide();
-	    $("#contactId").val("");
-	    table.append('<tr><td class="empty">Empty</td></tr>');
-	  }
-	}
-
+        if (data == undefined) {
+          $("#updateContact").hide();
+          $("#contactId").val("");
+          table.append('<tr><td class="empty">Empty</td></tr>');
+        } else {
+          if (data.length > 0) {
+            for (var i in data) {
+              var row = $("<tr></tr>");
+              row.append($("<td></td>").text(data[i].id));
+              row.append($("<td></td>").addClass("textRow")
+              .append($('<a href="#"></a>').data("contactid", data[i].id)
+              .text(data[i].label == "" ? "Empty contact" : data[i].label)
+              .click(openContactAPICall)));
+              table.append(row);
+            }
+          } else {
+            $("#updateContact").hide();
+            $("#contactId").val("");
+            table.append('<tr><td class="empty">Empty</td></tr>');
+          }
+        }
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
       }
-    });
+  });
   };
 
   var openContactAPICall = function() {
@@ -1744,14 +1748,15 @@ $(document).ready(function() {
     var emails = $("#contactEmails");
 
     resetInfo();
+    clearVCard();
 
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+        info.text("Password for encryption is not defined!");
+        info.addClass("error");
+        info.show();
+        return;
       }
     }
 
@@ -1760,16 +1765,15 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("get-contact",id),
       complete: function() {
-	loader.hide();
+        loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
       },
       success: function(data) {
-
-	if (encryptionEnabled) {
+        if (encryptionEnabled) {
           var d_data = decrypt(data);
 
           if (d_data == "error") {
@@ -1780,147 +1784,200 @@ $(document).ready(function() {
           }
 
           try {
-            data = $.parseJSON(d_data);
+            data = d_data ? $.parseJSON(d_data) : d_data;
           } catch (err) {
             info.text("Decryption failed!");
             info.addClass("error");
             info.show();
             return;
           }
-	}
+        }
 
-	if (typeof data.id == "undefined") {
+        if (typeof data.id == "undefined") {
           info.text("Unreadable data!");
           info.addClass("error");
           info.show();
           return;
         }
 
-	info.text("OK");
-	info.show();
-	$("#contactId").val(data.id);
-	$("#contactFirstName").val(data.first_name);
-	$("#contactLastName").val(data.last_name);
+        info.text("OK");
+        info.show();
+        $("#contactId").val(data.id);
+        $("#contactFirstName").val(data.first_name);
+        $("#contactLastName").val(data.last_name);
 
-	/*if (typeof data.note != "undefined" && data.note.length > 0)
-	  $("#contactNote").val(data.note);*/
+        /*if (typeof data.note != "undefined" && data.note.length > 0)
+        $("#contactNote").val(data.note);*/
 
-	if (typeof data.avatar != "undefined" && data.avatar.length > 0)
-	  $("#contactAvatar").attr("src", data.avatar);
-	else
-	  $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
+        if (typeof data.avatar != "undefined" && data.avatar.length > 0)
+          $("#contactAvatar").attr("src", data.avatar);
+        else
+          $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
 
-	$("#updateContact").show();
-	$("#deleteContact").show();
+        $("#updateContact").show();
+        $("#deleteContact").show();
+        if (platformName == "bb10") {
+          $("#contactVCardP").show();
+        }
 
-	$("#contactPhones p").remove();
-	$("#contactEmails p").remove();
+        $("#contactPhones p").remove();
+        $("#contactEmails p").remove();
 
-	// Add phones
-	if (typeof data.phones != "undefined" && data.phones.length > 0) {
-	  for (var i in data.phones) {
+        // Add phones
+        if (typeof data.phones != "undefined" && data.phones.length > 0) {
+          for (var i in data.phones) {
 
-	    var t_mobile = data.phones[i].type == "mobile";
-	    var t_fax = data.phones[i].type == "fax";
-	    var t_pager = data.phones[i].type == "pager";
-	    var t_assistant = data.phones[i].type == "assistant";
-	    var t_video = data.phones[i].type == "video";
-	    var t_undefined = !t_mobile;
-	    var c_home = data.phones[i].context == "home";
-	    var c_work = data.phones[i].context == "work";
-	    var c_other = data.phones[i].context == "other";
-	    var c_undefined = !c_home && !c_work && !c_other;
+            var t_mobile = data.phones[i].type == "mobile";
+            var t_fax = data.phones[i].type == "fax";
+            var t_pager = data.phones[i].type == "pager";
+            var t_assistant = data.phones[i].type == "assistant";
+            var t_video = data.phones[i].type == "video";
+            var t_home = data.phones[i].type == "home";
+            var t_work = data.phones[i].type == "work";
+            var t_other = data.phones[i].type == "other";
+            var t_undefined = !t_mobile && !t_fax && !t_pager && !t_assistant  && !t_video && !t_home && !t_work && !t_other;
+            var c_home = data.phones[i].context == "home";
+            var c_work = data.phones[i].context == "work";
+            var c_other = data.phones[i].context == "other";
+            var c_undefined = !c_home && !c_work && !c_other;
 
-	    var t_undefined_option = $("<option value='undefined'>Undefined</option>");
-	    if (t_undefined)
-	      t_undefined_option.attr("selected","selected");
-	    var t_mobile_option = $("<option value='mobile'>Mobile</option>");
-	    if (t_mobile)
-	      t_mobile_option.attr("selected","selected");
-	    var t_assistant_option = $("<option value='assistant'>Assistant</option>");
-	    if (t_assistant)
-	      t_assistant_option.attr("selected","selected");
-	    var t_fax_option = $("<option value='fax'>Fax</option>");
-	    if (t_fax)
-	      t_fax_option.attr("selected","selected");
-	    var t_pager_option = $("<option value='pager'>Pager</option>");
-	    if (t_pager)
-	      t_pager_option.attr("selected","selected");
-	    var t_video_option = $("<option value='video'>Video</option>");
-	    if (t_video)
-	      t_video_option.attr("selected","selected");
-	    var c_undefined_option = $("<option value='undefined'>Undefined</option>");
-	    if (c_undefined)
-	      c_undefined_option.attr("selected","selected");
-	    var c_home_option = $("<option value='home'>Home</option>");
-	    if (c_home)
-	      c_home_option.attr("selected","selected");
-	    var c_work_option = $("<option value='work'>Work</option>");
-	    if (c_work)
-	      c_work_option.attr("selected","selected");
-	    var c_other_option = $("<option value='other'>Other</option>");
-	    if (c_other)
-	      c_other_option.attr("selected","selected");
+            var t_undefined_option = $("<option value='undefined'>Undefined</option>");
+            if (t_undefined)
+              t_undefined_option.attr("selected","selected");
+            var t_mobile_option = $("<option value='mobile'>Mobile</option>");
+            if (t_mobile)
+              t_mobile_option.attr("selected","selected");
+            var t_assistant_option = $("<option value='assistant'>Assistant</option>");
+            if (t_assistant)
+              t_assistant_option.attr("selected","selected");
+            var t_fax_option = $("<option value='fax'>Fax</option>");
+            if (t_fax)
+              t_fax_option.attr("selected","selected");
+            var t_pager_option = $("<option value='pager'>Pager</option>");
+            if (t_pager)
+              t_pager_option.attr("selected","selected");
+            var t_video_option = $("<option value='video'>Video</option>");
+            if (t_video)
+              t_video_option.attr("selected","selected");
+            var t_home_option = $("<option value='home'>Home</option>");
+            if (t_home)
+              t_home_option.attr("selected","selected");
+            var t_work_option = $("<option value='work'>Work</option>");
+            if (t_work)
+              t_work_option.attr("selected","selected");
+            var t_other_option = $("<option value='other'>Other</option>");
+            if (t_other)
+              t_other_option.attr("selected","selected");
+            var c_undefined_option = $("<option value='undefined'>Undefined</option>");
+            if (c_undefined)
+              c_undefined_option.attr("selected","selected");
+            var c_home_option = $("<option value='home'>Home</option>");
+            if (c_home)
+              c_home_option.attr("selected","selected");
+            var c_work_option = $("<option value='work'>Work</option>");
+            if (c_work)
+              c_work_option.attr("selected","selected");
+            var c_other_option = $("<option value='other'>Other</option>");
+            if (c_other)
+              c_other_option.attr("selected","selected");
 
-	    phones.append($("<p></p>")
-	      .append($("<input type='tel' placeholder='Phone number'/>").val(data.phones[i].number))
-	      .append(" Type: ")
-	      .append($("<select name='type'></select>").append(t_undefined_option).append(t_assistant_option).append(t_fax_option).append(t_pager_option).append(t_video_option).append(t_mobile_option))
-	      .append(" Context: ")
-	      .append($("<select name='context'></select>").append(c_undefined_option).append(c_home_option).append(c_work_option).append(c_undefined_option))
-	      .append("&nbsp; &nbsp;")
-	      .append($("<button>Delete</button>").click(function(){
-		$(this).parent().remove();
-		if (phones.children().length == 0)
-		  phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
-	      }))
-	    );
-	  }
-	} else {
-	  phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
-	}
-
-	// Add emails
-	if (typeof data.emails != "undefined" && data.emails.length > 0) {
-	  for (var i in data.emails) {
-
-	    var c_home = data.emails[i].context == "home";
-	    var c_work = data.emails[i].context == "work";
-	    var c_other = data.emails[i].context == "other";
-	    var c_undefined = !c_home && !c_work && !c_other;
-
-	    var c_undefined_option = $("<option value='undefined'>Undefined</option>");
-	    if (c_undefined)
-	      c_undefined_option.attr("selected","selected");
-	    var c_home_option = $("<option value='home'>Home</option>");
-	    if (c_home)
-	      c_home_option.attr("selected","selected");
-	    var c_work_option = $("<option value='work'>Work</option>");
-	    if (c_work)
-	      c_work_option.attr("selected","selected");
-	    var c_other_option = $("<option value='other'>Other</option>");
-	    if (c_other)
-	      c_other_option.attr("selected","selected");
-
-	    emails.append($("<p></p>")
-	      .append($("<input type='email' placeholder='Email address'/>").val(data.emails[i].address))
-	      .append(" Context: ")
-	      .append($("<select name='context'></select>").append(c_undefined_option).append(c_home_option).append(c_work_option).append(c_undefined_option))
-	      .append("&nbsp; &nbsp;")
-	      .append($("<button>Delete</button>").click(function(){
-		$(this).parent().remove();
-		if (emails.children().length == 0)
-		  emails.append($("<p>No email addresses defined</p>").addClass("empty"));
-	      }))
-	    );
-	  }
-	} else {
-	  emails.append($("<p>No email addresses defined</p>").addClass("empty"));
-	}
-
+            if (platformName == "sailfish") {
+              phones.append($("<p></p>")
+              .append($("<input type='tel' placeholder='Phone number'/>").val(data.phones[i].number))
+              .append(" Type: ")
+              .append($("<select name='type'></select>").append(t_undefined_option).append(t_assistant_option).append(t_fax_option).append(t_pager_option).append(t_video_option).append(t_mobile_option))
+              .append(" Context: ")
+              .append($("<select name='context'></select>").append(c_undefined_option).append(c_home_option).append(c_work_option).append(c_other_option))
+              .append("&nbsp; &nbsp;")
+              .append($("<button>Delete</button>").click(function(){
+                $(this).parent().remove();
+                if (phones.children().length == 0)
+                phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+              })));
+            }
+            if (platformName == "bb10") {
+              phones.append($("<p></p>")
+              .append($("<input type='tel' placeholder='Phone number'/>").val(data.phones[i].number))
+              .append(" Type: ")
+              .append($("<select name='type'></select>").append(t_mobile_option).append(t_home_option).append(t_work_option).append(t_other_option))
+              .append("&nbsp; &nbsp;")
+              .append($("<button>Delete</button>").click(function(){
+                $(this).parent().remove();
+                if (phones.children().length == 0)
+                phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+              })));
+            }
+        }
+      } else {
+        phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
       }
-    });
-  };
+
+      // Add emails
+      if (typeof data.emails != "undefined" && data.emails.length > 0) {
+        for (var i in data.emails) {
+          if (platformName == "sailfish") {
+            var c_home = data.emails[i].context == "home";
+            var c_work = data.emails[i].context == "work";
+            var c_other = data.emails[i].context == "other";
+            var c_undefined = !c_home && !c_work && !c_other;
+
+            var c_undefined_option = $("<option value='undefined'>Undefined</option>");
+            if (c_undefined)
+              c_undefined_option.attr("selected","selected");
+            var c_home_option = $("<option value='home'>Home</option>");
+            if (c_home)
+              c_home_option.attr("selected","selected");
+            var c_work_option = $("<option value='work'>Work</option>");
+            if (c_work)
+              c_work_option.attr("selected","selected");
+            var c_other_option = $("<option value='other'>Other</option>");
+            if (c_other)
+              c_other_option.attr("selected","selected");
+
+            emails.append($("<p></p>")
+              .append($("<input type='email' placeholder='Email address'/>").val(data.emails[i].address))
+              .append(" Context: ")
+              .append($("<select name='context'></select>").append(c_undefined_option).append(c_home_option).append(c_work_option).append(c_other_option))
+              .append("&nbsp; &nbsp;")
+              .append($("<button>Delete</button>").click(function(){
+                $(this).parent().remove();
+                if (emails.children().length == 0)
+                emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+            })));
+        }
+        if (platformName == "bb10") {
+          var t_home = data.emails[i].type == "home";
+          var t_work = data.emails[i].type == "work";
+          var t_other = data.emails[i].type == "other";
+          var t_undefined = !t_home && !t_work && !t_other;
+
+          var t_home_option = $("<option value='home'>Home</option>");
+          if (t_home)
+            t_home_option.attr("selected","selected");
+          var t_work_option = $("<option value='work'>Work</option>");
+          if (t_work)
+            t_work_option.attr("selected","selected");
+          var t_other_option = $("<option value='other'>Other</option>");
+          if (t_other)
+            t_other_option.attr("selected","selected");
+          if (t_undefined)
+            t_home_option.attr("selected","selected");
+
+          emails.append($("<p></p>")
+            .append($("<input type='email' placeholder='Email address'/>").val(data.emails[i].address))
+            .append(" Type: ")
+            .append($("<select name='type'></select>").append(t_home_option).append(t_work_option).append(t_other_option))
+            .append("&nbsp; &nbsp;")
+            .append($("<button>Delete</button>").click(function(){
+              $(this).parent().remove();
+              if (emails.children().length == 0)
+              emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+          })));
+        }
+      }
+    } else {
+      emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+  }}});};
 
   function getContactBody() {
     var phones = $("#contactPhones");
@@ -1932,17 +1989,18 @@ $(document).ready(function() {
     var phonesArray = new Array();
     $("#contactPhones > p:not(.empty)").each(function(){
       var number = $(this).children("input").val().trim();
+
       //TODO Better phone number validation
       if (number.length == 0)
-	return;
+        return;
       var type = $(this).children("select[name=type]").val();
       var context = $(this).children("select[name=context]").val();
 
       var obj = {number: number};
       if (context == "home" || context == "work" || context == "other")
-	obj["context"] = context;
-      if (type == "mobile"|| type == "assistant" || type == "fax" || type == "pager" || type == "video")
-	obj["type"] = type;
+        obj["context"] = context;
+      if (type == "mobile"|| type == "assistant" || type == "fax" || type == "pager" || type == "video" || type == "home" || type == "work" || type == "other")
+        obj["type"] = type;
 
       phonesArray.push(obj);
     });
@@ -1951,25 +2009,26 @@ $(document).ready(function() {
     $("#contactEmails > p:not(.empty)").each(function(){
       var address = $(this).children("input").val().trim();
       if (address.length == 0)
-	return;
+        return;
       if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(address)) {
-	return;
+        return;
       }
-      var context = $(this).children("select[name=context]").val();
 
-      var obj = {address: address};
-      if (context == "home" || context == "work" || context == "other")
-	obj["context"] = context;
+      if (platformName == "sailfish") {
+        var context = $(this).children("select[name=context]").val();
+        var obj = {address: address};
+        if (context == "home" || context == "work" || context == "other")
+          obj["context"] = context;
+      }
+      if (platformName == "bb10") {
+        var type = $(this).children("select[name=type]").val();
+        var obj = {address: address};
+        if (type == "home" || type == "work" || type == "other")
+          obj["type"] = type;
+      }
 
       emailsArray.push(obj);
     });
-
-    /*if (emailsArray.length == 0 && phonesArray.length == 0) {
-      info.addClass("error");
-      info.text("Phone number or email address is not defined!");
-      info.show();
-      return;
-    }*/
 
     var body = {first_name: firstName, last_name: lastName};
     if (phonesArray.length > 0)
@@ -1977,7 +2036,7 @@ $(document).ready(function() {
     if (emailsArray.length > 0)
       body["emails"] = emailsArray;
     /*if (note.length > 0)
-      body["note"] = note;*/
+    body["note"] = note;*/
 
     return body;
   }
@@ -1989,19 +2048,21 @@ $(document).ready(function() {
     var lastName = $("#contactLastName").val().trim();
 
     resetInfo();
+    clearVCard();
 
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
     $("#updateContact").hide();
     $("#deleteContact").hide();
+    $("#contactVCardP").hide();
     $("#contactId").val("");
     $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
 
@@ -2040,6 +2101,71 @@ $(document).ready(function() {
     });
   };
 
+  var getContactVCardAPICall = function() {
+    var info = $("#contactsInfo");
+    var loader = $("#contactsLoader");
+    var id = $("#contactId").val();
+
+    resetInfo();
+    clearVCard();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    if (id == "") {
+      info.addClass("error");
+      info.text("Contact ID is empty!");
+      info.show();
+      return;
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-contact-vcard", id),
+      complete: function() {
+      	loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          data = d_data;
+	      }
+
+      	info.text("OK");
+      	info.show();
+
+      	if (data !== undefined) {
+          var blob = new Blob([data], {type: 'text/vcard'});
+          var url = URL.createObjectURL(blob);
+          var filename = $("#contactFirstName").val().trim() + "_" + $("#contactLastName").val().trim() + ".vcf";
+          $("#contactVCardP").append($("<a download='" + filename + "'>" + filename + "</a>").attr("href",url));
+        }
+      }
+    });
+  };
+
   var updateContactAPICall = function() {
     var info = $("#contactsInfo");
     var loader = $("#contactsLoader");
@@ -2048,14 +2174,15 @@ $(document).ready(function() {
     var id = $("#contactId").val();
 
     resetInfo();
+    clearVCard();
 
     if (encryptionEnabled) {
       var key = $("#key input").val().trim();
       if (key.length == 0) {
-	info.text("Password for encryption is not defined!");
-	info.addClass("error");
-	info.show();
-	return;
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
       }
     }
 
@@ -2104,47 +2231,83 @@ $(document).ready(function() {
   $("#addPhone").click(function() {
     var phones = $("#contactPhones");
     phones.children(".empty").remove();
-    phones.append($("<p></p>")
-      .append($("<input type='tel' placeholder='Phone number'/>"))
-      .append(" Type: ")
-      .append($("<select name='type'></select>")
-	.append($("<option value='undefined' selected='selected'>Undefined</option>"))
-	.append($("<option value='assistant'>Assistant</option>"))
-	.append($("<option value='fax'>Fax</option>"))
-	.append($("<option value='pager'>Pager</option>"))
-	.append($("<option value='video'>Video</option>"))
-	.append($("<option value='mobile'>Mobile</option>")))
-      .append(" Context: ")
-      .append($("<select name='context'></select>")
-      	.append($("<option value='undefined' selected='selected'>Undefined</option>"))
-	.append($("<option value='home'>Home</option>"))
-	.append($("<option value='work'>Work</option>"))
-	.append($("<option value='other'>Other</option>")))
-      .append("&nbsp; &nbsp;")
-      .append($("<button>Delete</button>").click(function(){
-	$(this).parent().remove();
-	if (phones.children().length == 0)
-	  phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
-      })));
+
+    if (platformName == "sailfish") {
+      phones.append($("<p></p>")
+        .append($("<input type='tel' placeholder='Phone number'/>"))
+        .append(" Type: ")
+        .append($("<select name='type'></select>")
+        .append($("<option value='undefined' selected='selected'>Undefined</option>"))
+        .append($("<option value='assistant'>Assistant</option>"))
+        .append($("<option value='fax'>Fax</option>"))
+        .append($("<option value='pager'>Pager</option>"))
+        .append($("<option value='video'>Video</option>"))
+        .append($("<option value='mobile'>Mobile</option>")))
+        .append(" Context: ")
+        .append($("<select name='context'></select>")
+        .append($("<option value='undefined' selected='selected'>Undefined</option>"))
+        .append($("<option value='home'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (phones.children().length == 0)
+            phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+        })));
+    }
+    if (platformName == "bb10") {
+      phones.append($("<p></p>")
+        .append($("<input type='tel' placeholder='Phone number'/>"))
+        .append(" Type: ")
+        .append($("<select name='type'></select>")
+        .append($("<option value='mobile' selected='selected'>Mobile</option>"))
+        .append($("<option value='home'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (phones.children().length == 0)
+            phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+        })));
+    }
   });
 
   $("#addEmail").click(function() {
     var emails = $("#contactEmails");
     emails.children(".empty").remove();
-    emails.append($("<p></p>")
-      .append($("<input type='email' placeholder='Email address'/>"))
-      .append(" Context: ")
-      .append($("<select name='context'></select>")
-      	.append($("<option value='undefined' selected='selected'>Undefined</option>"))
-	.append($("<option value='home'>Home</option>"))
-	.append($("<option value='work'>Work</option>"))
-	.append($("<option value='other'>Other</option>")))
-      .append("&nbsp; &nbsp;")
-      .append($("<button>Delete</button>").click(function(){
-	$(this).parent().remove();
-	if (emails.children().length == 0)
-	  emails.append($("<p>No email addresses defined</p>").addClass("empty"));
-      })));
+    if (platformName == "sailfish") {
+      emails.append($("<p></p>")
+        .append($("<input type='email' placeholder='Email address'/>"))
+        .append(" Context: ")
+        .append($("<select name='context'></select>")
+        .append($("<option value='undefined' selected='selected'>Undefined</option>"))
+        .append($("<option value='home'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (emails.children().length == 0)
+            emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+        })));
+    }
+    if (platformName == "bb10") {
+      emails.append($("<p></p>")
+        .append($("<input type='email' placeholder='Email address'/>"))
+        .append(" Type: ")
+        .append($("<select name='type'></select>")
+        .append($("<option value='home' selected='selected'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (emails.children().length == 0)
+            emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+        })));
+    }
   });
 
   $("#getContacts").click(getContactsAPICall);
@@ -2154,6 +2317,8 @@ $(document).ready(function() {
   $("#updateContact").click(updateContactAPICall);
 
   $("#clearContact").click(clearContact);
+
+  $("#downloadVCard").click(getContactVCardAPICall);
 
   $("#contactFilter").focus(function() {
     var info = $("#contactGetInfo");
@@ -2194,15 +2359,15 @@ $(document).ready(function() {
       type: 'GET',
       url: getAPIUrl("delete-contact",id),
       complete: function() {
-	loader.hide();
+	      loader.hide();
       },
       error: function(xhr, status, error) {
-	info.text("Something goes wrong!");
-	info.addClass("error");
-	info.show();
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
       },
       success: function(data) {
-	info.text("OK");
+	      info.text("OK");
         info.show();
       }
     });
@@ -2318,6 +2483,7 @@ $(document).ready(function() {
       <p><button id="addEmail">Add new</button></p>
     </div>
     <!--<p><textarea id="contactNote" placeholder="Insert note here"></textarea></p>-->
+    <p id="contactVCardP"><button id="downloadVCard">Download VCard</button></p>
     <p>
       <button id="clearContact">Clear</button>
       <button id="createContact">Create new contact</button>
@@ -2342,9 +2508,9 @@ $(document).ready(function() {
   <div class="page" id="about">
     <h2>About</h2>
     <!--<img id="logo"/>-->
-    <p><i>Send to Phone</i> - web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone</p>
+    <p><i>Send to Phone</i> - web app and Firefox add-on that simplifies clipboard<span class="bb-hide">, bookmarks</span>, notes and contacts transfer between the PC and your phone via WiFi</p>
     <p>App version: <span id="webversion" class="version"></span></p>
-    <p>Server API version: <span id="apiversion" class="version"></span></p>
+    <!--<p>Server API version: <span id="apiversion" class="version"></span></p>-->
     <p></p>
     <div class="section">
     <h2>Firefox</h2>
@@ -2354,14 +2520,14 @@ $(document).ready(function() {
     </div>
 
     <div class="section">
-      <h2>Bugs & feature requests</h2>
+      <h2>Bugs and feature requests</h2>
       <p>If you have any special requirements, feature requests or if you find
       any bug, please report it using
       <a href="https://github.com/mkiol/SendToJolla/issues">this form</a> or send <a href="mailto:sendtophone@mkiol.net">e-mail</a>.</p>
     </div>
 
     <div class="section">
-    <h2>Copyright & source code</h2>
+    <h2>Copyright and source code</h2>
     <p>Copyright &copy; 2015 by Michal Kosciesza</p>
     <p><i>Sent to Phone</i> is distributed under
       <a href="https://www.mozilla.org/MPL/2.0/">
@@ -2375,14 +2541,11 @@ $(document).ready(function() {
       <h3>version: 2.1</h3>
       <ul>
       	<li>Support for Contacts management. It provides the possibility to add new,
-      	delete or edit contacts. Due to Jolla Store constraints, this feature is only available in
-        <a href="https://openrepos.net/content/mkiol/send-phone">OpenRepos package</a>.</li>
-      	<!--<li>Proxy connection mode. Enables connection when phone and browser are not in the same local network.
-      	To make it possible, simple `proxy.php` script has to be deployed on external WWW server.</li>-->
+      	delete or edit contacts.<span class="bb-hide"> Due to Jolla Store constraints, this feature is only available in
+        <a href="https://openrepos.net/content/mkiol/send-phone">OpenRepos package</a>.</span></li>
       	<li>End-to-end encryption. Data transfer between server and client app (e.g. web browser) can be encrypted.
-      	<!--This fetaure especially makes sense in the case of use Proxy connection mode without SSL protection.-->
         </li>
-        <li>Bookmarks backup. All bookmarks can be downloaded or uploaded as a single file.</li>
+        <li class="bb-hide">Bookmarks backup. All bookmarks can be downloaded or uploaded as a single file.</li>
         <li>Connection on WiFi tethering. Enables connection when the client app (e.g. web browser on the laptop) is connected to WiFi Hotspot that is provided by the phone.</li>
       </ul>
       <h3>version: 2.0</h3>

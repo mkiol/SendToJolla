@@ -18,8 +18,6 @@ Page {
     Component.onCompleted: {
         if (settings.startLocalServer)
             server.startLocalServer();
-        if (settings.startProxy)
-            server.connectProxy();
     }
 
     SilicaFlickable {
@@ -44,16 +42,8 @@ Page {
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
                 color: Theme.primaryColor
-                text: settings.proxy ? qsTr("Mark below what connection mode you want to enable.") : qsTr("Toggle below to enable or disable %1 local server.").arg(APP_NAME)
+                text: qsTr("Toggle below to enable or disable %1 local server.").arg(APP_NAME)
                 wrapMode: Text.WordWrap
-            }
-
-            Label {
-                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                color: Theme.secondaryColor
-                text: qsTr("To be able to use Proxy mode, fill 'Proxy URL' in the settings.")
-                wrapMode: Text.WordWrap
-                visible: settings.proxyUrl === "" && settings.proxy
             }
 
             TextSwitch {
@@ -68,51 +58,17 @@ Page {
                 }
             }
 
-            TextSwitch {
-                visible: settings.proxy
-                text: qsTr("Proxy")
-                automaticCheck: false
-                checked: server.proxyOpen
-                enabled: settings.proxyUrl != "";
-                busy: server.proxyBusy;
-                onClicked: {
-                    if (!server.proxyBusy) {
-                        if (server.proxyOpen)
-                            server.disconnectProxy();
-                        else
-                            server.connectProxy();
-                    }
-                }
-            }
-
             Label {
                 anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                visible: server.localServerRunning || server.proxyOpen
+                visible: server.localServerRunning
                 color: Theme.secondaryColor
                 text: qsTr("To open Web client, go to the URL address below in your favorite web browser.")
                 wrapMode: Text.WordWrap
             }
 
-            /*
-            Label {
-                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                visible: server.localServerRunning || server.proxyOpen
-                color: Theme.secondaryColor
-                text: qsTr("Tip #2: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
-                wrapMode: Text.WordWrap
-            }
-
-            Label {
-                anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                visible: server.localServerRunning || server.proxyOpen
-                color: Theme.secondaryColor
-                text: qsTr("Tip #3: To send phone's clipboard data, after copying bring %1 to the foreground.").arg(APP_NAME)
-                wrapMode: Text.WordWrap
-            }*/
-
             ListItem {
                 id: urlList
-                enabled: server.localServerRunning || server.proxyOpen
+                enabled: server.localServerRunning
                 visible: enabled
                 onClicked: showMenu()
                 contentHeight: col.height + 2 * Theme.paddingLarge
@@ -131,22 +87,12 @@ Page {
                         wrapMode: Text.WordWrap
                         visible: server.localServerRunning
                     }
-
-                    Label {
-                        id: proxyUrlLabel
-                        anchors {left: parent.left; right: parent.right; leftMargin: Theme.paddingLarge;rightMargin: Theme.paddingLarge}
-                        color: Theme.highlightColor
-                        text: server.proxyOpen ? server.getWebClientProxyUrl() : ""
-                        wrapMode: Text.WordWrap
-                        visible: server.proxyOpen
-                    }
                 }
 
                 Connections {
                     target: settings
                     onCookieChanged: {
                         localServerUrlLabel.text = server.getLocalServerUrl();
-                        proxyUrlLabel.text = server.getWebClientProxyUrl();
                     }
                 }
 
