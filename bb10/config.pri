@@ -43,6 +43,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/Notification.qml) \
         $$quote($$BASEDIR/assets/PaddingLabel.qml) \
         $$quote($$BASEDIR/assets/SettingsPage.qml) \
+        $$quote($$BASEDIR/assets/ToggleComponent.qml) \
         $$quote($$BASEDIR/assets/changelog.png) \
         $$quote($$BASEDIR/assets/ic_save.png) \
         $$quote($$BASEDIR/assets/icon.png) \
@@ -51,12 +52,14 @@ config_pri_assets {
 
 config_pri_source_group1 {
     SOURCES += \
-        $$quote($$BASEDIR/src/main_bb10.cpp) \
+        $$quote($$BASEDIR/src/main.cpp) \
+        $$quote($$BASEDIR/src/proxyclient.cpp) \
         $$quote($$BASEDIR/src/server.cpp) \
         $$quote($$BASEDIR/src/settings.cpp) \
         $$quote($$BASEDIR/src/utils.cpp)
 
     HEADERS += \
+        $$quote($$BASEDIR/src/proxyclient.h) \
         $$quote($$BASEDIR/src/server.h) \
         $$quote($$BASEDIR/src/settings.h) \
         $$quote($$BASEDIR/src/utils.h)

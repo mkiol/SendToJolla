@@ -22,17 +22,22 @@ Page {
     }
 
     function validatePort(port) {
-        return parseInt(port).toString() == port && parseInt(port) > 0 && parseInt(port) <= 65535;
+        return parseInt(port).toString() == port && parseInt(port) > 1023 && parseInt(port) <= 65535;
     }
 
     function accept() {
-
         if (! validatePort(portField.text)) {
-            notification.show(qsTr("Port number is incorrect!"));
+            notification.show(qsTr("Port number is invalid!"));
+            return;
+        }
+        
+        if (cryptSwitch.checked && cryptKeyField.text.trim() === "") {
+            notification.show(qsTr("Password is invalid!"));
             return;
         }
 
         settings.port = portField.text;
+        settings.cryptKey = cryptKeyField.text;
 
         nav.pop();
     }
@@ -82,7 +87,7 @@ Page {
                 }
 
                 Header {
-                    title: qsTr("Listening port")
+                    title: qsTr("Local server")
                 }
 
                 Container {
@@ -90,9 +95,21 @@ Page {
                     rightPadding: utils.du(2)
                     topPadding: utils.du(2)
                     bottomPadding: utils.du(2)
+                    
+                    ToggleComponent {
+                        id: serverToggle
+                        text: qsTr("Auto start on startup")
+                        checked: settings.startLocalServer
+                        enabled: validatePort(portField.text)
+                        onCheckedChanged: {
+                            onCheckedChanged: {
+                                settings.startLocalServer = checked;
+                            }
+                        }
+                    }
 
                     Label {
-                        text: qsTr("Define a listening port number. Changes will take effect after app restart.")
+                        text: qsTr("Listening port number. Changes will take effect after app restart.")
                         multiline: true
                     }
 
@@ -108,7 +125,7 @@ Page {
 
                         validator: Validator {
                             mode: ValidationMode.FocusLost
-                            errorMessage: qsTr("Port number is incorrect!")
+                            errorMessage: qsTr("Port number is invalid! Allowed port range is 1024-65535.")
                             onValidate: {
                                 if (validatePort(portField.text))
                                     state = ValidationState.Valid;
@@ -119,6 +136,42 @@ Page {
 
                         onCreationCompleted: {
                             text = settings.port;
+                        }
+                    }
+                }
+                
+                Header {
+                    title: qsTr("Encryption")
+                }
+                
+                Container {
+                    leftPadding: utils.du(2)
+                    rightPadding: utils.du(2)
+                    topPadding: utils.du(2)
+                    bottomPadding: utils.du(2)
+                    
+                    ToggleComponent {
+                        id: cryptSwitch
+                        text: qsTr("Encryption required")
+                        checked: settings.crypt
+                        onCheckedChanged: {
+                            settings.crypt = checked;
+                        }
+                    }
+                    
+                    Container {
+                        topPadding: utils.du(1)
+                    }
+                    
+                    TextField {
+                        id: cryptKeyField
+                        hintText: qsTr("Enter password here!")
+                        inputMode: TextFieldInputMode.Password
+                        visible: cryptSwitch.checked
+                        //preferredWidth: display.pixelSize.width / 2
+                        
+                        onCreationCompleted: {
+                            text = settings.cryptKey;
                         }
                     }
                 }

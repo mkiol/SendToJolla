@@ -5,6 +5,7 @@ QT += network
 LIBS += -lbbsystem -lbbplatform -lbbdevice -lbbpim
 
 DEFINES += BB10
+DEFINES += CONTACTS
 
 TRANSLATIONS = $${TARGET}.ts
 

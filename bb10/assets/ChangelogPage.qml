@@ -24,6 +24,32 @@ Page {
         ScrollView {
             Container {
                 Header {
+                    title: qsTr("Version %1").arg("2.1")
+                }
+                
+                Container {
+                    leftPadding: utils.du(2)
+                    rightPadding: utils.du(2)
+                    topPadding: utils.du(2)
+                    bottomPadding: utils.du(2)
+                    
+                    LogItem {
+                        title: "Contacts"
+                        description: "Provides contacts management functions. It allows to add new, delete or edit contacts."
+                    }
+                    
+                    LogItem {
+                        title: "End-to-end encryption"
+                        description: "Data transfer between server and client app (e.g. web browser) can be encrypted."
+                    }
+                    
+                    LogItem {
+                        title: "Connection on WiFi tethering"
+                        description: "Enables connection when the client app (e.g. web browser on the laptop) is connected to WiFi Hotspot that is provided by your phone."
+                    }
+                }
+                
+                Header {
                     title: qsTr("Version %1").arg("2.0")
                 }
                 

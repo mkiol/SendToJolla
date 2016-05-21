@@ -13,56 +13,2421 @@
 -->
 
 <head>
-  <title>Send To Phone</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"/>
-  <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png"/>
-  <link rel="stylesheet" type="text/css" href="default.css"/>
-  <script src="jquery.min.js"></script>
-  <script src="webclient.js"></script>
+<title>Send To Phone</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz
+AAACkwAAApMBv+Bu1wAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAJiSURB
+VDiNfZNPiNVVFMc/59yfM5MzpjkTg4ObQBQSXehASEKBu4LEmM3MqqA/TqioqxFRLHKwNiEtqp2C
+zCYJDNRFaSFDmb3aGSiZyOgDo/Q9e1o5v3u+Ld78npOIZ3O/nMv93PPXWmMrLqVCg1gGC8wDPDDL
+1VnHokYRtQUqj/Px3TrzzFpjqxpmsbj9MGMdSFtXsDlfwzx2psOtoxXAiQLJ4elnIBKSo/COJhwp
+Vb4lCj+Sd/RNdQCSQSS63v6Q7ve+JG14FaXux0GQfDTv6HutDQhHcnLtG+hfhm/cQtcHZ/CXxmFh
+/+MgH7G9d8iJtrP88SzW20dcv0I5fQLfPI5PnsZG98HgikemM2vFiLcvEvnGDPn6r6RNI6jxJ7Of
+TECU8PwrMDGF3jpMrNwASg8gpQ+nPauWT2D0GIYt7cdXrsZWryd++Jo4fQx7dh1a2IsGlqH1m9Ca
+F+BeC7t5FYMul1Kdqg4XppEyINIbe4nuJ8gHt6KL3yOVEBk9uRQt6K7SGXKF16QE4eQrl+HW70gZ
+FQXpnXehdzH67H1oNVH9N/zQm/j5rzo1cbLXNFccsjH703cochvStwhtO4CKHvTzOezzT1GzOa8T
+CS8LHSdSo4LEhfPtx8pIJTYwCLsn0drnYObaQ8Pm+MCJ6TpKu6p25ou/oDsNNHOVmNxPHh9Fp76A
+v5ro73//N2AKxyQBcPvlF6fMYhTPeE8BcR80O7cP7V3o6Ll9Mc9Nr2b6qZPfjqH0OpEa8U+JSqi6
+U0XX0VUKSg8iqOyPzRuHitJGSDFsHsNmeYj5v3tgJvASyDf/A3JZf17ev7beAAAAAElFTkSuQmCC"/>
+
+<style type="text/css">
+body {
+  background-color: white;
+  color: black;
+  font-family: Sans-serif;
+  margin: 0;
+  margin-bottom: 4em;
+  margin-top: 0;
+}
+p, div {
+  font-weight: normal;
+  font-size: 1em;
+}
+h1 {
+  font-weight: bold;
+  font-size: 1.5em;
+}
+h2 {
+  font-weight: bold;
+  font-size: 1em;
+}
+h3 {
+  font-weight: normal;
+  font-size: 1em;
+}
+input, textarea {
+  padding: 0.5em;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+  width: 30em;
+  max-width: 100%;
+}
+button {
+  padding: 0.1em;
+  margin-right: 0.5em;
+}
+li {
+  margin: 1em;
+}
+table {
+    margin: 1em 0px;
+    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+th, td {
+    border-bottom: 1px solid #D0D0D0;
+    padding: 1em;
+    text-align: left;
+}
+tr:nth-child(2n) {
+    background-color: WhiteSmoke;
+}
+.tip {
+  font-size: 1em;
+  color: gray;
+}
+.info {
+  padding: 0.5em;
+  background-color: WhiteSmoke;
+  border: 1px solid Silver;
+  color: DarkGreen;
+}
+.warning {
+  padding: 0.5em;
+  background-color: WhiteSmoke;
+  border: 1px solid Silver;
+  color: blue;
+}
+.error {
+  color: red;
+}
+.icon {
+  width: 24px;
+  height: 24px;
+}
+.version {
+  font-family: Monospace;
+  padding: 0.2em;
+  background-color: WhiteSmoke;
+  border: 1px solid Silver;
+  color: Black;
+}
+.logname {
+font-weight: bold;
+}
+img.loader {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+/* Bookmarks */
+
+#bookmarkId {
+  width: 25px;
+}
+#bookmarkName {
+  width: 300px;
+}
+
+/* Clipboard */
+
+#clipboard textarea {
+  height: 10em;
+  margin-bottom: 0.5em;
+}
+
+/* Notes */
+
+.colorRow {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAABkCAYAAACGqxDMAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAC7SURBVFiF7djRDYIwFIXhU8dwDRZgAZzCqdAp3MMxXIPjgyUxtlUqDYnmv8l9Ied+CfSGBIJtq2HtWmKAgICAgICAgICAgICArUFLOkkaJO1jD/Fa+fvQ+brZ7m2r0H3MJJUDpw/YMzotAccF2Nzj63DuGV4qziDJ5sBrBZhkN1mbrmI+yebAQwWYZrdYG3vFYge7+JvFks56rMZ8ml28zaOkkBt6B35Vv/36AgQEBAQEBAQEBAQE/AvwDkuceil61qCiAAAAAElFTkSuQmCC);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.pickedColor {
+  border: 2px solid gray;
+}
+.textRow {
+  min-width: 280px;
+}
+.empty {
+  color: gray;
+  font-style: italic;
+}
+#colorPicker div {
+  float: left;
+}
+#colorPicker div a {
+  display:block;
+  height:100%;
+  width:100%;
+}
+#form {
+  width: 100%;
+}
+#notes table tr td a {
+  display:block;
+  height:100%;
+  width:100%;
+}
+#noteId {
+  width: 25px;
+  vertical-align: top;
+}
+#notes textarea {
+  height: 10em;
+}
+
+/* Contacts */
+
+#contactFirstName, #contactLastName, #contactFilter  {
+  width: 15em;
+  vertical-align: center;
+}
+#contacts {
+  vertical-align: center;
+}
+#contacts input[type=tel]  {
+  width: 15em;
+}
+#contacts input[type=email]  {
+  width: 15em;
+}
+#contactId {
+  width: 2em;
+}
+#contacts textarea {
+  height: 10em;
+  width: 35em;
+}
+#contactAvatar {
+  width: 150px;
+  border: 1px solid Silver;
+  margin-right: 1em;
+  margin-bottom: 0.7em;
+  float: left;
+}
+#contacts .overflow div {
+  width: 100%;
+}
+#contacts .overflow div input {
+  margin-bottom: 8px;
+}
+
+/* Crypt */
+#key {
+  background-color: WhiteSmoke;
+  padding: 0.5em;
+  width: 100%;
+  display: block;
+}
+#key input {
+  width: 200px;
+  vertical-align: center;
+  padding: 0.5em;
+  margin: 0;
+}
+
+/* Layout */
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+  heigh: 35px;
+}
+.overflow {
+  overflow: auto;
+}
+.section {
+  border-top: 1px solid #D0D0D0;
+  margin-top: 2em;
+}
+.subsection {
+  border-left: 10px solid #D0D0D0;
+  padding-left: 1em;
+}
+.page {
+  margin: 0.5em;
+}
+
+/* Menu */
+
+div#menu {
+  /*position: fixed;*/
+  top: 0; left: 0;
+  width: 100%;
+  background-color: DarkOrange;
+}
+div#menu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+div#menu li {
+  float:left;
+  margin: 0;
+  display: table; position: relative; overflow: hidden;
+}
+div#menu a {
+  display: block;
+  width: 7em;
+  height: 20px;
+  padding: 5px;
+  display: table-cell; vertical-align: middle;
+}
+div#menu a:link, div#menu a:visited {
+  font-weight: bold;
+  color: white;
+  background-color: DarkOrange;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+div#menu a:hover, div#menu a:active {
+  background-color: OrangeRed;
+}
+div#menu a.active {
+  background-color: OrangeRed;
+}
+</style>
+
+<script src="jquery.min.js"></script>
+
+<script>
+/*
+A JavaScript implementation of the SHA family of hashes, as
+defined in FIPS PUB 180-2 as well as the corresponding HMAC implementation
+as defined in FIPS PUB 198a
+
+Copyright Brian Turek 2008-2015
+Distributed under the BSD License
+See http://caligatio.github.com/jsSHA/ for more information
+
+Several functions taken from Paul Johnston
+*/
+'use strict';(function(E){function t(e,a,c){var g=0,b=[],d=0,f,k,l,h,m,w,n,q=!1,r=!1,p=[],t=[],v,u=!1;c=c||{};f=c.encoding||"UTF8";v=c.numRounds||1;l=y(a,f);if(v!==parseInt(v,10)||1>v)throw Error("numRounds must a integer >= 1");if("SHA-1"===e)m=512,w=z,n=F,h=160;else throw Error("Chosen SHA variant is not supported");k=x(e);this.setHMACKey=function(a,b,d){var c;if(!0===r)throw Error("HMAC key already set");if(!0===q)throw Error("Cannot set HMAC key after finalizing hash");if(!0===u)throw Error("Cannot set HMAC key after calling update");
+f=(d||{}).encoding||"UTF8";b=y(b,f)(a);a=b.binLen;b=b.value;c=m>>>3;d=c/4-1;if(c<a/8){for(b=n(b,a,0,x(e));b.length<=d;)b.push(0);b[d]&=4294967040}else if(c>a/8){for(;b.length<=d;)b.push(0);b[d]&=4294967040}for(a=0;a<=d;a+=1)p[a]=b[a]^909522486,t[a]=b[a]^1549556828;k=w(p,k);g=m;r=!0};this.update=function(a){var e,c,f,h=0,n=m>>>5;e=l(a,b,d);a=e.binLen;c=e.value;e=a>>>5;for(f=0;f<e;f+=n)h+m<=a&&(k=w(c.slice(f,f+n),k),h+=m);g+=h;b=c.slice(h>>>5);d=a%m;u=!0};this.getHash=function(a,c){var f,l,m;if(!0===
+r)throw Error("Cannot call getHash after setting HMAC key");m=A(c);switch(a){case "HEX":f=function(a){return B(a,m)};break;case "B64":f=function(a){return C(a,m)};break;case "BYTES":f=D;break;default:throw Error("format must be HEX, B64, or BYTES");}if(!1===q)for(k=n(b,d,g,k),l=1;l<v;l+=1)k=n(k,h,0,x(e));q=!0;return f(k)};this.getHMAC=function(a,c){var f,l,p;if(!1===r)throw Error("Cannot call getHMAC without first setting HMAC key");p=A(c);switch(a){case "HEX":f=function(a){return B(a,p)};break;case "B64":f=
+function(a){return C(a,p)};break;case "BYTES":f=D;break;default:throw Error("outputFormat must be HEX, B64, or BYTES");}!1===q&&(l=n(b,d,g,k),k=w(t,x(e)),k=n(l,h,m,k));q=!0;return f(k)}}function G(e,a,c){var g=e.length,b,d,f,k,l;a=a||[0];c=c||0;l=c>>>3;if(0!==g%2)throw Error("String of HEX type must be in byte increments");for(b=0;b<g;b+=2){d=parseInt(e.substr(b,2),16);if(isNaN(d))throw Error("String of HEX type contains invalid characters");k=(b>>>1)+l;for(f=k>>>2;a.length<=f;)a.push(0);a[f]|=d<<
+8*(3-k%4)}return{value:a,binLen:4*g+c}}function H(e,a,c){var g=[],b,d,f,k,g=a||[0];c=c||0;d=c>>>3;for(b=0;b<e.length;b+=1)a=e.charCodeAt(b),k=b+d,f=k>>>2,g.length<=f&&g.push(0),g[f]|=a<<8*(3-k%4);return{value:g,binLen:8*e.length+c}}function I(e,a,c){var g=[],b=0,d,f,k,l,h,m,g=a||[0];c=c||0;a=c>>>3;if(-1===e.search(/^[a-zA-Z0-9=+\/]+$/))throw Error("Invalid character in base-64 string");f=e.indexOf("=");e=e.replace(/\=/g,"");if(-1!==f&&f<e.length)throw Error("Invalid '=' found in base-64 string");
+for(f=0;f<e.length;f+=4){h=e.substr(f,4);for(k=l=0;k<h.length;k+=1)d="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(h[k]),l|=d<<18-6*k;for(k=0;k<h.length-1;k+=1){m=b+a;for(d=m>>>2;g.length<=d;)g.push(0);g[d]|=(l>>>16-8*k&255)<<8*(3-m%4);b+=1}}return{value:g,binLen:8*b+c}}function B(e,a){var c="",g=4*e.length,b,d;for(b=0;b<g;b+=1)d=e[b>>>2]>>>8*(3-b%4),c+="0123456789abcdef".charAt(d>>>4&15)+"0123456789abcdef".charAt(d&15);return a.outputUpper?c.toUpperCase():c}function C(e,
+a){var c="",g=4*e.length,b,d,f;for(b=0;b<g;b+=3)for(f=b+1>>>2,d=e.length<=f?0:e[f],f=b+2>>>2,f=e.length<=f?0:e[f],f=(e[b>>>2]>>>8*(3-b%4)&255)<<16|(d>>>8*(3-(b+1)%4)&255)<<8|f>>>8*(3-(b+2)%4)&255,d=0;4>d;d+=1)8*b+6*d<=32*e.length?c+="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(f>>>6*(3-d)&63):c+=a.b64Pad;return c}function D(e){var a="",c=4*e.length,g,b;for(g=0;g<c;g+=1)b=e[g>>>2]>>>8*(3-g%4)&255,a+=String.fromCharCode(b);return a}function A(e){var a={outputUpper:!1,b64Pad:"="};
+e=e||{};a.outputUpper=e.outputUpper||!1;!0===e.hasOwnProperty("b64Pad")&&(a.b64Pad=e.b64Pad);if("boolean"!==typeof a.outputUpper)throw Error("Invalid outputUpper formatting option");if("string"!==typeof a.b64Pad)throw Error("Invalid b64Pad formatting option");return a}function y(e,a){var c;switch(a){case "UTF8":case "UTF16BE":case "UTF16LE":break;default:throw Error("encoding must be UTF8, UTF16BE, or UTF16LE");}switch(e){case "HEX":c=G;break;case "TEXT":c=function(e,b,d){var f=[],c=[],l=0,h,m,p,
+n,q,f=b||[0];b=d||0;p=b>>>3;if("UTF8"===a)for(h=0;h<e.length;h+=1)for(d=e.charCodeAt(h),c=[],128>d?c.push(d):2048>d?(c.push(192|d>>>6),c.push(128|d&63)):55296>d||57344<=d?c.push(224|d>>>12,128|d>>>6&63,128|d&63):(h+=1,d=65536+((d&1023)<<10|e.charCodeAt(h)&1023),c.push(240|d>>>18,128|d>>>12&63,128|d>>>6&63,128|d&63)),m=0;m<c.length;m+=1){q=l+p;for(n=q>>>2;f.length<=n;)f.push(0);f[n]|=c[m]<<8*(3-q%4);l+=1}else if("UTF16BE"===a||"UTF16LE"===a)for(h=0;h<e.length;h+=1){d=e.charCodeAt(h);"UTF16LE"===a&&
+(m=d&255,d=m<<8|d>>>8);q=l+p;for(n=q>>>2;f.length<=n;)f.push(0);f[n]|=d<<8*(2-q%4);l+=2}return{value:f,binLen:8*l+b}};break;case "B64":c=I;break;case "BYTES":c=H;break;default:throw Error("format must be HEX, TEXT, B64, or BYTES");}return c}function r(e,a){return e<<a|e>>>32-a}function p(e,a){var c=(e&65535)+(a&65535);return((e>>>16)+(a>>>16)+(c>>>16)&65535)<<16|c&65535}function u(e,a,c,g,b){var d=(e&65535)+(a&65535)+(c&65535)+(g&65535)+(b&65535);return((e>>>16)+(a>>>16)+(c>>>16)+(g>>>16)+(b>>>16)+
+(d>>>16)&65535)<<16|d&65535}function x(e){if("SHA-1"===e)e=[1732584193,4023233417,2562383102,271733878,3285377520];else throw Error("No SHA variants supported");return e}function z(e,a){var c=[],g,b,d,f,k,l,h;g=a[0];b=a[1];d=a[2];f=a[3];k=a[4];for(h=0;80>h;h+=1)c[h]=16>h?e[h]:r(c[h-3]^c[h-8]^c[h-14]^c[h-16],1),l=20>h?u(r(g,5),b&d^~b&f,k,1518500249,c[h]):40>h?u(r(g,5),b^d^f,k,1859775393,c[h]):60>h?u(r(g,5),b&d^b&f^d&f,k,2400959708,c[h]):u(r(g,5),b^d^f,k,3395469782,c[h]),k=f,f=d,d=r(b,30),b=g,g=l;a[0]=
+p(g,a[0]);a[1]=p(b,a[1]);a[2]=p(d,a[2]);a[3]=p(f,a[3]);a[4]=p(k,a[4]);return a}function F(e,a,c,g){var b;for(b=(a+65>>>9<<4)+15;e.length<=b;)e.push(0);e[a>>>5]|=128<<24-a%32;e[b]=a+c;c=e.length;for(a=0;a<c;a+=16)g=z(e.slice(a,a+16),g);return g}"function"===typeof define&&define.amd?define(function(){return t}):"undefined"!==typeof exports?"undefined"!==typeof module&&module.exports?module.exports=exports=t:exports=t:E.jsSHA=t})(this);
+</script>
+
+
+<script>
+/*
+  Copyright (C) 2015 Michal Kosciesza <michal@mkiol.net>
+
+  This file is part of SendToPhone application.
+
+  This Source Code Form is subject to the terms of
+  the Mozilla Public License, v.2.0. If a copy of
+  the MPL was not distributed with this file, You can
+  obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+// Global vars
+var serverURL;
+var platformName;
+var apiList;
+var encryptionEnabled = false;
+var webVersion = "2.1";
+var apiVersion = "";
+
+// Checks if URL syntax is valid
+// Source: http://dzone.com/snippets/validate-url-regexp
+function isUrl(s) {
+  var re = /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+  return re.test(s);
+}
+
+// Read a UTF8 String from a "byte" source
+// Source: http://snipplr.com/view/31206/
+function readUTF8String(bytes) {
+  var ix = 0;
+
+  if( bytes.slice(0,3) == "\xEF\xBB\xBF") {
+    ix = 3;
+  }
+
+  var string = "";
+  for( ; ix < bytes.length; ix++ ) {
+    var byte1 = bytes[ix].charCodeAt(0);
+    if( byte1 < 0x80 ) {
+      string += String.fromCharCode(byte1);
+    } else if( byte1 >= 0xC2 && byte1 < 0xE0 ) {
+      var byte2 = bytes[++ix].charCodeAt(0);
+      string += String.fromCharCode(((byte1&0x1F)<<6) + (byte2&0x3F));
+    } else if( byte1 >= 0xE0 && byte1 < 0xF0 ) {
+      var byte2 = bytes[++ix].charCodeAt(0);
+      var byte3 = bytes[++ix].charCodeAt(0);
+      string += String.fromCharCode(((byte1&0xFF)<<12) + ((byte2&0x3F)<<6) + (byte3&0x3F));
+    } else if( byte1 >= 0xF0 && byte1 < 0xF5) {
+      var byte2 = bytes[++ix].charCodeAt(0);
+      var byte3 = bytes[++ix].charCodeAt(0);
+      var byte4 = bytes[++ix].charCodeAt(0);
+      var codepoint = ((byte1&0x07)<<18) + ((byte2&0x3F)<<12)+ ((byte3&0x3F)<<6) + (byte4&0x3F);
+      codepoint -= 0x10000;
+      string += String.fromCharCode((codepoint>>10) + 0xD800,(codepoint&0x3FF) + 0xDC00);
+    }
+  }
+
+  return string;
+}
+
+// Converts string to UTF8 byte array
+// Source: https://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array/28227607#28227607
+function stringToUtf8ByteArray(str) {
+  //str = str.replace(/\r\n/g, '\n');
+  var out = [], p = 0;
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    if (c < 128) {
+      out.push(str[i]);
+    } else if (c < 2048) {
+      out.push(String.fromCharCode((c >> 6) | 192));
+      out.push(String.fromCharCode((c & 63) | 128));
+    } else {
+      out.push(String.fromCharCode((c >> 12) | 224));
+      out.push(String.fromCharCode(((c >> 6) & 63) | 128));
+      out.push(String.fromCharCode((c & 63) | 128));
+    }
+  }
+  return out;
+}
+
+function encrypt(data) {
+  var key = $("#key input").val().trim();
+  var shaObj = new jsSHA("SHA-1", "TEXT");
+  shaObj.update(key);
+  key = shaObj.getHash("BYTES");
+
+  var array = stringToUtf8ByteArray(data);
+  var l = array.length;
+  var counter = l, temp, index;
+  while (counter > 0) {
+    counter--;
+    index = (key.charCodeAt(counter % key.length) * counter) % l;
+    temp = array[counter];
+    array[counter] = array[index];
+    array[index] = temp;
+  }
+
+  var e_data = array.join('');
+  var obj = {id: "encrypted_container", ver: "1", data: btoa(e_data)};
+  return obj;
+}
+
+function decrypt(data) {
+  if (data.id === "undefined" || data.id != "encrypted_container")
+    return "error";
+  if (data.ver === "undefined" || data.ver != "1")
+    return "error";
+  if (data.data === "undefined" || data.data === "")
+    return undefined;
+
+  var key = $("#key input").val().trim();
+  var shaObj = new jsSHA("SHA-1", "TEXT");
+  shaObj.update(key);
+  key = shaObj.getHash("BYTES");
+
+  var array = atob(data.data).split('');
+
+  var counter = 0, temp, index;
+  var l = array.length;
+  while (counter < l) {
+    index = (key.charCodeAt(counter % key.length) * counter) % l;
+    temp = array[counter];
+    array[counter] = array[index];
+    array[index] = temp;
+    counter++;
+  }
+
+  return readUTF8String(array.join(''));
+}
+
+function getServerUrl() {
+
+  var url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+  var hash;
+
+  var hashes = window.location.href.slice(window.location.href.indexOf("?") + 1).split("&");
+  if (hashes.length > 0)
+    url += "?";
+  else
+    url += "?dummy=true";
+
+  for(var i = 0; i < hashes.length; i++) {
+    hash = hashes[i].split("=");
+    if(hash[0] != "api" && hash[0] != "data") {
+      url += hashes[i] + "&";
+    }
+  }
+
+  return url.substring(0, url.length-1);
+}
+
+function getAPIUrl(api, data) {
+  return serverURL + "&api=" + api + (data ? "&data=" + encodeURIComponent(data) : "");
+}
+
+function loadImages() {
+  //$("#logo").attr("src",getAPIUrl("web-client","icon-64.png"));
+  $(".loader").attr("src",getAPIUrl("web-client","loader.gif"));
+}
+
+function resetInfo() {
+  $(".loader").hide();
+  $(".info").hide();
+  $(".info").removeClass("error");
+  $("#bookmarksbackup :file").val("");
+  $("#bookmarksbackup a").remove();
+}
+
+function setPage(page) {
+  if (page != "#browser" && page != "#clipboard" && page != "#notes" && page != "#contacts" && page != "#about")
+    page = "#browser";
+  if (apiList.indexOf("update-contact") == -1 && page == "#contact")
+    page = "#browser";
+  $(page).show();
+  $(page + "MenuItem").addClass("active");
+}
+
+$(document).ready(function() {
+
+  serverURL = getServerUrl();
+
+  // Load load images
+  loadImages();
+
+  // Initial reset
+  resetInfo();
+  $("div.page").hide();
+  $("#key").hide();
+  $("#key input").val("");
+  $("#webversion").text(webVersion);
+
+  // Get options
+  $.ajax({
+    type: 'GET',
+    url: getAPIUrl("options"),
+    complete: function() {
+      $(".loader").hide();
+    },
+    error: function(xhr, status, error) {
+      var info = $(".info");
+      info.text("Something goes wrong!");
+      info.addClass("error");
+      info.show();
+    },
+    success: function(data) {
+      platformName = data.platform;
+      if (platformName == "bb10") {
+        $(".bb-hide").hide();
+      }
+      if (platformName == "sailfish") {
+      	$(".sailfish-hide").hide();
+      	setPickedColor(0);
+      }
+
+      encryptionEnabled = data.encryption_enabled;
+      if (encryptionEnabled) {
+	       $("#key").show();
+      }
+
+      apiVersion = data.api_version;
+      $("#apiversion").text(apiVersion);
+
+      apiList = data.api_list;
+      if (apiList.indexOf("update-contact") == -1) {
+        // Contact API is disabled
+        $("#contactsMenuItem").remove();
+      }
+
+      setPage(window.location.hash);
+    }
+  });
+
+  // --- Menu
+
+  $("#menu ul li a").click(function() {
+    $("div#menu ul li a").removeClass("active");
+    $(this).addClass("active");
+    $("div.page").hide();
+    $($(this).attr("href")).show();
+	  $("html, body").animate({scrollTop:0},"fast");
+  });
+
+  // --- Bookmarks backup
+
+  var getBookmarksFileAPICall = function() {
+    var info = $("#bookmarksbackup span.info");
+    var loader = $("#bookmarksbackup img.loader");
+
+    resetInfo();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-bookmarks-file"),
+      complete: function() {
+      	loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = d_data ? $.parseJSON(d_data) : d_data;
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+	      }
+
+      	data = JSON.stringify(data);
+
+      	info.text(data === undefined ? "OK, It seems no bookmarks are defined." : "OK");
+      	info.show();
+
+      	if (data !== undefined) {
+          var blob = new Blob([data], {type: 'application/json'});
+          var url = URL.createObjectURL(blob);
+          $("#dbP").append($("<a download='bookmarks.json'>bookmarks.json</a>").attr("href",url));
+        }
+      }
+    });
+  }
+
+  var setBookmarksFileAPICall = function() {
+    var info = $("#bookmarksbackup span.info");
+    var loader = $("#bookmarksbackup img.loader");
+    var file = $("#bookmarksbackup :file");
+
+    if (file[0].files.length == 0) {
+        info.text("Bookmarks file is not selected!");
+        info.addClass("error");
+        info.show();
+        return;
+    }
+
+    var filef = file[0].files[0];
+    var reader = new FileReader();
+
+    reader.onload = function(event){
+      var data = event.target.result;
+      try {
+        JSON.parse(data);
+      }
+      catch(e) {
+        info.text("Bookmarks file is invalid!");
+        info.addClass("error");
+        info.show();
+        return;
+      }
+
+      if (encryptionEnabled) {
+        data = encrypt(data);
+      }
+
+      loader.show();
+      $.ajax({
+        type: 'POST',
+        url: getAPIUrl("set-bookmarks-file"),
+        data: encryptionEnabled ? JSON.stringify(data) : data,
+        complete: function() {
+          loader.hide();
+        },
+        success: function(data) {
+          info.text("OK");
+          info.show();
+          getBookmarksAPICall();
+        },
+        error: function(xhr, status, error) {
+          info.text("Something goes wrong!");
+          info.addClass("error");
+          info.show();
+        },
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json'
+      });
+    };
+
+    reader.onerror = function(event){
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+    };
+
+    reader.readAsText(filef);
+    resetInfo();
+  };
+
+  $("#downloadBookmarks").click(getBookmarksFileAPICall);
+  $("#uploadBookmarks").click(setBookmarksFileAPICall);
+
+  // --- Bookmarks management
+
+  var bookmarksList;
+
+  $("#updateBookmark").hide();
+  $("#deleteBookmark").hide();
+
+  function clearDeleteBookmark() {
+    setTimeout(function() {
+      var button = $("#deleteBookmark");
+      button.data("firstclickdone", false);
+      button.text("Delete bookmark");
+    }, 1000);
+  }
+
+  var getBookmarksAPICall = function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var table = $("#bookmarks table");
+
+    resetInfo();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    $("#bookmarks table tr").remove();
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-bookmarks"),
+      complete: function() {
+	      loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = d_data ? $.parseJSON(d_data) : d_data;
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+	}
+
+	info.text(data == undefined ? "OK, It seems no bookmarks are defined." : "OK");
+	info.show();
+
+	bookmarksList = data;
+	if (data == undefined) {
+	  $("#updateBookmark").hide();
+	  $("#deleteBookmark").hide();
+	  $("#bookmarkId").val("");
+	  table.append('<tr><td class="empty">Empty</td></tr>');
+	} else {
+	  if (data.length > 0) {
+	    for (var i in data) {
+	      var row = $("<tr></tr>");
+	      row.append($("<td></td>").text(data[i].id));
+	      row.append($("<td></td>").append($("<img/>")
+	      .attr("src",data[i].icon == undefined || data[i].icon == "" ?
+	      getAPIUrl("web-client","icon-launcher-bookmark.png") : data[i].icon)
+	      .addClass("icon")));
+	      row.append($("<td></td>").append($('<a href="#"></a>')
+	      .data("bookmarkId",data[i].id)
+	      .text(data[i].title == "" ?
+	      data[i].url.length > 50 ? data[i].url.substring(0,50) : data[i].url :
+	      data[i].title.length > 50 ? data[i].title.substring(0,50) : data[i].title)
+	      .click(function (){
+      		var id = $(this).data("bookmarkId") - 1;
+      		$("#bookmarkId").val(bookmarksList[id].id);
+      		$("#bookmarkName").val(bookmarksList[id].title);
+      		$("#bookmarkUrl").val(bookmarksList[id].url);
+      		$("#bookmarkIcon").val(bookmarksList[id].icon == undefined ? "" : bookmarksList[id].icon);
+      		$("#updateBookmark").show();
+      		$("#deleteBookmark").show();
+	      })));
+	      table.append(row);
+	    }
+	  } else {
+	    $("#updateBookmark").hide();
+	    $("#deleteBookmark").hide();
+	    $("#bookmarkId").val("");
+	    table.append('<tr><td class="empty">Empty</td></tr>');
+	  }
+	}
+
+      }
+    });
+  }
+
+  var openUrlAPICall = function() {
+    var info = $("#openurl span.info");
+    var loader = $("#openurl img.loader");
+    var url = $("#openurl input").val();
+
+    resetInfo();
+
+    if (url == "") {
+      info.addClass("error");
+      info.text("URL is not set!");
+	    info.show();
+      return;
+    }
+    if (!isUrl(url)) {
+      info.addClass("error");
+      info.text("URL is invalid!");
+	    info.show();
+      return;
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("open-url",url),
+      complete: function() {
+	       loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+      	info.text("OK");
+      	info.show();
+      }
+    });
+  }
+
+  $("#openurl input").focus(function() {
+    var info = $("#browser span.info");
+	  info.hide();
+  });
+
+  $("#openurl input").bind('keyup', function(e) {
+    if (e.keyCode == 13) {
+      openUrlAPICall();
+    }
+  });
+
+  $("#createBookmark").click(function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var title = $("#bookmarkName").val();
+    var url = $("#bookmarkUrl").val();
+    var icon = $("#bookmarkIcon").val();
+
+    $("#updateBookmark").hide();
+    $("#deleteBookmark").hide();
+    $("#bookmarkId").val("");
+
+    resetInfo();
+
+    if (title == "") {
+      info.addClass("error");
+      info.text("Title is not defined!");
+      info.show();
+      return;
+    }
+
+    if (url == "") {
+      info.addClass("error");
+      info.text("URL is not defined!");
+      info.show();
+      return;
+    }
+
+    if (!isUrl(url)) {
+      info.addClass("error");
+      info.text("URL is invalid!");
+      info.show();
+      return;
+    }
+
+    if (icon !== "" && !isUrl(icon)) {
+      if (icon.lastIndexOf("data:image/", 0) !== 0) {
+        info.addClass("error");
+        info.text("Icon is invalid!");
+        info.show();
+        return;
+      }
+    }
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    var content = {"title": title, "url": url, "icon": icon};
+    if (encryptionEnabled) {
+      content = encrypt(JSON.stringify(content));
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("create-bookmark"),
+      data: JSON.stringify(content),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getBookmarksAPICall();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      contentType: "application/json; charset=utf-8"
+    });
+  });
+
+  $("#updateBookmark").click(function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var title = $("#bookmarkName").val();
+    var url = $("#bookmarkUrl").val();
+    var id = $("#bookmarkId").val();
+    var icon = $("#bookmarkIcon").val();
+
+    resetInfo();
+
+    if (id < 0) {
+      info.addClass("error");
+      info.text("Bookmark ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (title == "") {
+      info.addClass("error");
+      info.text("Title is not defined!");
+      info.show();
+      return;
+    }
+
+    if (url == "") {
+      info.addClass("error");
+      info.text("URL is not defined!");
+      info.show();
+      return;
+    }
+
+    if (!isUrl(url)) {
+      info.addClass("error");
+      info.text("URL is invalid!");
+      info.show();
+      return;
+    }
+
+    if (icon !== "" && !isUrl(icon)) {
+      if (icon.lastIndexOf("data:image/", 0) !== 0) {
+        info.addClass("error");
+        info.text("Icon is invalid!");
+        info.show();
+        return;
+      }
+    }
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    var content = {"title": title, "url": url, "icon": icon};
+    if (encryptionEnabled) {
+      content = encrypt(JSON.stringify(content));
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("update-bookmark", id),
+      data: JSON.stringify(content),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getBookmarksAPICall();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      contentType: "application/json; charset=utf-8"
+    });
+  });
+
+  $("#deleteBookmark").data("firstclickdone",false).click(function() {
+    var info = $("#bookmarks span.info");
+    var loader = $("#bookmarks img.loader");
+    var id = $("#bookmarkId").val();
+
+    resetInfo();
+
+    if (id == "" || id < 1) {
+      info.addClass("error");
+      info.text("Bookmark ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (!$(this).data("firstclickdone")) {
+      $(this).data("firstclickdone",true);
+      $(this).text("Confirm bookmark deletion");
+      clearDeleteBookmark();
+      return;
+    }
+
+    $("#bookmarkId").val("");
+    $("#bookmarkName").val("");
+    $("#bookmarkUrl").val("");
+    $("#updateBookmark").hide();
+
+    $(this).hide();
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("delete-bookmark",id),
+      complete: function() {
+	      loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+	      getBookmarksAPICall();
+      }
+    });
+
+  });
+
+  $("#bookmarkName").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  $("#bookmarkUrl").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  $("#openUrl").click(openUrlAPICall);
+  $("#getBookmarks").click(getBookmarksAPICall);
+
+  // --- Clipboard actions
+
+  $("button#getClip").click(function() {
+    var info = $("#clipboard span.info");
+    var loader = $("#clipboard img.loader");
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    resetInfo();
+
+    loader.show();
+
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-clipboard"),
+      complete: function() {
+	       loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          data = d_data;
+	      }
+
+      	info.text(data == undefined ? "OK, Clipboard is empty." : "OK");
+      	info.show();
+      	$("#clipboard textarea").val(data);
+      }
+    });
+  });
+
+  $("button#setClip").click(function() {
+    var info = $("#clipboard span.info");
+    var loader = $("#clipboard img.loader");
+    var content = $("#clipboard textarea").val();
+
+    resetInfo();
+
+    if (content === "") {
+      info.addClass("error");
+      info.text("Clipboard's content is not defined!");
+      info.show();
+      return;
+    }
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    if (encryptionEnabled) {
+      content = encrypt(content);
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("set-clipboard"),
+      data: encryptionEnabled ? JSON.stringify(content) : content,
+      complete: function() {
+	      loader.hide();
+      },
+      success: function(data) {
+      	info.text("OK");
+      	info.show();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      contentType: encryptionEnabled ? "application/json; charset=utf-8" : "text/plain; charset=utf-8",
+      dataType: 'json'
+    });
+
+  });
+
+  $("#clipboard textarea").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  // --- Notes actions
+
+  var pickedColor = 0;
+  var availableColors = [
+    "#cc0000", "#cc7700", "#ccbb00",
+    "#88cc00", "#00b315", "#00bf9f",
+    "#005fcc", "#0016de", "#bb00cc"];
+
+  $("#noteId").val("");
+  $("#noteTitle").val("");
+  $("#notes textarea").val("");
+  $("#updateNote").hide();
+  $("#deleteNote").hide();
+
+  function clearDeleteNote() {
+    setTimeout(function() {
+      var button = $("#deleteNote");
+      button.data("firstclickdone", false);
+      button.text("Delete note");
+    }, 1000);
+  }
+
+  function setPickedColor(colorId) {
+    if (colorId < 0 && colorId > 8) {
+      colorId = 0;
+    }
+    pickedColor = colorId;
+    var colorPicker = $("#colorPicker");
+    $("#colorPicker div").remove();
+    for (var i in availableColors) {
+      var dot = $("<div></div>").addClass("colorRow")
+      .css("background-color", availableColors[i])
+      .append($("<a href='#'></a>").data("colorid", i)
+      .click(function() {
+        setPickedColor($(this).data("colorid"));
+      }));
+      if (i == pickedColor)
+        dot.addClass("pickedColor");
+      colorPicker.append(dot);
+    }
+  }
+
+  function getColorId(color) {
+    for (var i in availableColors) {
+      if (availableColors[i] == color)
+        return i;
+    }
+    return -1;
+  }
+
+  var getNotesAPICall = function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var table = $("#notes table");
+
+    resetInfo();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+	info.text("Password for encryption is not defined!");
+	info.addClass("error");
+	info.show();
+	return;
+      }
+    }
+
+    $("#notes table tr").remove();
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-notes-list"),
+      complete: function() {
+	       loader.hide();
+      },
+      success: function(data) {
+
+      	if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data === "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = d_data ? $.parseJSON(d_data) : d_data;
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+      	}
+
+      	info.text(data === undefined ? "OK, You don't have any notes." : "OK");
+      	info.show();
+
+      	if (data == undefined) {
+      	  $("#updateNote").hide();
+      	  $("#noteId").val("");
+      	  table.append('<tr><td class="empty">Empty</td></tr>');
+      	} else {
+      	  if (data.length > 0) {
+      	    for (var i in data) {
+      	      var row = $("<tr></tr>");
+      	      row.append($("<td></td>").text(data[i].id));
+      	      if (platformName == "sailfish") {
+            		row.append($("<td></td>").addClass("colorRow")
+            		.css("background-color", data[i].color));
+      	      }
+      	      row.append($("<td></td>").addClass("textRow")
+      	      .append($('<a href="#"></a>').data("noteid", data[i].id)
+      	      .text(data[i].title == "" ? "Empty note" : data[i].title)
+      	      .click(openNoteAPICall)));
+      	      table.append(row);
+      	    }
+      	  } else {
+      	    $("#updateNote").hide();
+      	    $("#noteId").val("");
+      	    table.append('<tr><td class="empty">Empty</td></tr>');
+      	  }
+      	}
+
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      }
+    });
+  };
+
+  var openNoteAPICall = function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var id = $(this).data("noteid");
+
+    resetInfo();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-note",id),
+      complete: function() {
+	      loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+
+	if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = d_data ? $.parseJSON(d_data) : d_data;
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+	}
+
+	if (typeof data.id == "undefined" || typeof data.body == "undefined") {
+          info.text("Unreadable data!");
+          info.addClass("error");
+          info.show();
+          return;
+        }
+
+	info.text("OK");
+	info.show();
+
+	$("#notes textarea").val(data.body);
+	$("#noteId").val(data.id);
+
+	var colorId = getColorId(data.color);
+	if (colorId >= 0 && colorId < 10)
+	  setPickedColor(colorId);
+
+	$("#noteTitle").val(data.title);
+	$("#updateNote").show();
+	$("#deleteNote").show();
+      }
+    });
+  };
+
+  $("button#getNotes").click(getNotesAPICall);
+
+  $("button#updateNote").click(function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var content = $("#notes textarea").val();
+    var title = $("#noteTitle").val();
+    var id = $("#noteId").val();
+
+    resetInfo();
+
+    if (id < 1) {
+      info.addClass("error");
+      info.text("Note ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (platformName == "sailfish" && pickedColor < 0) {
+      info.addClass("error");
+      info.text("Note color is not defined!");
+      info.show();
+      return;
+    }
+
+    if (platformName == "bb10" && title == "") {
+      info.addClass("error");
+      info.text("Title is not defined!");
+      info.show();
+      return;
+    }
+
+    if (content == "") {
+      info.addClass("error");
+      info.text("Note content is not defined!");
+      info.show();
+      return;
+    }
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    var body;
+    if (platformName == "sailfish")
+      body = {"color": availableColors[pickedColor], "body": content};
+    else
+      body = {"title": title, "body": content};
+
+    if (encryptionEnabled) {
+      body = encrypt(JSON.stringify(body));
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("update-note", id),
+      data: JSON.stringify(body),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getNotesAPICall();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json'
+    });
+
+  });
+
+  $("button#createNote").click(function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var title = $("#noteTitle").val();
+    var content = $("#notes textarea").val();
+
+    $("#updateNote").hide();
+    $("#deleteNote").hide();
+    $("#noteId").val("");
+
+    resetInfo();
+
+    if (platformName == "sailfish" && pickedColor < 0) {
+      info.addClass("error");
+      info.text("Note color is not defined!");
+      info.show();
+      return;
+    }
+
+    if (platformName == "blackberry" && title == "") {
+      info.addClass("error");
+      info.text("Title is not defined!");
+      info.show();
+      return;
+    }
+
+    if (content == "") {
+      info.addClass("error");
+      info.text("Note content is not defined!");
+      info.show();
+      return;
+    }
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    var body;
+    if (platformName == "sailfish")
+      body = {"color": availableColors[pickedColor], "body": content};
+    else
+      body = {"title": title, "body": content};
+
+    if (encryptionEnabled) {
+      body = encrypt(JSON.stringify(body));
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("create-note"),
+      data: JSON.stringify(body),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+        getNotesAPICall();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json'
+    });
+
+  });
+
+  $("#deleteNote").data("firstclickdone",false).click(function() {
+    var info = $("#notes span.info");
+    var loader = $("#notes img.loader");
+    var id = $("#noteId").val();
+
+    resetInfo();
+
+    if (id == "" || id < 1) {
+      info.addClass("error");
+      info.text("Note ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (!$(this).data("firstclickdone")) {
+      $(this).data("firstclickdone",true);
+      $(this).text("Confirm note deletion");
+      clearDeleteNote();
+      return;
+    }
+
+    $("#noteId").val("");
+    $("#noteTitle").val("");
+    $("#notes textarea").val("");
+    $("#updateNote").hide();
+    $(this).hide();
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("delete-note",id),
+      complete: function() {
+      	loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+	      getNotesAPICall();
+      }
+    });
+  });
+
+  $("#noteId").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  $("#notes textarea").focus(function() {
+    $(".info").removeClass("error").hide();
+  });
+
+  // --- Contacts actions
+
+  clearContact();
+
+  function clearDeleteContact() {
+    setTimeout(function() {
+      var button = $("#deleteContact");
+      button.data("firstclickdone", false);
+      button.text("Delete contact");
+    }, 1000);
+  }
+
+  function clearContact() {
+    $("#contacts span.info").hide();
+    $("#contacts img.loader").hide();
+    $("#contactId").val("");
+    $("#contactFirstName").val("");
+    $("#contactLastName").val("");
+    $("#updateContact").hide();
+    $("#deleteContact").hide();
+    $("#contactVCardP").hide();
+    $("#contactVCardP a").remove();
+    $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
+    $("#contactPhones p").remove();
+    $("#contactPhones").append($("<p>No phone numbers defined</p>").addClass("empty"));
+    $("#contactEmails p").remove();
+    $("#contactEmails").append($("<p>No email addresses defined</p>").addClass("empty"));
+  }
+
+  function clearVCard() {
+    $("#contactVCardP a").remove();
+  }
+
+  var getContactsAPICall = function() {
+    var info = $("#contactGetInfo");
+    var loader = $("#contactGetLoader");
+    var table = $("#contacts table");
+    var filter = $("#contactFilter").val();
+
+    resetInfo();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    $("#contacts table tr").remove();
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-contacts", filter),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = d_data ? $.parseJSON(d_data) : d_data;
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+        }
+
+        info.text(data == undefined ? "No contacts matching specific pattern found!" : "OK");
+        info.show();
+
+        if (data == undefined) {
+          $("#updateContact").hide();
+          $("#contactId").val("");
+          table.append('<tr><td class="empty">Empty</td></tr>');
+        } else {
+          if (data.length > 0) {
+            for (var i in data) {
+              var row = $("<tr></tr>");
+              row.append($("<td></td>").text(data[i].id));
+              row.append($("<td></td>").addClass("textRow")
+              .append($('<a href="#"></a>').data("contactid", data[i].id)
+              .text(data[i].label == "" ? "Empty contact" : data[i].label)
+              .click(openContactAPICall)));
+              table.append(row);
+            }
+          } else {
+            $("#updateContact").hide();
+            $("#contactId").val("");
+            table.append('<tr><td class="empty">Empty</td></tr>');
+          }
+        }
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      }
+  });
+  };
+
+  var openContactAPICall = function() {
+    var info = $("#contactGetInfo");
+    var loader = $("#contactGetLoader");
+    var id = $(this).data("contactid");
+    var phones = $("#contactPhones");
+    var emails = $("#contactEmails");
+
+    resetInfo();
+    clearVCard();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+        info.text("Password for encryption is not defined!");
+        info.addClass("error");
+        info.show();
+        return;
+      }
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-contact",id),
+      complete: function() {
+        loader.hide();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      success: function(data) {
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          try {
+            data = d_data ? $.parseJSON(d_data) : d_data;
+          } catch (err) {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+        }
+
+        if (typeof data.id == "undefined") {
+          info.text("Unreadable data!");
+          info.addClass("error");
+          info.show();
+          return;
+        }
+
+        info.text("OK");
+        info.show();
+        $("#contactId").val(data.id);
+        $("#contactFirstName").val(data.first_name);
+        $("#contactLastName").val(data.last_name);
+
+        /*if (typeof data.note != "undefined" && data.note.length > 0)
+        $("#contactNote").val(data.note);*/
+
+        if (typeof data.avatar != "undefined" && data.avatar.length > 0)
+          $("#contactAvatar").attr("src", data.avatar);
+        else
+          $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
+
+        $("#updateContact").show();
+        $("#deleteContact").show();
+        if (platformName == "bb10") {
+          $("#contactVCardP").show();
+        }
+
+        $("#contactPhones p").remove();
+        $("#contactEmails p").remove();
+
+        // Add phones
+        if (typeof data.phones != "undefined" && data.phones.length > 0) {
+          for (var i in data.phones) {
+
+            var t_mobile = data.phones[i].type == "mobile";
+            var t_fax = data.phones[i].type == "fax";
+            var t_pager = data.phones[i].type == "pager";
+            var t_assistant = data.phones[i].type == "assistant";
+            var t_video = data.phones[i].type == "video";
+            var t_home = data.phones[i].type == "home";
+            var t_work = data.phones[i].type == "work";
+            var t_other = data.phones[i].type == "other";
+            var t_undefined = !t_mobile && !t_fax && !t_pager && !t_assistant  && !t_video && !t_home && !t_work && !t_other;
+            var c_home = data.phones[i].context == "home";
+            var c_work = data.phones[i].context == "work";
+            var c_other = data.phones[i].context == "other";
+            var c_undefined = !c_home && !c_work && !c_other;
+
+            var t_undefined_option = $("<option value='undefined'>Undefined</option>");
+            if (t_undefined)
+              t_undefined_option.attr("selected","selected");
+            var t_mobile_option = $("<option value='mobile'>Mobile</option>");
+            if (t_mobile)
+              t_mobile_option.attr("selected","selected");
+            var t_assistant_option = $("<option value='assistant'>Assistant</option>");
+            if (t_assistant)
+              t_assistant_option.attr("selected","selected");
+            var t_fax_option = $("<option value='fax'>Fax</option>");
+            if (t_fax)
+              t_fax_option.attr("selected","selected");
+            var t_pager_option = $("<option value='pager'>Pager</option>");
+            if (t_pager)
+              t_pager_option.attr("selected","selected");
+            var t_video_option = $("<option value='video'>Video</option>");
+            if (t_video)
+              t_video_option.attr("selected","selected");
+            var t_home_option = $("<option value='home'>Home</option>");
+            if (t_home)
+              t_home_option.attr("selected","selected");
+            var t_work_option = $("<option value='work'>Work</option>");
+            if (t_work)
+              t_work_option.attr("selected","selected");
+            var t_other_option = $("<option value='other'>Other</option>");
+            if (t_other)
+              t_other_option.attr("selected","selected");
+            var c_undefined_option = $("<option value='undefined'>Undefined</option>");
+            if (c_undefined)
+              c_undefined_option.attr("selected","selected");
+            var c_home_option = $("<option value='home'>Home</option>");
+            if (c_home)
+              c_home_option.attr("selected","selected");
+            var c_work_option = $("<option value='work'>Work</option>");
+            if (c_work)
+              c_work_option.attr("selected","selected");
+            var c_other_option = $("<option value='other'>Other</option>");
+            if (c_other)
+              c_other_option.attr("selected","selected");
+
+            if (platformName == "sailfish") {
+              phones.append($("<p></p>")
+              .append($("<input type='tel' placeholder='Phone number'/>").val(data.phones[i].number))
+              .append(" Type: ")
+              .append($("<select name='type'></select>").append(t_undefined_option).append(t_assistant_option).append(t_fax_option).append(t_pager_option).append(t_video_option).append(t_mobile_option))
+              .append(" Context: ")
+              .append($("<select name='context'></select>").append(c_undefined_option).append(c_home_option).append(c_work_option).append(c_other_option))
+              .append("&nbsp; &nbsp;")
+              .append($("<button>Delete</button>").click(function(){
+                $(this).parent().remove();
+                if (phones.children().length == 0)
+                phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+              })));
+            }
+            if (platformName == "bb10") {
+              phones.append($("<p></p>")
+              .append($("<input type='tel' placeholder='Phone number'/>").val(data.phones[i].number))
+              .append(" Type: ")
+              .append($("<select name='type'></select>").append(t_mobile_option).append(t_home_option).append(t_work_option).append(t_other_option))
+              .append("&nbsp; &nbsp;")
+              .append($("<button>Delete</button>").click(function(){
+                $(this).parent().remove();
+                if (phones.children().length == 0)
+                phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+              })));
+            }
+        }
+      } else {
+        phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+      }
+
+      // Add emails
+      if (typeof data.emails != "undefined" && data.emails.length > 0) {
+        for (var i in data.emails) {
+          if (platformName == "sailfish") {
+            var c_home = data.emails[i].context == "home";
+            var c_work = data.emails[i].context == "work";
+            var c_other = data.emails[i].context == "other";
+            var c_undefined = !c_home && !c_work && !c_other;
+
+            var c_undefined_option = $("<option value='undefined'>Undefined</option>");
+            if (c_undefined)
+              c_undefined_option.attr("selected","selected");
+            var c_home_option = $("<option value='home'>Home</option>");
+            if (c_home)
+              c_home_option.attr("selected","selected");
+            var c_work_option = $("<option value='work'>Work</option>");
+            if (c_work)
+              c_work_option.attr("selected","selected");
+            var c_other_option = $("<option value='other'>Other</option>");
+            if (c_other)
+              c_other_option.attr("selected","selected");
+
+            emails.append($("<p></p>")
+              .append($("<input type='email' placeholder='Email address'/>").val(data.emails[i].address))
+              .append(" Context: ")
+              .append($("<select name='context'></select>").append(c_undefined_option).append(c_home_option).append(c_work_option).append(c_other_option))
+              .append("&nbsp; &nbsp;")
+              .append($("<button>Delete</button>").click(function(){
+                $(this).parent().remove();
+                if (emails.children().length == 0)
+                emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+            })));
+        }
+        if (platformName == "bb10") {
+          var t_home = data.emails[i].type == "home";
+          var t_work = data.emails[i].type == "work";
+          var t_other = data.emails[i].type == "other";
+          var t_undefined = !t_home && !t_work && !t_other;
+
+          var t_home_option = $("<option value='home'>Home</option>");
+          if (t_home)
+            t_home_option.attr("selected","selected");
+          var t_work_option = $("<option value='work'>Work</option>");
+          if (t_work)
+            t_work_option.attr("selected","selected");
+          var t_other_option = $("<option value='other'>Other</option>");
+          if (t_other)
+            t_other_option.attr("selected","selected");
+          if (t_undefined)
+            t_home_option.attr("selected","selected");
+
+          emails.append($("<p></p>")
+            .append($("<input type='email' placeholder='Email address'/>").val(data.emails[i].address))
+            .append(" Type: ")
+            .append($("<select name='type'></select>").append(t_home_option).append(t_work_option).append(t_other_option))
+            .append("&nbsp; &nbsp;")
+            .append($("<button>Delete</button>").click(function(){
+              $(this).parent().remove();
+              if (emails.children().length == 0)
+              emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+          })));
+        }
+      }
+    } else {
+      emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+  }}});};
+
+  function getContactBody() {
+    var phones = $("#contactPhones");
+    var emails = $("#contactEmails");
+    var firstName = $("#contactFirstName").val().trim();
+    var lastName = $("#contactLastName").val().trim();
+    //var note = $("#contactNote").val().trim();
+
+    var phonesArray = new Array();
+    $("#contactPhones > p:not(.empty)").each(function(){
+      var number = $(this).children("input").val().trim();
+
+      //TODO Better phone number validation
+      if (number.length == 0)
+        return;
+      var type = $(this).children("select[name=type]").val();
+      var context = $(this).children("select[name=context]").val();
+
+      var obj = {number: number};
+      if (context == "home" || context == "work" || context == "other")
+        obj["context"] = context;
+      if (type == "mobile"|| type == "assistant" || type == "fax" || type == "pager" || type == "video" || type == "home" || type == "work" || type == "other")
+        obj["type"] = type;
+
+      phonesArray.push(obj);
+    });
+
+    var emailsArray = new Array();
+    $("#contactEmails > p:not(.empty)").each(function(){
+      var address = $(this).children("input").val().trim();
+      if (address.length == 0)
+        return;
+      if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(address)) {
+        return;
+      }
+
+      if (platformName == "sailfish") {
+        var context = $(this).children("select[name=context]").val();
+        var obj = {address: address};
+        if (context == "home" || context == "work" || context == "other")
+          obj["context"] = context;
+      }
+      if (platformName == "bb10") {
+        var type = $(this).children("select[name=type]").val();
+        var obj = {address: address};
+        if (type == "home" || type == "work" || type == "other")
+          obj["type"] = type;
+      }
+
+      emailsArray.push(obj);
+    });
+
+    var body = {first_name: firstName, last_name: lastName};
+    if (phonesArray.length > 0)
+      body["phones"] = phonesArray;
+    if (emailsArray.length > 0)
+      body["emails"] = emailsArray;
+    /*if (note.length > 0)
+    body["note"] = note;*/
+
+    return body;
+  }
+
+  var createContactAPICall = function() {
+    var info = $("#contactsInfo");
+    var loader = $("#contactsLoader");
+    var firstName = $("#contactFirstName").val().trim();
+    var lastName = $("#contactLastName").val().trim();
+
+    resetInfo();
+    clearVCard();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    $("#updateContact").hide();
+    $("#deleteContact").hide();
+    $("#contactVCardP").hide();
+    $("#contactId").val("");
+    $("#contactAvatar").attr("src", getAPIUrl("web-client", "avatar.png"));
+
+    if (firstName.length + lastName.length < 1) {
+      info.addClass("error");
+      info.text("First name and last name are not defined!");
+      info.show();
+      return;
+    }
+
+    var body = getContactBody();
+    if (encryptionEnabled) {
+      body = encrypt(JSON.stringify(body));
+    }
+
+    loader.show();
+
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("create-contact"),
+      data: JSON.stringify(body),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      contentType: "application/json",
+      dataType: 'json'
+    });
+  };
+
+  var getContactVCardAPICall = function() {
+    var info = $("#contactsInfo");
+    var loader = $("#contactsLoader");
+    var id = $("#contactId").val();
+
+    resetInfo();
+    clearVCard();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    if (id == "") {
+      info.addClass("error");
+      info.text("Contact ID is empty!");
+      info.show();
+      return;
+    }
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("get-contact-vcard", id),
+      complete: function() {
+      	loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+
+        if (encryptionEnabled) {
+          var d_data = decrypt(data);
+
+          if (d_data == "error") {
+            info.text("Decryption failed!");
+            info.addClass("error");
+            info.show();
+            return;
+          }
+
+          data = d_data;
+	      }
+
+      	info.text("OK");
+      	info.show();
+
+      	if (data !== undefined) {
+          var blob = new Blob([data], {type: 'text/vcard'});
+          var url = URL.createObjectURL(blob);
+          var filename = $("#contactFirstName").val().trim() + "_" + $("#contactLastName").val().trim() + ".vcf";
+          $("#contactVCardP").append($("<a download='" + filename + "'>" + filename + "</a>").attr("href",url));
+        }
+      }
+    });
+  };
+
+  var updateContactAPICall = function() {
+    var info = $("#contactsInfo");
+    var loader = $("#contactsLoader");
+    var firstName = $("#contactFirstName").val().trim();
+    var lastName = $("#contactLastName").val().trim();
+    var id = $("#contactId").val();
+
+    resetInfo();
+    clearVCard();
+
+    if (encryptionEnabled) {
+      var key = $("#key input").val().trim();
+      if (key.length == 0) {
+      	info.text("Password for encryption is not defined!");
+      	info.addClass("error");
+      	info.show();
+      	return;
+      }
+    }
+
+    if (id == "") {
+      info.addClass("error");
+      info.text("Contact ID is empty!");
+      info.show();
+      return;
+    }
+
+    if (firstName.length + lastName.length < 1) {
+      info.addClass("error");
+      info.text("First name and last name are not defined!");
+      info.show();
+      return;
+    }
+
+    var body = getContactBody();
+    if (encryptionEnabled) {
+      body = encrypt(JSON.stringify(body));
+    }
+
+    loader.show();
+
+    $.ajax({
+      type: 'POST',
+      url: getAPIUrl("update-contact", id),
+      data: JSON.stringify(body),
+      complete: function() {
+        loader.hide();
+      },
+      success: function(data) {
+        info.text("OK");
+        info.show();
+      },
+      error: function(xhr, status, error) {
+        info.text("Something goes wrong!");
+        info.addClass("error");
+        info.show();
+      },
+      contentType: "application/json",
+      dataType: 'json'
+    });
+  };
+
+  $("#addPhone").click(function() {
+    var phones = $("#contactPhones");
+    phones.children(".empty").remove();
+
+    if (platformName == "sailfish") {
+      phones.append($("<p></p>")
+        .append($("<input type='tel' placeholder='Phone number'/>"))
+        .append(" Type: ")
+        .append($("<select name='type'></select>")
+        .append($("<option value='undefined' selected='selected'>Undefined</option>"))
+        .append($("<option value='assistant'>Assistant</option>"))
+        .append($("<option value='fax'>Fax</option>"))
+        .append($("<option value='pager'>Pager</option>"))
+        .append($("<option value='video'>Video</option>"))
+        .append($("<option value='mobile'>Mobile</option>")))
+        .append(" Context: ")
+        .append($("<select name='context'></select>")
+        .append($("<option value='undefined' selected='selected'>Undefined</option>"))
+        .append($("<option value='home'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (phones.children().length == 0)
+            phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+        })));
+    }
+    if (platformName == "bb10") {
+      phones.append($("<p></p>")
+        .append($("<input type='tel' placeholder='Phone number'/>"))
+        .append(" Type: ")
+        .append($("<select name='type'></select>")
+        .append($("<option value='mobile' selected='selected'>Mobile</option>"))
+        .append($("<option value='home'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (phones.children().length == 0)
+            phones.append($("<p>No phone numbers defined</p>").addClass("empty"));
+        })));
+    }
+  });
+
+  $("#addEmail").click(function() {
+    var emails = $("#contactEmails");
+    emails.children(".empty").remove();
+    if (platformName == "sailfish") {
+      emails.append($("<p></p>")
+        .append($("<input type='email' placeholder='Email address'/>"))
+        .append(" Context: ")
+        .append($("<select name='context'></select>")
+        .append($("<option value='undefined' selected='selected'>Undefined</option>"))
+        .append($("<option value='home'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (emails.children().length == 0)
+            emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+        })));
+    }
+    if (platformName == "bb10") {
+      emails.append($("<p></p>")
+        .append($("<input type='email' placeholder='Email address'/>"))
+        .append(" Type: ")
+        .append($("<select name='type'></select>")
+        .append($("<option value='home' selected='selected'>Home</option>"))
+        .append($("<option value='work'>Work</option>"))
+        .append($("<option value='other'>Other</option>")))
+        .append("&nbsp; &nbsp;")
+        .append($("<button>Delete</button>").click(function(){
+          $(this).parent().remove();
+          if (emails.children().length == 0)
+            emails.append($("<p>No email addresses defined</p>").addClass("empty"));
+        })));
+    }
+  });
+
+  $("#getContacts").click(getContactsAPICall);
+
+  $("#createContact").click(createContactAPICall);
+
+  $("#updateContact").click(updateContactAPICall);
+
+  $("#clearContact").click(clearContact);
+
+  $("#downloadVCard").click(getContactVCardAPICall);
+
+  $("#contactFilter").focus(function() {
+    var info = $("#contactGetInfo");
+    info.hide();
+  });
+
+  $("#contactFilter").bind('keyup', function(e) {
+    if (e.keyCode == 13) {
+      getContactsAPICall();
+    }
+  });
+
+  $("#deleteContact").data("firstclickdone",false).click(function() {
+    var info = $("#contactsInfo");
+    var loader = $("#contactsLoader");
+    var id = $("#contactId").val();
+
+    resetInfo();
+
+    if (id == "") {
+      info.addClass("error");
+      info.text("Contact ID is unknown!");
+      info.show();
+      return;
+    }
+
+    if (!$(this).data("firstclickdone")) {
+      $(this).data("firstclickdone",true);
+      $(this).text("Confirm contact deletion");
+      clearDeleteContact();
+      return;
+    }
+
+    clearContact();
+
+    loader.show();
+    $.ajax({
+      type: 'GET',
+      url: getAPIUrl("delete-contact",id),
+      complete: function() {
+	      loader.hide();
+      },
+      error: function(xhr, status, error) {
+      	info.text("Something goes wrong!");
+      	info.addClass("error");
+      	info.show();
+      },
+      success: function(data) {
+	      info.text("OK");
+        info.show();
+      }
+    });
+  });
+
+});
+
+</script>
+
 </head>
 
 <body>
-  <h1>Send to Phone</h1>
   <div id="menu" class="clearfix">
     <ul>
       <li><a id="browserMenuItem" href="#browser">Browser</a></li>
       <li><a id="clipboardMenuItem" href="#clipboard">Clipboard</a></li>
       <li><a id="notesMenuItem" href="#notes">Notes</a></li>
+      <li><a id="contactsMenuItem" href="#contacts">Contacts</a></li>
       <li><a id="aboutMenuItem" href="#about">About</a></li>
     </ul>
   </div>
+  <div id="key"><input type="password" value="" placeholder="Insert password here" /></div>
 
   <div class="page" id="browser">
-   <div id="openurl">
-    <h2>Open URL</h2>
-    <p>Open the specified URL in phone's default browser.</p>
-    <p>
-		<input type="text" value="" placeholder="Insert URL here" />
-		<button id="openUrl">Open</button>
-		<img class="loader" src="loader.gif" />
-		<span class="info"></span>
-	</p>
-	</div>
-	<div id="bookmarks" class="section, bb-hide">
-		<h2>Bookmarks</h2>
-		<p>Create new or update existing bookmark.</p>
-		<p>
-			<input id="bookmarkId" type="text" value="" placeholder="Id" disabled="true" />
-			<input id="bookmarkName" type="text" value="" placeholder="Title" />
-			<input id="bookmarkUrl" type="text" value="" placeholder="URL" />
-		</p>
-		<p>
-			<button id="createBookmark">Create new bookmark</button>
-			<button id="updateBookmark">Update existing bookmark</button>
-			<button id="deleteBookmark">Delete bookmark</button>
-			<button id="getBookmarks">Refresh list of bookmarks</button>
-			<img class="loader" src="loader.gif" />
-			<span class="info"></span>
-		</p>
-		<p><table><tr><td class="empty">Empty</td></tr></table></p>
-	</div>
+    <div id="openurl">
+      <h2>Open URL</h2>
+      <p>Open the specified URL in phone's default browser.</p>
+      <p>
+        <input type="text" value="" placeholder="Insert URL here" />
+        <button id="openUrl">Open</button>
+        <img class="loader"/>
+        <span class="info"></span>
+      </p>
+    </div>
+    <div id="bookmarksbackup" class="section bb-hide">
+      <h2>Bookmarks backup</h2>
+      <p>Download or upload bookmarks file.</p>
+      <p id="dbP"><button id="downloadBookmarks">Download bookmarks</button></p>
+      <p><button id="uploadBookmarks">Upload bookmarks</button><input name="file" type="file" /></p>
+      <p><img class="loader"/><span class="info"></span></p>
+    </div>
+    <div id="bookmarks" class="section bb-hide">
+      <h2>Bookmarks management</h2>
+      <p>Create new or update existing bookmark.</p>
+      <p>
+        <input id="bookmarkId" type="text" value="" placeholder="Id" disabled="true" />
+        <input id="bookmarkName" type="text" value="" placeholder="Title" />
+        <input id="bookmarkUrl" type="text" value="" placeholder="URL" />
+        <input id="bookmarkIcon" type="text" value="" placeholder="Icon" />
+      </p>
+      <p>
+        <button id="createBookmark">Create new bookmark</button>
+        <button id="updateBookmark">Update existing bookmark</button>
+        <button id="deleteBookmark">Delete bookmark</button>
+        <button id="getBookmarks">Refresh list of bookmarks</button>
+        <img class="loader"/>
+        <span class="info"></span>
+      </p>
+      <p><table><tr><td class="empty">Empty</td></tr></table></p>
+    </div>
   </div>
 
   <div class="page" id="clipboard">
@@ -71,7 +2436,7 @@
     <p>
     <button id="setClip">Set</button>
     <button id="getClip">Get</button>
-    <img class="loader" src="loader.gif" />
+    <img class="loader"/>
     <span class="info"></span>
 	</p>
     <p class="tip bb-hide">Tip: To get content of phone's clipboard, after copying
@@ -92,34 +2457,77 @@
       <button id="updateNote">Update existing note</button>
       <button id="deleteNote">Delete note</button>
       <button id="getNotes">Refresh list of notes</button>
-      <img class="loader" src="loader.gif" />
+      <img class="loader"/>
       <span class="info"></span>
     </p>
     <p><table><tr><td class="empty">Empty</td></tr></table></p>
   </div>
 
+  <div class="page" id="contacts">
+    <h2>Contact</h2>
+    <p>Search, create new or update contacts.</p>
+    <div class="overflow">
+      <img id="contactAvatar" alt="Avatar" />
+      <div>
+      	<input id="contactId" type="text" value="" placeholder="Id" disabled="true" /><br/>
+      	<input id="contactFirstName" type="text" value="" placeholder="First name" /><br/>
+      	<input id="contactLastName" type="text" value="" placeholder="Last name" /><br/>
+      </div>
+    </div>
+    <div class="subsection">
+      <p>Phone numbers:</p>
+      <div id="contactPhones"><p class="empty">No phone numbers defined</p></div>
+      <p><button id="addPhone">Add new</button></p>
+      <p>Emails:</p>
+      <div id="contactEmails"><p class="empty">No email addresses defined</p></div>
+      <p><button id="addEmail">Add new</button></p>
+    </div>
+    <!--<p><textarea id="contactNote" placeholder="Insert note here"></textarea></p>-->
+    <p id="contactVCardP"><button id="downloadVCard">Download VCard</button></p>
+    <p>
+      <button id="clearContact">Clear</button>
+      <button id="createContact">Create new contact</button>
+      <button id="updateContact">Update existing contact</button>
+      <button id="deleteContact">Delete contact</button>
+      <img id="contactsLoader" class="loader"/>
+      <span id="contactsInfo" class="info"></span>
+    </p>
+    <div class="section">
+      <h2>Search</h2>
+      <p>Search contact by specific pattern.</p>
+      <p>
+      	<input id="contactFilter" type="text" value="" placeholder="Search pattern" />
+      	<button id="getContacts">Get list of contacts</button>
+      	<img id="contactGetLoader" class="loader"/>
+      	<span id="contactGetInfo" class="info"></span>
+      </p>
+      <p><table><tr><td class="empty">Empty</td></tr></table></p>
+    </div>
+  </div>
+
   <div class="page" id="about">
     <h2>About</h2>
-	<img src="icon-64.png" />
-	<p><i>Send to Phone</i></p>
-	<p>version: <span class="version"></span></p>
-    <p>Web app and Firefox add-on that simplifies clipboard, notes & bookmarks transfer between the PC and your phone.</p>
-	<div class="section">
+    <!--<img id="logo"/>-->
+    <p><i>Send to Phone</i> - web app and Firefox add-on that simplifies clipboard<span class="bb-hide">, bookmarks</span>, notes and contacts transfer between the PC and your phone via WiFi</p>
+    <p>App version: <span id="webversion" class="version"></span></p>
+    <!--<p>Server API version: <span id="apiversion" class="version"></span></p>-->
+    <p></p>
+    <div class="section">
     <h2>Firefox</h2>
     <p>Add-on can be downloaded directly form
       <a href="https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/">
         Mozilla repository</a>.</p>
     </div>
 
-	<div class="section">
-    <h2>Bugs & feature requests</h2>
-    <p>If you have any special requirements, feature requests or if you find
+    <div class="section">
+      <h2>Bugs and feature requests</h2>
+      <p>If you have any special requirements, feature requests or if you find
       any bug, please report it using
       <a href="https://github.com/mkiol/SendToJolla/issues">this form</a> or send <a href="mailto:sendtophone@mkiol.net">e-mail</a>.</p>
-	</div>
+    </div>
 
     <div class="section">
-    <h2>Copyright & source code</h2>
+    <h2>Copyright and source code</h2>
     <p>Copyright &copy; 2015 by Michal Kosciesza</p>
     <p><i>Sent to Phone</i> is distributed under
       <a href="https://www.mozilla.org/MPL/2.0/">
@@ -128,20 +2536,29 @@
       <a href="https://github.com/mkiol/SendToJolla">GitHub</a>.</p>
     </div>
 
-	<div class="section">
-  <h2>Changelog</h2>
-  <h3>version: 2.0</h3>
-	<ul>
-		<li>Web-based client. This is an alternative way to use <i>Send to Phone</i>,
-    especially for those who don't use Firefox. To open Web client, go to
-		<i>Server URL</i> address in your favorite browser.</li>
-    <li class="bb-hide">Support of Bookmarks management. It provides the possibility to add new,
-    delete or edit bookmarks of the native browser.</li>
-		<li>Support of Notes. It allows to save text as a new note, delete or
-		edit existing note.</li>
-	</ul>
-	</div>
+    <div class="section">
+      <h2>Changelog</h2>
+      <h3>version: 2.1</h3>
+      <ul>
+      	<li>Support for Contacts management. It provides the possibility to add new,
+      	delete or edit contacts.<span class="bb-hide"> Due to Jolla Store constraints, this feature is only available in
+        <a href="https://openrepos.net/content/mkiol/send-phone">OpenRepos package</a>.</span></li>
+      	<li>End-to-end encryption. Data transfer between server and client app (e.g. web browser) can be encrypted.
+        </li>
+        <li class="bb-hide">Bookmarks backup. All bookmarks can be downloaded or uploaded as a single file.</li>
+        <li>Connection on WiFi tethering. Enables connection when the client app (e.g. web browser on the laptop) is connected to WiFi Hotspot that is provided by the phone.</li>
+      </ul>
+      <h3>version: 2.0</h3>
+      <ul>
+      	<li>Web-based client. This is an alternative way to use <i>Send to Phone</i>,
+      	especially for those who don't use Firefox. To open Web client, go to
+      	<i>Server URL</i> address in your favorite browser.</li>
+      	<li>Support of Bookmarks management. It provides the possibility to add new,
+      	delete or edit bookmarks of the native browser.</li>
+      	<li>Support of Notes. It allows to save text as a new note, delete or
+      	edit existing note.</li>
+      </ul>
+    </div>
   </div>
-
 </body>
 </html>

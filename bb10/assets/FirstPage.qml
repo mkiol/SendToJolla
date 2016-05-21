@@ -12,14 +12,15 @@
 import bb.cascades 1.2
 
 Page {
-    
     property bool menuEnabled: true
     
     onCreationCompleted: {
         server.newEvent.connect(newEventHandler);
         settings.cookieChanged.connect(newCookieHandler);
-        
-        server.startServer();
+        server.runningChanged.connect(localServerRunningHandler);
+
+        if (settings.startLocalServer)
+            server.startLocalServer();
     }
     
     function newEventHandler(text) {
@@ -28,6 +29,10 @@ Page {
     
     function newCookieHandler() {
         urlLabel.text = server.getServerUrl();
+    }
+    
+    function localServerRunningHandler() {
+        serverToggle.checked = server.localServerRunning;
     }
     
     titleBar: TitleBar {
@@ -45,31 +50,38 @@ Page {
                     bottomPadding: utils.du(2)
                     
                     Label {
-                        text: server.running ? 
-                        qsTr("Server is running.") :
-                        qsTr("Server is not running.")
-                        multiline: true
-                    }
-
-                    Label {
-                        visible: server.running
-                        textStyle.color: utils.secondaryText()
-                        text: qsTr("Tip #1: To open Web client, go to below URL address in your favorite web browser.")
+                        text: qsTr("Toggle below to enable or disable %1 local server.").arg(APP_NAME)
                         multiline: true
                     }
                     
+                    ToggleComponent {
+                        id: serverToggle
+                        text: qsTr("Local server")
+                        onCheckedChanged: {
+                            if (checked && !server.localServerRunning) {
+                                checked = server.startLocalServer();
+                                return;
+                            }
+                            if (!checked && server.localServerRunning) {
+                                server.stopLocalServer();
+                                return;
+                            }
+                        }
+                    }
+
                     Label {
-                        visible: server.running
+                        visible: server.localServerRunning
                         textStyle.color: utils.secondaryText()
-                        text: qsTr("Tip #2: To configure Firefox add-on, go to add-on's preferences and fill out the 'Server URL' with the URL displayed below.")
+                        text: qsTr("To open Web client, go to the URL address below in your favorite web browser.")
                         multiline: true
                     }
                     
                     Label {
                         id: urlLabel
-                        text: server.getServerUrl()
+                        text: server.localServerRunning ? server.getLocalServerUrl() : ""
                         multiline: true
                         textStyle.color: utils.primary()
+                        //visible: server.localServerRunning
                     }
                 }
                 

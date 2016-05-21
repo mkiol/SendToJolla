@@ -1,19 +1,19 @@
 /* A Bison parser, made by GNU Bison 2.7.  */
 
 /* Skeleton interface for Bison LALR(1) parsers in C++
-   
+
       Copyright (C) 2002-2012 Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,7 +26,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -62,14 +62,13 @@
   }
 
   #define YYERROR_VERBOSE 1
-  
+
   Q_DECLARE_METATYPE(QVector<QVariant>*)
   Q_DECLARE_METATYPE(QVariantMap*)
 
 
 /* Line 33 of lalr1.cc  */
 #line 72 "json_parser.hh"
-
 
 #include <string>
 #include <iostream>
@@ -228,7 +227,7 @@ namespace yy {
     /// For a rule, its LHS.
     static const unsigned char yyr1_[];
     /// For a rule, its RHS length.
-    static const unsigned char yyr2_[]; 
+    static const unsigned char yyr2_[];
 
     /// Convert the symbol name \a n to a form suitable for a diagnostic.
     static std::string yytnamerr_ (const char *n);

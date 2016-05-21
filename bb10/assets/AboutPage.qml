@@ -66,7 +66,7 @@ Page {
             PaddingLabel {
                 horizontalAlignment: HorizontalAlignment.Center
                 textStyle.textAlign: TextAlign.Center
-                text: qsTr("Web app and Firefox add-on that simplifies clipboard & notes transfer between the PC and your phone via WiFi")
+                text: qsTr("Web app that simplifies clipboard, notes & contacts transfer between the PC and your phone via WiFi")
             }
 
             PaddingLabel {
@@ -111,7 +111,7 @@ Page {
             
             PaddingLabel {
                 textFormat: TextFormat.Html
-                text: "Copyright &copy; 2011-2013 Nikhil Marathe"
+                text: "QHttpServer - Copyright &copy; 2011-2013 Nikhil Marathe"
             }
             
             Container {
