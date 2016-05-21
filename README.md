@@ -21,8 +21,6 @@ API is public and can be used by anyone who want to create client application.
 
 The API description is located [here](https://github.com/mkiol/SendToJolla/blob/master/New API.md).
 
-The old and deprecated API description is located [here](https://github.com/mkiol/SendToJolla/blob/master/API.md).
-
 ---------------
 
 This software is distributed under

@@ -140,7 +140,7 @@ Has the following form:
 
 * `server URL` is server URL.
 
-Returns `200 OK` response upon success. Response contains phone's clipboard text.
+Returns `200 OK` or `204 No Content` response upon success. Response contains phone's clipboard text.
 
 #### Example
 
