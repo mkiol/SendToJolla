@@ -218,7 +218,7 @@ const QHostAddress Server::getAddress()
                 && interface.flags().testFlag(QNetworkInterface::IsUp)
                 && interface.flags().testFlag(QNetworkInterface::IsRunning)
 #ifdef SAILFISH
-                && (interface.name() == "eth0" || interface.name() == "wlan0" || interface.name() == "tether")) {
+                && (interface.name() == "eth0" || interface.name() == "wlan0" || interface.name() == "tether") || interface.name() == "rndis0")) {
 #elif BB10
                 && (interface.name() == "en0" || interface.name() == "bcm0" || interface.name() == "bcm1")) {
 #endif
