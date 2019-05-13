@@ -34,11 +34,14 @@ using namespace bb::cascades;
 static const char *APP_NAME = "Send to Phone";
 static const char *AUTHOR = "Michal Kosciesza <michal@mkiol.net>";
 static const char *PAGE = "https://github.com/mkiol/SendToJolla";
-static const char *VERSION = "2.1";
+static const char *VERSION = "2.2 (beta)";
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
 #ifdef SAILFISH
+#ifdef CONTACTS
+    QCoreApplication::setSetuidAllowed(true);
+#endif
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 

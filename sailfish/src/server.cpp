@@ -19,6 +19,7 @@
 #include <QCryptographicHash>
 #include <QPair>
 #include <QList>
+#include <QTextStream>
 
 #ifdef BB10
 #include <bps/navigator.h>
@@ -933,6 +934,12 @@ void Server::handleLocalServerNewApi(QHttpRequest *req, QHttpResponse *resp)
         if (api == "get-contacts") {
             emit newEvent(QString("%1 request from %2").arg(api).arg(source));
             sendResponse(req, resp, 200, "application/json", getContacts(data), s->getCrypt());
+            return;
+        }
+
+        if (api == "get-contacts-vcard") {
+            emit newEvent(QString("%1 request from %2").arg(api).arg(source));
+            sendResponse(req, resp, 200, "text/vcard", getContactsVCard(data), s->getCrypt());
             return;
         }
 
@@ -2295,38 +2302,6 @@ QByteArray Server::getContacts(const QString &filter)
     return "";
 }
 
-QByteArray Server::getAccounts()
-{
-#ifdef BB10
-    QVariantList jsonArray;
-
-    // Accounts
-    AccountService aservice;
-    QList<Account> aclist = aservice.accounts(Service::Contacts);
-    if (!aclist.isEmpty()) {
-        for (QList<Account>::iterator it = aclist.begin(); it != aclist.end(); ++it) {
-            //qDebug() << (*ait).displayName() << (*ait).id() << (*ait).provider().name();
-            QVariantMap map;
-            map.insert("id", (*it).id());
-            map.insert("label", (*it).displayName().isEmpty() ? (*it).provider().name() : (*it).displayName());
-            jsonArray.append(map);
-        }
-    }
-
-    QJson::Serializer serializer;
-    bool ok;
-    QByteArray json = serializer.serialize(jsonArray, &ok);
-
-    if (!ok) {
-      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
-      return "";
-    }
-
-    return json;
-#endif
-    return "";
-}
-
 QByteArray Server::getContact(int id)
 {
 #ifdef SAILFISH
@@ -2652,6 +2627,29 @@ QByteArray Server::getContact(int id)
     return "";
 }
 
+QByteArray Server::getContactsVCard(const QString &filter)
+{
+#ifdef SAILFISH
+    QContactSortOrder sort; sort.setDirection(Qt::DescendingOrder);
+    QList<QContactSortOrder> sortList; sortList.push_front(sort);
+    QList<QContact> results = filter.isEmpty() ?
+                cm->contacts(sortList) :
+                cm->contacts(QContactDisplayLabel::match(filter), sortList);
+
+    QByteArray data;
+    QTextStream out(&data);
+
+    for (QList<QContact>::iterator it = results.begin(); it != results.end(); ++it) {
+        int id = (*it).id().toString().split("-").last().toInt();
+        out << getContactVCard(id);
+    }
+
+    out.flush();
+    return data;
+#endif
+    return QByteArray();
+}
+
 QByteArray Server::getContactVCard(int id)
 {
 #ifdef SAILFISH
@@ -2660,12 +2658,103 @@ QByteArray Server::getContactVCard(int id)
 
     if (contact.isEmpty()) {
         qWarning() << "Contact with id =" << id << "does not exist!";
-        return "";
+        return QByteArray();
     }
 
-    qWarning() << "Not implemented yet :-(";
+    QByteArray data;
+    QTextStream out(&data);
 
-    return "";
+    QString label = contact.detail<QContactDisplayLabel>().label();
+    QString fname = contact.detail<QContactName>().firstName();
+    QString lname = contact.detail<QContactName>().lastName();
+    QString avatar = contact.detail<QContactAvatar>().imageUrl().toLocalFile();
+    QString org = contact.detail<QContactOrganization>().name();
+    QString note = contact.detail<QContactNote>().note();
+
+    out << "BEGIN:VCARD\n"
+        << "VERSION:3.0\n";
+
+    if (!label.isEmpty())
+        out << "FN:" << label << "\n";
+    if (!fname.isEmpty() || !lname.isEmpty()) {
+        out << "N:"
+            << (lname.isEmpty() ? "" : lname) << ";"
+            << (fname.isEmpty() ? "" : fname) << ";"
+            << ";;\n";
+    }
+    if (!org.isEmpty())
+        out << "ORG:" << org << "\n";
+    if (!note.isEmpty())
+        out << "NOTE:" << note << "\n";
+    if (!avatar.isEmpty()) {
+        QFile file(avatar);
+        if (file.exists()) {
+            if(file.open(QIODevice::ReadOnly)) {
+                out << "PHOTO;ENCODING=b;TYPE=JPEG:"
+                    << file.readAll().toBase64() << "\n";
+            } else {
+                qWarning() << "Can not open avatar file!" << file.errorString();
+            }
+        } else {
+            qWarning() << "Avatar file doesn't exist!" << file.fileName();
+        }
+    }
+
+    QList<QContactPhoneNumber> numbers = contact.details<QContactPhoneNumber>();
+    if (!numbers.isEmpty()) {
+        for (QList<QContactPhoneNumber>::iterator it = numbers.begin(); it != numbers.end(); ++it) {
+            QString number = (*it).number();
+            if (!number.isEmpty()) {
+                QString type;
+                QList<int> contexts = (*it).contexts();
+                for (QList<int>::iterator it = contexts.begin(); it != contexts.end(); ++it) {
+                    switch (*it) {
+                    case QContactDetail::ContextHome:
+                        type = "home";
+                        break;
+                    case QContactDetail::ContextWork:
+                        type = "work";
+                        break;
+                    case QContactDetail::ContextOther:
+                        type = "other";
+                        break;
+                    }
+                }
+                out << "TEL" << (type.isEmpty() ? "" : ";TYPE=" + type)
+                    << ":" << number << "\n";
+            }
+        }
+    }
+
+    QList<QContactEmailAddress> emails = contact.details<QContactEmailAddress>();
+    if (!emails.isEmpty()) {
+        for (QList<QContactEmailAddress>::iterator it = emails.begin(); it != emails.end(); ++it) {
+            QString address = (*it).emailAddress();
+            if (!address.isEmpty()) {
+                QString type;
+                QList<int> contexts = (*it).contexts();
+                for (QList<int>::iterator it = contexts.begin(); it != contexts.end(); ++it) {
+                    switch (*it) {
+                    case QContactDetail::ContextHome:
+                        type = "home";
+                        break;
+                    case QContactDetail::ContextWork:
+                        type = "work";
+                        break;
+                    case QContactDetail::ContextOther:
+                        type = "other";
+                        break;
+                    }
+                }
+                out << "EMAIL" << (type.isEmpty() ? "" : ";TYPE=" + type)
+                    << ":" << address << "\n";
+            }
+        }
+    }
+
+    out << "END:VCARD\n";
+    out.flush();
+    return data;
 #elif BB10
     // Finding contact with given ID
     ContactService service;
@@ -3221,6 +3310,38 @@ bool Server::deleteContact(int id)
 }
 #endif // CONTACTS
 
+QByteArray Server::getAccounts()
+{
+#ifdef BB10
+    QVariantList jsonArray;
+
+    // Accounts
+    AccountService aservice;
+    QList<Account> aclist = aservice.accounts(Service::Contacts);
+    if (!aclist.isEmpty()) {
+        for (QList<Account>::iterator it = aclist.begin(); it != aclist.end(); ++it) {
+            //qDebug() << (*ait).displayName() << (*ait).id() << (*ait).provider().name();
+            QVariantMap map;
+            map.insert("id", (*it).id());
+            map.insert("label", (*it).displayName().isEmpty() ? (*it).provider().name() : (*it).displayName());
+            jsonArray.append(map);
+        }
+    }
+
+    QJson::Serializer serializer;
+    bool ok;
+    QByteArray json = serializer.serialize(jsonArray, &ok);
+
+    if (!ok) {
+      qWarning() << "Can not serialize JSON:" << serializer.errorMessage();
+      return "";
+    }
+
+    return json;
+#endif
+    return "";
+}
+
 QByteArray Server::encrypt(const QByteArray & data)
 {
     Settings* s = Settings::instance();
@@ -3429,9 +3550,8 @@ QByteArray Server::getOptions()
 #ifdef CONTACTS
                "get-contacts" <<
                "get-contact" <<
-#ifdef BB10
                "get-contact-vcard" <<
-#endif
+               "get-contacts-vcard" <<
                "create-contact" <<
                "update-contact" <<
                "delete-contact" <<

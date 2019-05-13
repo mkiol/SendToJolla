@@ -148,6 +148,7 @@ private:
     QString getContentType(const QString & file);
 #ifdef CONTACTS
     QByteArray getContacts(const QString & filter);
+    QByteArray getContactsVCard(const QString &filter);
     QByteArray getContact(int id);
     QByteArray getContactVCard(int id);
     bool createContact(const QByteArray &json);
