@@ -5,6 +5,12 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Mon May 13 2019 Michal Kosciesza <michal@mkiol.net> 2.2-1
+- vCard export for SFOS
+
+* Sat May 21 2016 Michal Kosciesza <michal@mkiol.net> 2.1-4
+- OpenRepos release
+
 * Mon Apr 11 2016 Michal Kosciesza <michal@mkiol.net> 2.1-3
 - Web app bug fixes
 
