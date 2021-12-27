@@ -11,7 +11,7 @@ so your data will never be transferred to any third parties.
 ## Downloads
 
 * Sailfish app: [OpenRepos repository](https://openrepos.net/content/mkiol/send-phone)
-* BlackBerry 10 app: [BlackBerry World](https://appworld.blackberry.com/webstore/content/59953449/?countrycode=PL&lang=en)
+* BlackBerry 10 app: [BlackBerry World](https://appworld.blackberry.com/webstore/content/59953449/?countrycode=PL&lang=en) or [BAR file directly from GitHub](https://github.com/mkiol/SendToJolla/raw/master/bb10/bar/sendtophone-2_1_0_1.bar)
 * Firefox add-on: [addons.mozilla.org page](https://addons.mozilla.org/firefox/addon/send-to-phone-jolla/)
 
 ## API description
